@@ -104,6 +104,8 @@ export default {
   "surah.copyAyah": "Copy ayah with translations",
   "surah.copy": "Copy",
   "surah.copyFooter": "Quran {key}",
+  "surah.copied": "Copied {key} with translations",
+  "surah.copyFailed": "Couldn't copy — your browser blocked the clipboard",
   "surah.wordAria": "{tl}: {en}",
   "surah.wordListen": "Listen",
   "surah.wordRef": "{key} · word {n}",

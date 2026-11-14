@@ -147,9 +147,10 @@ async function renderReader() {
   if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ block: "start" });
 }
 
-function copyAyah(a, idx) {
+async function copyAyah(a, idx) {
   const lines = [ayahText(idx), ...trList.map(tr => `${trTexts[tr.id][idx]} — ${tr.name}`), t("surah.copyFooter", { key: a.k })];
-  navigator.clipboard?.writeText(lines.join("\n\n"));
+  const ok = await C.copyText(lines.join("\n\n"));
+  C.toast(t(ok ? "surah.copied" : "surah.copyFailed", { key: a.k }));
 }
 
 // ======================================================= word popover

@@ -125,6 +125,32 @@ export function footer() {
     t("footer.text"), h("a", { href: "sources.html" }, t("footer.link")))));
 }
 
+// ---------- clipboard + toast
+/** Copy text; falls back to a hidden textarea when the Clipboard API is blocked. Returns true on success. */
+export async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const ta = h("textarea", { readonly: true, style: "position:fixed;opacity:0;top:0;left:0" });
+    ta.value = text;
+    document.body.append(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch { ok = false; }
+    ta.remove();
+    return ok;
+  }
+}
+let toastEl, toastTimer;
+export function toast(msg) {
+  if (!toastEl) { toastEl = h("div", { class: "toast", role: "status", "aria-live": "polite" }); document.body.append(toastEl); }
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+}
+
 // ---------- tooltip
 let tipEl;
 export function tip(e, html) {
