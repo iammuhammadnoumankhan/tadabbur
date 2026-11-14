@@ -12,23 +12,23 @@
 </head>
 <body>
   <main class="wrap">
-    <section class="gate" id="gate"><div class="skeleton">Loading surah…</div></section>
+    <section class="gate" id="gate"><div class="skeleton" data-i18n="surah.loading"></div></section>
 
     <div class="toolbar card" id="toolbar">
       <button class="btn primary" id="play-all"></button>
-      <div class="seg" id="script-seg" title="Arabic script">
-        <button data-v="indopak">IndoPak</button>
-        <button data-v="uthmani">Uthmani</button>
+      <div class="seg" id="script-seg" data-i18n-title="surah.scriptLabel">
+        <button data-v="indopak" data-i18n="surah.indopak"></button>
+        <button data-v="uthmani" data-i18n="surah.uthmani"></button>
       </div>
-      <div class="seg" id="wbw-seg" title="Word-by-word meaning under each word">
-        <button data-v="off">No WBW</button>
-        <button data-v="ur">اردو</button>
-        <button data-v="en">English</button>
-        <button data-v="both">Both</button>
+      <div class="seg" id="wbw-seg" data-i18n-title="surah.wbwLabel">
+        <button data-v="off" data-i18n="surah.noWbw"></button>
+        <button data-v="ur" data-i18n="lang.ur"></button>
+        <button data-v="en" data-i18n="lang.en"></button>
+        <button data-v="both" data-i18n="surah.both"></button>
       </div>
       <span class="grow"></span>
-      <button class="btn" id="open-tr">Translations <span class="chip" id="tr-count"></span></button>
-      <button class="btn" id="open-settings" aria-label="Reading settings"></button>
+      <button class="btn" id="open-tr"><span data-i18n="surah.translations"></span> <span class="chip" id="tr-count"></span></button>
+      <button class="btn" id="open-settings" data-i18n-aria-label="surah.settingsAria"></button>
     </div>
 
     <div id="reader" translate="no"></div>
@@ -36,12 +36,12 @@
   </main>
 
   <!-- word popover -->
-  <div class="pop card" id="pop" role="dialog" aria-label="Word details"></div>
+  <div class="pop card" id="pop" role="dialog" data-i18n-aria-label="surah.wordDialog"></div>
 
   <!-- drawers -->
   <div class="scrim" id="scrim"></div>
   <aside class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawer-h"><h3 id="drawer-title"></h3><button class="icon-btn" id="drawer-close" aria-label="Close"></button></div>
+    <div class="drawer-h"><h3 id="drawer-title"></h3><button class="icon-btn" id="drawer-close" data-i18n-aria-label="common.close"></button></div>
     <div class="drawer-b" id="drawer-body"></div>
   </aside>
 

@@ -22,7 +22,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
     - external source links still respond (weekly, not on every push).
   - Deploy to GitHub Pages from Actions, and only when the checks pass.
   - *Why first:* every later feature adds data. This makes sure nothing corrupts the Quran text or drops a citation.
-- [ ] **2. Data contract and shared core**
+- [x] **2. Data contract and shared core** *(done 2026-11-15)*
   *(not on the idea list, but needed for the apps)*
   - Document every `data/*.json` format in `docs/DATA.md`, with a version number.
   - Move data loading, search and settings into a DOM-free `js/core/` module, so a mobile or desktop app can reuse the same logic.

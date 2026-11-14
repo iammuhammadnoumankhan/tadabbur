@@ -1,0 +1,138 @@
+{
+ "schema": 1,
+ "built": "2026-11-15",
+ "counts": {
+  "surahs": 114,
+  "ayahs": 6236,
+  "words": 77429,
+  "translations": 16,
+  "tafsirs": 7,
+  "hadith_linked": 386,
+  "seerah_events": 24,
+  "prophets": 24
+ },
+ "datasets": [
+  {
+   "id": "chapters",
+   "files": [
+    "chapters.json"
+   ],
+   "src": [
+    "qc-chapters"
+   ]
+  },
+  {
+   "id": "quran-text",
+   "files": [
+    "surah/NNN.json",
+    "checksums.json"
+   ],
+   "src": [
+    "qc-text",
+    "qc-wbw"
+   ]
+  },
+  {
+   "id": "indopak",
+   "files": [
+    "indopak/NNN.json",
+    "checksums-indopak.json"
+   ],
+   "src": [
+    "dk-indopak-text",
+    "dk-indopak-font"
+   ]
+  },
+  {
+   "id": "translations",
+   "files": [
+    "translations.json",
+    "tr/<id>/NNN.json"
+   ],
+   "src": [
+    "qc-tr-234",
+    "qc-tr-54",
+    "qc-tr-97",
+    "qc-tr-158",
+    "qc-tr-151",
+    "qc-tr-819",
+    "qc-tr-156",
+    "qc-tr-831",
+    "qc-tr-20",
+    "qc-tr-84",
+    "qc-tr-85",
+    "qc-tr-95",
+    "qc-tr-203",
+    "qc-tr-19",
+    "qc-tr-22",
+    "qc-tr-149"
+   ]
+  },
+  {
+   "id": "surah-info",
+   "files": [
+    "info/NNN.json"
+   ],
+   "src": [
+    "qc-chapter-info"
+   ]
+  },
+  {
+   "id": "tafsir",
+   "files": [
+    "tafsirs.json"
+   ],
+   "src": [
+    "qc-tafsir-160",
+    "qc-tafsir-159",
+    "qc-tafsir-818",
+    "qc-tafsir-157",
+    "qc-tafsir-169",
+    "qc-tafsir-168",
+    "qc-tafsir-817"
+   ]
+  },
+  {
+   "id": "hadith",
+   "files": [
+    "hadith-index.json",
+    "hadith/NNN.json"
+   ],
+   "src": [
+    "sahih-hadith-text"
+   ]
+  },
+  {
+   "id": "seerah",
+   "files": [
+    "seerah.json",
+    "seerah/<id>.json",
+    "seerah-by-surah.json"
+   ],
+   "src": [
+    "seerah-timeline",
+    "sahih-hadith-text"
+   ]
+  },
+  {
+   "id": "prophets",
+   "files": [
+    "stories.json",
+    "stories-by-surah.json"
+   ],
+   "src": [
+    "qac-ontology"
+   ]
+  },
+  {
+   "id": "search",
+   "files": [
+    "search/ar.json",
+    "search/tr-<id>.json"
+   ],
+   "src": [
+    "qc-imlaei-simple"
+   ]
+  }
+ ]
+}

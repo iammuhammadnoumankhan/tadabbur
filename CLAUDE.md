@@ -25,9 +25,15 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 ## Architecture
 - Static site in plain **HTML, CSS and vanilla JS (ES modules)**. No framework and no build step. Must work from any static host and inside future app wrappers.
 - Pages: `index.html`, `surah.html`, `timeline.html`, `stories.html`, `search.html`, `sources.html`.
-- JS:
-  - `js/common.js`: data loading, settings, header, icons
-  - one module per page: `home.js`, `surah.js`, `timeline.js`, `stories.js`, `search.js`
+- JS has three layers:
+  - **`js/core/`**: no DOM. Data loading (`data.js`), settings with pluggable storage (`settings.js`), search engine (`search.js`) and Quran reference helpers (`quran.js`). Mobile and desktop apps reuse it; an app calls `configure({ base, fetch })` and `settings.configureStorage(adapter)`.
+  - **`js/i18n/`**: every interface string, in `en.js`, through `t(key, vars)`. Static HTML uses `data-i18n`, `data-i18n-html`, `data-i18n-placeholder`, `data-i18n-title` or `data-i18n-aria-label`. A missing key shows as `⟦key⟧`, and the smoke test fails on it.
+  - **`js/common.js`**: browser UI layer. Re-exports core and `t`, and holds the theme, `h()`, `sanitize()`, header and footer, tooltip and journey bars.
+  - Then one module per page: `home.js`, `surah.js`, `timeline.js`, `stories.js`, `search.js`, `sources.js`.
+- **Rules:**
+  - Never hard-code UI text; add a key to `js/i18n/en.js`.
+  - Never touch `document` or `window` in `js/core/`.
+  - Data formats are defined in `docs/DATA.md` (schema 1). A breaking change bumps `SCHEMA` in `build_manifest.py`, `validate_data.py` and `js/core/data.js`.
 - CSS: `css/style.css`, with colour tokens on `:root` and dark mode via `[data-theme="dark"]`.
 - Fonts:
   - bundled: `fonts/DigitalKhatt-IndoPak.woff2` (SIL OFL; licence file next to it)
@@ -38,8 +44,8 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 Web first, then mobile (Capacitor/TWA) and desktop (Tauri) wrapping the same code. So:
 - use only **relative paths** (`data/...`, never `/data/...`), so it works under `/tadabbur/` and inside app wrappers;
 - **no server dependency** for core features; data is static JSON;
-- keep data access and logic separate from the DOM (moving into `js/core/` per roadmap item 2);
-- keep all UI text in one place (moving to `js/i18n/` per roadmap item 2), ready for the Urdu interface;
+- keep logic in `js/core/` (no DOM), not in page modules;
+- keep all UI text in `js/i18n/en.js`, ready for the Urdu interface;
 - put `localStorage` access behind try/catch (`common.js` already does), and store settings and progress in a shape that can sync later;
 - design mobile-first: test at 375px wide with no horizontal scroll.
 
@@ -50,6 +56,7 @@ python3 scripts/build_indopak.py   # IndoPak text (DigitalKhatt) aligned to Qura
 python3 scripts/build_seerah.py    # Seerah timeline from Sahih al-Bukhari (asserts anchor hadith text)
 python3 scripts/build_stories.py   # prophets from the Quranic Arabic Corpus ontology
 python3 scripts/build_search.py    # search index
+python3 scripts/build_manifest.py  # data/manifest.json (schema version + counts) — always last
 ```
 - Scripts must **merge into** `data/sources.json`, never overwrite it.
 - Scripts **assert** their invariants (6,236 ayahs, alignment, anchor text) so the build fails loudly when something drifts.
@@ -57,7 +64,7 @@ python3 scripts/build_search.py    # search index
 ## Checks and deployment (CI/CD)
 - `.github/workflows/ci.yml` runs on every push and pull request:
   - **validate-data:** `scripts/validate_data.py`, covering Arabic fingerprints, 114 surahs and 6,236 ayahs everywhere, IndoPak word alignment, every `src` listed, valid ayah links, and the search index matching the translations;
-  - **smoke-test:** `scripts/smoke_test.py`, which loads every page in headless Chromium at desktop and 375px, and fails on JS errors, missing files, missing content or sideways scroll.
+  - **smoke-test:** `scripts/smoke_test.py`, which loads every page in headless Chromium at desktop and 375px, and fails on JS errors, missing files, missing content, missing text keys or sideways scroll. It also runs `scripts/core_worker_test.js` in a Web Worker (no DOM) to prove the core works as an app would use it.
 - **Deploy:** only from `main`, only after both checks pass. GitHub Pages is set to "GitHub Actions" as its source, and only `*.html`, `css/`, `js/`, `fonts/` and `data/` are published.
 - `.github/workflows/links.yml` runs weekly (Mondays) and on demand: `scripts/check_links.py` confirms every source URL and live service (tafsir API, audio, sunnah.com) still responds.
 - **Run all checks locally before pushing:**

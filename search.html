@@ -13,12 +13,12 @@
 <body>
   <main class="wrap">
     <section class="hero" style="text-align:left;padding-bottom:6px">
-      <h1>Search the <em>Quran</em></h1>
-      <p class="lead" style="margin:0">Search by meaning in Urdu or English, by Arabic word (with or without harakat), by reference like <b>2:255</b> or <b>Baqarah 255</b>, or by surah or prophet name.</p>
+      <h1 data-i18n-html="search.titleHtml"></h1>
+      <p class="lead" style="margin:0" data-i18n-html="search.leadHtml"></p>
     </section>
     <form class="search-box card" id="form" role="search">
-      <input type="search" id="q" name="q" autocomplete="off" placeholder="صبر · patience · رحمة · 2:255 · Yusuf" aria-label="Search the Quran" dir="auto">
-      <button class="btn primary" type="submit">Search</button>
+      <input type="search" id="q" name="q" autocomplete="off" data-i18n-placeholder="search.placeholder" data-i18n-aria-label="nav.search" dir="auto">
+      <button class="btn primary" type="submit" data-i18n="common.search"></button>
     </form>
     <div class="search-scope" id="scope"></div>
     <div id="results"></div>

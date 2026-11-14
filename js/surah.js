@@ -1,5 +1,5 @@
 import * as C from "./common.js";
-const { h, $, $$, ICON } = C;
+const { h, $, $$, ICON, t, sanitize, toArabicDigits } = C;
 
 C.header();
 C.footer();
@@ -7,34 +7,15 @@ C.footer();
 const params = new URLSearchParams(location.search);
 const N = Math.min(114, Math.max(1, parseInt(params.get("n") || "1", 10) || 1));
 
-const [chs, data, hIndex, src, trMeta, seerah, seerahBySurah] = await Promise.all([
+const [chs, data, hIndex, src, trMeta, seerah, seerahBySurah, stories, storiesBySurah] = await Promise.all([
   C.chapters(), C.surah(N), C.hadithIndex(), C.sources(), C.translations(),
-  C.getJSON("data/seerah.json").catch(() => null), C.getJSON("data/seerah-by-surah.json").catch(() => ({})),
-]);
-const [stories, storiesBySurah] = await Promise.all([
-  C.getJSON("data/stories.json").catch(() => null), C.getJSON("data/stories-by-surah.json").catch(() => ({})),
+  C.seerah().catch(() => null), C.seerahBySurah(), C.stories().catch(() => null), C.storiesBySurah(),
 ]);
 const surahProphets = (storiesBySurah[N] || []).map(id => stories.prophets.find(p => p.id === id)).filter(Boolean);
 const seerahEvents = (seerahBySurah[N] || []).map(id => seerah.events.find(e => e.id === id)).filter(Boolean);
 const ch = chs.find(c => c.n === N);
 const hCounts = hIndex[N] || {};
-document.title = `${ch.name} (${ch.n}) · Tadabbur`;
-
-// ======================================================= sanitize 3rd-party HTML
-const ALLOWED = new Set(["H1", "H2", "H3", "H4", "P", "DIV", "SPAN", "BR", "B", "I", "STRONG", "EM", "UL", "OL", "LI", "SUP", "SUB", "BLOCKQUOTE"]);
-function sanitize(html) {
-  const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
-  const walk = node => {
-    for (const el of [...node.children]) {
-      if (!ALLOWED.has(el.tagName)) { el.replaceWith(...el.childNodes); continue; }
-      for (const a of [...el.attributes]) if (a.name !== "class") el.removeAttribute(a.name);
-      walk(el);
-    }
-  };
-  const root = doc.body.firstChild;
-  walk(root);
-  return root.innerHTML;
-}
+document.title = t("surah.pageTitle", { name: ch.name, n: ch.n });
 
 // ======================================================= gateway
 async function renderGate() {
@@ -42,27 +23,29 @@ async function renderGate() {
   const gate = $("#gate");
   gate.innerHTML = "";
   const hadithTotal = Object.keys(hCounts).length;
+  const mk = ch.place === "makkah";
   const left = h("div", { class: "gate-title" },
-    h("div", { class: "num" }, `Surah ${ch.n} of 114`),
+    h("div", { class: "num" }, t("surah.ofTotal", { n: ch.n })),
     h("div", { class: "ar", translate: "no" }, ch.ar),
     h("h1", {}, ch.nameC),
     h("div", { class: "mean" }, `"${ch.meaning.en}" · `, h("span", { class: "urdu" }, ch.meaning.ur)),
     h("div", { class: "stats" },
-      h("div", { class: `stat ${ch.place}` }, h("div", { class: "v" }, ch.place === "makkah" ? "Makki" : "Madani"), h("div", { class: "l" }, ch.place === "makkah" ? "Revealed in Makkah period" : "Revealed in Madinah period")),
-      h("div", { class: "stat" }, h("div", { class: "v" }, `#${ch.order}`), h("div", { class: "l" }, "in order of revelation")),
-      h("div", { class: "stat" }, h("div", { class: "v" }, ch.ayahs), h("div", { class: "l" }, `ayahs · pages ${ch.pages[0]}–${ch.pages[1]}`))),
+      h("div", { class: `stat ${ch.place}` }, h("div", { class: "v" }, C.placeName(ch.place)),
+        h("div", { class: "l" }, t(mk ? "surah.revealedInMakkah" : "surah.revealedInMadinah"))),
+      h("div", { class: "stat" }, h("div", { class: "v" }, `#${ch.order}`), h("div", { class: "l" }, t("surah.inRevelationOrder"))),
+      h("div", { class: "stat" }, h("div", { class: "v" }, ch.ayahs), h("div", { class: "l" }, t("surah.ayahsPages", { from: ch.pages[0], to: ch.pages[1] })))),
     h("div", { class: "mini-journey" },
       C.journeyBars(chs, { current: N }),
-      h("div", { class: "journey-axis" }, h("span", {}, "First revealed"), h("span", {}, "Last revealed"))),
+      h("div", { class: "journey-axis" }, h("span", {}, t("common.firstRevealed")), h("span", {}, t("common.lastRevealed")))),
     h("div", { class: "source", style: "margin-top:8px" }, src["qc-chapters"].publisher, " — ", src["qc-chapters"].note),
     hadithTotal ? h("div", { style: "margin-top:14px" },
-      h("span", { class: "chip hadith-chip" }, `${hadithTotal} ayah${hadithTotal > 1 ? "s" : ""} of this surah ${hadithTotal > 1 ? "are" : "is"} cited in Sahih al-Bukhari. Look for the gold badge.`)) : null,
+      h("span", { class: "chip hadith-chip" }, t("surah.bukhariCited", { n: hadithTotal }))) : null,
     seerahEvents.length ? h("div", { class: "seerah-links" },
-      h("span", { class: "tiny" }, "Seerah events whose hadith cite this surah:"),
+      h("span", { class: "tiny" }, t("surah.seerahLinks")),
       ...seerahEvents.map(e => h("a", { class: "chip", href: `timeline.html#${e.id}` },
-        `${e.name.en}${e.year != null ? ` · yr ${e.year}` : ""} →`))) : null,
+        `${e.name.en}${e.year != null ? t("common.yr", { n: e.year }) : ""} →`))) : null,
     surahProphets.length ? h("div", { class: "seerah-links" },
-      h("span", { class: "tiny" }, "Prophets referred to in this surah:"),
+      h("span", { class: "tiny" }, t("surah.prophetLinks")),
       ...surahProphets.map(p => h("a", { class: "chip", href: `stories.html?p=${p.id}` },
         p.en, h("span", { style: "font-family:var(--font-uthmani);margin-left:4px", translate: "no" }, p.ar)))) : null,
   );
@@ -73,18 +56,21 @@ async function renderGate() {
     const body = h("div", { class: "intro-body" });
     const source = h("div", { class: "source" });
     const seg = h("div", { class: "seg" },
-      ...["ur", "en"].map(l => h("button", { "data-v": l, onclick: () => { lang = l; fill(); } }, l === "ur" ? "اردو" : "English")));
-    const more = h("button", { class: "btn", onclick: () => { body.classList.toggle("open"); more.textContent = body.classList.contains("open") ? "Show less" : "Read full introduction"; } }, "Read full introduction");
+      ...["ur", "en"].map(l => h("button", { "data-v": l, onclick: () => { lang = l; fill(); } }, t(`lang.${l}`))));
+    const more = h("button", { class: "btn", onclick: () => {
+      body.classList.toggle("open");
+      more.textContent = t(body.classList.contains("open") ? "surah.introLess" : "surah.introMore");
+    } }, t("surah.introMore"));
     function fill() {
       const d = inf[lang];
       body.innerHTML = sanitize(d?.html || "");
       body.className = "intro-body" + (lang === "ur" ? " urdu" : "");
       body.dir = lang === "ur" ? "rtl" : "ltr";
       source.textContent = "";
-      source.append(d?.source || "", " · via Quran.com");
+      source.append(d?.source || "", t("surah.viaQuranCom"));
       $$("button", seg).forEach(b => b.classList.toggle("on", b.dataset.v === lang));
     }
-    right.append(h("h3", {}, "Before you read: background", seg), body, h("div", { class: "intro-actions" }, more, source));
+    right.append(h("h3", {}, t("surah.introTitle"), seg), body, h("div", { class: "intro-actions" }, more, source));
     fill();
   }
   gate.append(h("div", { class: "card gate-card" }, left, right));
@@ -92,7 +78,7 @@ async function renderGate() {
 
 // ======================================================= reader
 let trList = [];        // selected translation meta
-let trTexts = {};       // id -> array
+const trTexts = {};     // id -> array
 let hadithData = null;
 let ip = null;          // IndoPak text for this surah (when that script is chosen)
 
@@ -102,15 +88,14 @@ const wordText = (idx, i) => isIP() ? ip.ayahs[idx][i] : data.ayahs[idx].w[i].u;
 
 async function loadTranslations() {
   trList = await C.selectedTranslations();
-  await Promise.all(trList.map(async t => { trTexts[t.id] = await C.tr(t.id, N); }));
+  await Promise.all(trList.map(async tr => { trTexts[tr.id] = await C.tr(tr.id, N); }));
   $("#tr-count").textContent = trList.length;
 }
 
 function wordEl(w, a, i, idx) {
   const st = C.get();
-  const txt = wordText(idx, i);
-  const el = h("span", { class: "w", "data-k": a.k, "data-i": i, tabindex: "0", role: "button", "aria-label": `${w.tl}: ${w.en}` },
-    h("span", { class: `ar-${st.script}`, lang: "ar" }, txt));
+  const el = h("span", { class: "w", "data-k": a.k, "data-i": i, tabindex: "0", role: "button", "aria-label": t("surah.wordAria", { tl: w.tl, en: w.en }) },
+    h("span", { class: `ar-${st.script}`, lang: "ar" }, wordText(idx, i)));
   if (st.wbw) {
     if (st.showTranslit && w.tl) el.append(h("span", { class: "g", style: "font-style:italic;color:var(--ink-3)" }, w.tl));
     if (st.wbwLang === "ur" || st.wbwLang === "both") el.append(h("span", { class: "g ur", lang: "ur" }, w.ur || ""));
@@ -120,17 +105,16 @@ function wordEl(w, a, i, idx) {
 }
 
 function ayahEl(a, idx) {
-  const st = C.get();
   const hc = hCounts[a.k] || 0;
   const head = h("div", { class: "ayah-head" },
     h("span", { class: "ayah-key" }, a.k),
-    a.sajdah ? h("span", { class: "chip" }, "Sajdah") : null,
-    h("span", { class: "tiny" }, `Juz ${a.juz} · Page ${a.page}`),
+    a.sajdah ? h("span", { class: "chip" }, t("surah.sajdah")) : null,
+    h("span", { class: "tiny" }, t("surah.juzPage", { juz: a.juz, page: a.page })),
     h("span", { class: "sp" }),
-    hc ? h("button", { class: "chip hadith-chip", onclick: () => openHadith(a.k), title: "Sahih hadith that cite this ayah" }, `${hc} Sahih hadith`) : null,
-    h("button", { class: "chip tafsir-chip", onclick: () => openTafsir(a.k), title: "Read tafsir (commentary) of this ayah" }, "Tafsir"),
-    h("button", { class: "icon-btn", title: "Play this ayah", "aria-label": `Play ayah ${a.k}`, html: ICON.play, onclick: () => player.playFrom(idx, true) }),
-    h("button", { class: "icon-btn", title: "Copy ayah with translations", "aria-label": "Copy", html: ICON.copy, onclick: () => copyAyah(a, idx) }));
+    hc ? h("button", { class: "chip hadith-chip", onclick: () => openHadith(a.k), title: t("surah.hadithBadgeTitle") }, t("surah.hadithBadge", { n: hc })) : null,
+    h("button", { class: "chip tafsir-chip", onclick: () => openTafsir(a.k), title: t("surah.tafsirTitle") }, t("surah.tafsir")),
+    h("button", { class: "icon-btn", title: t("surah.playAyah"), "aria-label": t("surah.playAyahAria", { key: a.k }), html: ICON.play, onclick: () => player.playFrom(idx, true) }),
+    h("button", { class: "icon-btn", title: t("surah.copyAyah"), "aria-label": t("surah.copy"), html: ICON.copy, onclick: () => copyAyah(a, idx) }));
 
   const line = h("div", { class: "arabic-line", lang: "ar" },
     a.w.map((w, i) => wordEl(w, a, i, idx)),
@@ -138,16 +122,14 @@ function ayahEl(a, idx) {
       ? h("span", { class: "end-mark ar-indopak" }, `۝${toArabicDigits(a.n)}`)
       : h("span", { class: "end-mark ar-uthmani" }, `﴿${toArabicDigits(a.n)}﴾`));
 
-  const trs = h("div", { class: "trs" }, trList.map(t => {
-    const ur = t.lang === "ur";
-    return h("div", { class: `tr-item ${ur ? "ur" : ""}`, lang: t.lang === "ur-Latn" ? "ur" : t.lang },
-      h("div", { class: `txt ${ur ? "urdu" : ""}`, dir: ur ? "rtl" : "ltr" }, trTexts[t.id]?.[idx] ?? ""),
-      h("div", { class: "who" }, `— ${t.name}`));
+  const trs = h("div", { class: "trs" }, trList.map(tr => {
+    const ur = tr.lang === "ur";
+    return h("div", { class: `tr-item ${ur ? "ur" : ""}`, lang: tr.lang === "ur-Latn" ? "ur" : tr.lang },
+      h("div", { class: `txt ${ur ? "urdu" : ""}`, dir: ur ? "rtl" : "ltr" }, trTexts[tr.id]?.[idx] ?? ""),
+      h("div", { class: "who" }, `— ${tr.name}`));
   }));
   return h("article", { class: "ayah", id: a.k, "data-idx": idx }, head, line, trs);
 }
-
-const toArabicDigits = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
 
 async function renderReader() {
   const st = C.get();
@@ -158,7 +140,6 @@ async function renderReader() {
     const text = ip ? (await C.indopak(1)).ayahs[0].join(" ") : (await C.surah(1)).ayahs[0].u;
     r.append(h("div", { class: `bismillah ar-${st.script}`, lang: "ar" }, text));
   }
-  // render in chunks so long surahs stay responsive
   const frag = document.createDocumentFragment();
   data.ayahs.forEach((a, i) => frag.append(ayahEl(a, i)));
   r.append(frag);
@@ -167,13 +148,12 @@ async function renderReader() {
 }
 
 function copyAyah(a, idx) {
-  const lines = [ayahText(idx), ...trList.map(t => `${trTexts[t.id][idx]} — ${t.name}`), `Quran ${a.k}`];
+  const lines = [ayahText(idx), ...trList.map(tr => `${trTexts[tr.id][idx]} — ${tr.name}`), t("surah.copyFooter", { key: a.k })];
   navigator.clipboard?.writeText(lines.join("\n\n"));
 }
 
 // ======================================================= word popover
 const pop = $("#pop");
-let popWord = null;
 const wordAudio = new Audio();
 document.addEventListener("click", e => {
   const w = e.target.closest(".w");
@@ -190,19 +170,19 @@ function showPop(el) {
   const idx = data.ayahs.findIndex(x => x.k === el.dataset.k);
   const a = data.ayahs[idx];
   const w = a.w[+el.dataset.i];
-  popWord = w;
   const st = C.get();
   pop.innerHTML = "";
   pop.append(
     h("div", { class: `w-ar ar-${st.script}`, lang: "ar" }, wordText(idx, +el.dataset.i)),
     h("div", { class: "w-tl" }, w.tl || ""),
     h("dl", {},
-      h("dt", {}, "اردو"), h("dd", { class: "urdu", lang: "ur" }, w.ur || "—"),
-      h("dt", {}, "English"), h("dd", {}, w.en || "—")),
+      h("dt", {}, t("lang.ur")), h("dd", { class: "urdu", lang: "ur" }, w.ur || "—"),
+      h("dt", {}, t("lang.en")), h("dd", {}, w.en || "—")),
     h("div", { class: "row" },
-      h("button", { class: "btn", onclick: () => { wordAudio.src = C.WORD_AUDIO + w.a; wordAudio.play(); } }, h("span", { html: ICON.speaker }), "Listen"),
-      h("span", { class: "tiny" }, `${a.k} · word ${+el.dataset.i + 1}`)),
-    h("div", { class: "source", style: "margin-top:10px" }, "Word-by-word: Quran.com"));
+      h("button", { class: "btn", onclick: () => { wordAudio.src = C.audioUrl.word(w.a); wordAudio.play(); } },
+        h("span", { html: ICON.speaker }), t("surah.wordListen")),
+      h("span", { class: "tiny" }, t("surah.wordRef", { key: a.k, n: +el.dataset.i + 1 }))),
+    h("div", { class: "source", style: "margin-top:10px" }, t("surah.wordSource")));
   pop.classList.add("show");
   const r = el.getBoundingClientRect();
   const pw = pop.offsetWidth, ph = pop.offsetHeight;
@@ -229,99 +209,98 @@ function closeDrawer() { drawer.classList.remove("show"); scrim.classList.remove
 
 // --- translations picker
 $("#open-tr").onclick = () => {
-  const chosen = trList.map(t => t.id);
-  const groups = [["ur", "Urdu — اردو"], ["ur-Latn", "Roman Urdu"], ["en", "English"]];
+  const chosen = trList.map(tr => tr.id);
+  const groups = [["ur", t("lang.urduLabel")], ["ur-Latn", t("lang.romanUrdu")], ["en", t("lang.en")]];
   const body = h("div", {},
-    h("p", { class: "muted", style: "margin-top:0" }, "Pick as many as you like. They appear in the order you tick them."),
+    h("p", { class: "muted", style: "margin-top:0" }, t("surah.trPickerHint")),
     ...groups.map(([lang, label]) => h("div", { class: "opt-group" }, h("h4", {}, label),
-      ...trMeta.list.filter(t => t.lang === lang).map(t => {
-        const i = chosen.indexOf(t.id);
+      ...trMeta.list.filter(tr => tr.lang === lang).map(tr => {
+        const i = chosen.indexOf(tr.id);
         return h("label", { class: "check" },
           h("input", { type: "checkbox", checked: i >= 0, onchange: e => {
-            const cur = (C.get().translations?.length ? C.get().translations : trMeta.default).filter(x => x !== t.id);
-            if (e.target.checked) cur.push(t.id);
+            const cur = (C.get().translations?.length ? C.get().translations : trMeta.default).filter(x => x !== tr.id);
+            if (e.target.checked) cur.push(tr.id);
             C.set({ translations: cur });
             $("#open-tr").click();
           } }),
-          h("span", {}, t.name, h("div", { class: "tiny" }, "via Quran.com")),
+          h("span", {}, tr.name, h("div", { class: "tiny" }, t("surah.trVia"))),
           i >= 0 ? h("span", { class: "ord" }, `#${i + 1}`) : null);
       }))),
-    h("div", { class: "note" }, "Translations are shown exactly as published. Only footnote markers are removed. ", h("a", { href: "sources.html" }, "Sources")));
-  openDrawer("Translations", body);
+    h("div", { class: "note" }, t("surah.trNote"), h("a", { href: "sources.html" }, t("nav.sources"))));
+  openDrawer(t("surah.translations"), body);
 };
 
 // --- settings
-$("#open-settings").innerHTML = ICON.gear + "<span>Settings</span>";
+$("#open-settings").innerHTML = `${ICON.gear}<span>${t("surah.settings")}</span>`;
 $("#open-settings").onclick = () => {
   const st = C.get();
   const seg = (key, opts) => h("div", { class: "seg" }, ...opts.map(([v, l]) =>
     h("button", { class: st[key] === v ? "on" : null, onclick: () => { C.set({ [key]: v }); $("#open-settings").click(); } }, l)));
   const body = h("div", {},
-    h("div", { class: "opt-group" }, h("h4", {}, "Arabic script"), seg("script", [["indopak", "IndoPak (South Asian)"], ["uthmani", "Uthmani"]]),
-      h("div", { class: "tiny", style: "margin-top:6px" }, "IndoPak: DigitalKhatt text and font, after the IndoPak 'Quraan Al Majeed' mushaf. Uthmani: Quran.com text.")),
-    h("div", { class: "opt-group" }, h("h4", {}, "Arabic size"),
+    h("div", { class: "opt-group" }, h("h4", {}, t("surah.setScript")),
+      seg("script", [["indopak", t("surah.setScriptIndopak")], ["uthmani", t("surah.setScriptUthmani")]]),
+      h("div", { class: "tiny", style: "margin-top:6px" }, t("surah.setScriptNote"))),
+    h("div", { class: "opt-group" }, h("h4", {}, t("surah.setSize")),
       h("div", { class: "range-row" }, h("span", { class: "tiny" }, "A"),
-        h("input", { type: "range", min: 22, max: 56, value: st.arSize, oninput: e => C.set({ arSize: +e.target.value }) }),
+        h("input", { type: "range", min: 22, max: 56, value: st.arSize, "aria-label": t("surah.setSize"), oninput: e => C.set({ arSize: +e.target.value }) }),
         h("span", {}, "A"))),
-    h("div", { class: "opt-group" }, h("h4", {}, "Word-by-word under each word"),
-      seg("wbwLang", [["ur", "اردو"], ["en", "English"], ["both", "Both"]]),
+    h("div", { class: "opt-group" }, h("h4", {}, t("surah.setWbw")),
+      seg("wbwLang", [["ur", t("lang.ur")], ["en", t("lang.en")], ["both", t("surah.both")]]),
       h("label", { class: "check", style: "margin-top:8px" },
-        h("input", { type: "checkbox", checked: st.wbw, onchange: e => C.set({ wbw: e.target.checked }) }), "Show word meanings"),
+        h("input", { type: "checkbox", checked: st.wbw, onchange: e => C.set({ wbw: e.target.checked }) }), t("surah.setShowWbw")),
       h("label", { class: "check" },
-        h("input", { type: "checkbox", checked: st.showTranslit, onchange: e => C.set({ showTranslit: e.target.checked }) }), "Show transliteration")),
-    h("div", { class: "opt-group" }, h("h4", {}, "Surah names & introduction language"), seg("uiMeaning", [["ur", "اردو"], ["en", "English"]])),
-    h("div", { class: "opt-group" }, h("h4", {}, "Theme"), seg("theme", [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]])));
-  openDrawer("Reading settings", body);
+        h("input", { type: "checkbox", checked: st.showTranslit, onchange: e => C.set({ showTranslit: e.target.checked }) }), t("surah.setTranslit"))),
+    h("div", { class: "opt-group" }, h("h4", {}, t("surah.setMeaningLang")), seg("uiMeaning", [["ur", t("lang.ur")], ["en", t("lang.en")]])),
+    h("div", { class: "opt-group" }, h("h4", {}, t("surah.setTheme")),
+      seg("theme", [["auto", t("surah.themeAuto")], ["light", t("surah.themeLight")], ["dark", t("surah.themeDark")]])));
+  openDrawer(t("surah.settingsTitle"), body);
 };
 
 // --- tafsir panel (fetched live from Quran.com, shown as published)
+let tafsirListener = null;
 async function openTafsir(key) {
   const T = await C.tafsirs();
   const pick = () => C.get().tafsir || T.default[C.get().uiMeaning === "en" ? "en" : "ur"];
   const body = h("div");
-  openDrawer(`Tafsir of ${key}`, body);
+  openDrawer(t("surah.tafsirOf", { key }), body);
 
   async function fill() {
-    const id = pick();
-    const meta = T.list.find(t => t.id === id) || T.list[0];
+    const meta = T.list.find(x => x.id === pick()) || T.list[0];
     const ur = meta.lang === "ur";
-    const select = h("select", { class: "tafsir-select", "aria-label": "Choose tafsir", onchange: e => { C.set({ tafsir: +e.target.value }); } },
-      ...[["ur", "اردو — Urdu"], ["en", "English"]].map(([lang, label]) =>
-        h("optgroup", { label }, ...T.list.filter(t => t.lang === lang).map(t =>
-          h("option", { value: t.id, selected: t.id === meta.id }, t.name)))));
-    const nav = (dir) => {
+    const select = h("select", { class: "tafsir-select", "aria-label": t("surah.tafsirChoose"), onchange: e => C.set({ tafsir: +e.target.value }) },
+      ...[["ur", t("lang.urduLabel")], ["en", t("lang.en")]].map(([lang, label]) =>
+        h("optgroup", { label }, ...T.list.filter(x => x.lang === lang).map(x =>
+          h("option", { value: x.id, selected: x.id === meta.id }, x.name)))));
+    const nav = dir => {
       const i = data.ayahs.findIndex(x => x.k === key) + dir;
-      if (i >= 0 && i < data.ayahs.length) { key = data.ayahs[i].k; $("#drawer-title").textContent = `Tafsir of ${key}`; fill(); }
+      if (i >= 0 && i < data.ayahs.length) { key = data.ayahs[i].k; $("#drawer-title").textContent = t("surah.tafsirOf", { key }); fill(); }
     };
     body.innerHTML = "";
     body.append(
       h("div", { class: "tafsir-bar" }, select,
-        h("button", { class: "btn", onclick: () => nav(-1), "aria-label": "Previous ayah" }, "←"),
-        h("button", { class: "btn", onclick: () => nav(1), "aria-label": "Next ayah" }, "→")),
-      h("div", { class: "skeleton" }, "Loading tafsir…"));
+        h("button", { class: "btn", onclick: () => nav(-1), "aria-label": t("surah.prevAyah") }, "←"),
+        h("button", { class: "btn", onclick: () => nav(1), "aria-label": t("surah.nextAyah") }, "→")),
+      h("div", { class: "skeleton" }, t("surah.tafsirLoading")));
     $("#drawer-body").scrollTop = 0;
     try {
       const res = await C.tafsirFor(meta.id, key);
-      const t = res.tafsir || {};
-      const covers = Object.keys(t.verses || {});
-      const html = sanitize(t.text || "");
+      const tf = res.tafsir || {};
+      const covers = Object.keys(tf.verses || {});
+      const html = sanitize(tf.text || "");
       body.lastChild.replaceWith(h("div", {},
         covers.length > 1 ? h("div", { class: "note", style: "margin:12px 0" },
-          `This commentary explains ayahs ${covers[0]}–${covers[covers.length - 1].split(":")[1]} together.`) : null,
+          t("surah.tafsirCovers", { from: covers[0], to: covers[covers.length - 1].split(":")[1] })) : null,
         html.trim()
           ? h("div", { class: `tafsir-body${ur ? " urdu" : ""}`, dir: ur ? "rtl" : "ltr", lang: meta.lang, html })
-          : h("div", { class: "note", style: "margin-top:12px" }, "This tafsir has no separate commentary for this ayah."),
-        h("div", { class: "source", style: "margin-top:16px" },
-          `${meta.name} · ${meta.author || ""} · loaded live from Quran.com, shown as published`)));
+          : h("div", { class: "note", style: "margin-top:12px" }, t("surah.tafsirNone")),
+        h("div", { class: "source", style: "margin-top:16px" }, t("surah.tafsirSource", { name: meta.name, author: meta.author || "" }))));
     } catch {
-      body.lastChild.replaceWith(h("div", { class: "note", style: "margin-top:12px" },
-        "Couldn't load the tafsir. It's fetched live from Quran.com, so please check your internet connection and try again."));
+      body.lastChild.replaceWith(h("div", { class: "note", style: "margin-top:12px" }, t("surah.tafsirError")));
     }
   }
   tafsirListener = fill;
   fill();
 }
-let tafsirListener = null;
 C.onChange((_, patch) => { if ("tafsir" in patch && drawer.classList.contains("show") && tafsirListener) tafsirListener(); });
 
 // --- hadith panel
@@ -333,21 +312,21 @@ async function openHadith(key) {
   function fill() {
     body.innerHTML = "";
     body.append(
-      h("div", { class: "seg", style: "margin-bottom:12px" }, ...[["ur", "اردو"], ["en", "English"], ["ar", "العربية"]].map(([v, l]) =>
-        h("button", { class: v === lang ? "on" : null, onclick: () => { lang = v; fill(); } }, l))),
-      h("div", { class: "note" },
-        `These hadith from Sahih al-Bukhari cite ayah ${key} in their text. We only show a link where the hadith's own published translation names the ayah. We add no links of our own. Check each one on sunnah.com.`),
+      h("div", { class: "seg", style: "margin-bottom:12px" }, ...["ur", "en", "ar"].map(v =>
+        h("button", { class: v === lang ? "on" : null, onclick: () => { lang = v; fill(); } }, t(`lang.${v}`)))),
+      h("div", { class: "note" }, t("surah.hadithNote", { key })),
       ...list.map(x => h("div", { class: "hadith" },
         h("div", { class: "h-ref" },
-          h("span", {}, h("b", {}, `${x.c === "bukhari" ? "Sahih al-Bukhari" : "Sahih Muslim"} ${x.num}`), h("span", { class: "tiny" }, ` · Book ${x.book}: ${x.bookName || ""} · Hadith ${x.inBook}`)),
-          h("a", { href: x.url, target: "_blank", rel: "noopener" }, "Verify on sunnah.com ↗")),
+          h("span", {}, h("b", {}, t("surah.hadithRef", { collection: t(`collection.${x.c}`), num: x.num })),
+            h("span", { class: "tiny" }, t("surah.hadithBook", { book: x.book, bookName: x.bookName || "", inBook: x.inBook }))),
+          h("a", { href: x.url, target: "_blank", rel: "noopener" }, t("common.verifySunnah"))),
         h("div", { class: `h-txt ${lang === "ur" ? "urdu" : lang === "ar" ? "ar" : ""}`, dir: lang === "en" ? "ltr" : "rtl", lang },
-          (lang === "ur" ? x.ur : lang === "ar" ? x.ar : x.en) || "(not available in this language)"),
-        h("div", { class: "tiny", style: "margin-top:6px" }, "Also cites: ", x.refs.filter(r => r !== key).slice(0, 12).join(", ") || "—"))),
+          (lang === "ur" ? x.ur : lang === "ar" ? x.ar : x.en) || t("common.notInLanguage")),
+        h("div", { class: "tiny", style: "margin-top:6px" }, t("surah.alsoCites"), x.refs.filter(r => r !== key).slice(0, 12).join(", ") || "—"))),
       h("div", { class: "source", style: "margin-top:14px" }, src["sahih-hadith-text"].publisher));
   }
   fill();
-  openDrawer(`Sahih hadith citing ${key}`, body);
+  openDrawer(t("surah.hadithTitle", { key }), body);
 }
 
 // ======================================================= audio player
@@ -360,7 +339,7 @@ const player = {
   },
   load() {
     const a = data.ayahs[this.idx];
-    audio.src = C.AYAH_AUDIO(a.id);
+    audio.src = C.audioUrl.ayah(a.id);
     $$(".ayah.playing").forEach(x => x.classList.remove("playing"));
     const el = document.getElementById(a.k);
     el?.classList.add("playing");
@@ -368,7 +347,7 @@ const player = {
   },
   toggle() {
     if (this.playing) { audio.pause(); this.playing = false; }
-    else { if (this.idx < 0) this.idx = 0, this.load(); this.continuous = true; audio.play(); this.playing = true; }
+    else { if (this.idx < 0) { this.idx = 0; this.load(); } this.continuous = true; audio.play(); this.playing = true; }
     syncPlay();
   },
 };
@@ -377,7 +356,7 @@ audio.addEventListener("ended", () => {
   else { player.playing = false; syncPlay(); }
 });
 function syncPlay() {
-  $("#play-all").innerHTML = (player.playing ? ICON.pause + "<span>Pause</span>" : ICON.play + "<span>Listen</span>");
+  $("#play-all").innerHTML = player.playing ? `${ICON.pause}<span>${t("surah.pause")}</span>` : `${ICON.play}<span>${t("surah.listen")}</span>`;
 }
 $("#play-all").onclick = () => player.toggle();
 syncPlay();

@@ -32,10 +32,12 @@ Then build the prophets data (Quranic Arabic Corpus ontology):
 ```bash
 python3 scripts/build_stories.py
 ```
-Then build the search index:
+Then build the search index, and finally the manifest:
 ```bash
 python3 scripts/build_search.py
+python3 scripts/build_manifest.py
 ```
+Every data file's format is documented in [docs/DATA.md](docs/DATA.md).
 Raw downloads are cached in `.cache/` (git-ignored). The output goes to `data/`:
 
 | File | What |

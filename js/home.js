@@ -1,8 +1,9 @@
 import * as C from "./common.js";
-const { h, $, $$ } = C;
+const { h, $, $$, t } = C;
 
 C.header("surahs");
 C.footer();
+document.title = t("home.title");
 
 const chs = await C.chapters();
 const src = await C.sources();
@@ -15,22 +16,21 @@ const src = await C.sources();
   const box = $("#hero-ayah");
   box.innerHTML = "";
   box.append(h("div", { class: `arabic ar-${st.script}`, lang: "ar" }, ip ? ip.ayahs[28].join(" ") : a.u));
-  for (const t of trs.slice(0, 2)) {
-    const texts = await C.tr(t.id, 38);
-    box.append(h("div", { class: `tr${t.lang === "ur" ? " urdu" : ""}`, lang: t.lang }, texts[28]));
+  for (const tr of trs.slice(0, 2)) {
+    const texts = await C.tr(tr.id, 38);
+    box.append(h("div", { class: `tr${tr.lang === "ur" ? " urdu" : ""}`, lang: tr.lang }, texts[28]));
   }
   box.append(h("div", { class: "ref" },
-    h("a", { href: "surah.html?n=38#38:29" }, "Surah Sad 38:29"),
-    h("span", { class: "tiny" }, " · translation: ", trs.slice(0, 2).map(t => t.name).join(" / "))));
+    h("a", { href: "surah.html?n=38#38:29" }, t("home.heroRef", { name: chs[37].name, key: "38:29" })),
+    h("span", { class: "tiny" }, t("home.heroTranslation", { names: trs.slice(0, 2).map(x => x.name).join(" / ") }))));
 })();
 
 // ----- revelation journey
 $("#journey-bars").append(C.journeyBars(chs));
-$("#journey-src").textContent = "Order & place: " + src["qc-chapters"].publisher + ". Scholars differ on the exact order, so treat it as approximate.";
+$("#journey-src").textContent = t("home.journeySource", { publisher: src["qc-chapters"].publisher });
 
 // ----- grid
 let order = "mushaf", place = "all", q = "";
-const meaning = c => C.get().uiMeaning === "ur" ? c.meaning.ur : c.meaning.en;
 
 function card(c) {
   return h("a", { class: "card s-card", href: `surah.html?n=${c.n}` },
@@ -38,9 +38,9 @@ function card(c) {
     h("div", {},
       h("div", { class: "s-name" }, c.name),
       h("div", { class: "s-meta" },
-        h("span", { class: `pl ${c.place}` }, c.place === "makkah" ? "Makki" : "Madani"),
-        h("span", {}, `${c.ayahs} ayahs`),
-        h("span", {}, order === "revelation" ? `Surah ${c.n}` : `Revealed #${c.order}`))),
+        h("span", { class: `pl ${c.place}` }, C.placeName(c.place)),
+        h("span", {}, t("common.ayahs", { n: c.ayahs })),
+        h("span", {}, order === "revelation" ? t("common.surahNum", { n: c.n }) : t("common.revealedNum", { n: c.order })))),
     h("div", { class: "s-ar", translate: "no" }, c.ar,
       h("span", { class: "m" }, c.meaning.ur), h("span", { class: "tiny", style: "display:block;font-family:var(--font-ui)" }, c.meaning.en)));
 }
@@ -54,8 +54,8 @@ function render() {
   const g = $("#grid");
   g.innerHTML = "";
   list.forEach(c => g.append(card(c)));
-  $("#surah-count").textContent = `${list.length} of 114 surahs · ${list.reduce((s, c) => s + c.ayahs, 0).toLocaleString()} ayahs`
-    + (order === "revelation" ? " · sorted by revelation order" : "");
+  $("#surah-count").textContent = t("home.count", { shown: list.length, ayahs: list.reduce((s, c) => s + c.ayahs, 0).toLocaleString() })
+    + (order === "revelation" ? t("home.sortedRevelation") : "");
 }
 
 function seg(id, fn) {

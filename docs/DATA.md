@@ -1,0 +1,117 @@
+# Tadabbur data contract
+
+Every client reads the same static JSON in `data/`: the website now, and the mobile and desktop apps later. This file is the contract.
+
+- **Schema version: 1.** It's recorded in `data/manifest.json` as `schema`.
+  - Adding a field doesn't change the version; clients must ignore fields they don't know.
+  - Renaming or removing a field, or changing a field's meaning or type, **bumps the version**. Clients refuse data with a version they don't support (`js/core/data.js` → `SCHEMA`).
+- `scripts/validate_data.py` enforces the rules below in CI.
+
+## Conventions
+- **Ayah key:** `"surah:ayah"`, e.g. `"2:255"`. Surahs are 1–114; ayah counts come from `chapters.json`.
+- **Global ayah index:** 0–6235 in mushaf order, used by the search files. Index = sum of the earlier surahs' ayah counts + (ayah − 1).
+- **`NNN`:** the surah number zero-padded to 3 digits (`001` … `114`).
+- **Word index:** 1-based within an ayah, matching `surah/NNN.json` → `w`.
+- **`src`:** an id that must exist in `sources.json`. Every dataset carries one, either per file or per record.
+- **Text is never altered:** Arabic, translations, tafsir and hadith are shown as fetched. Only footnote markers and unsafe HTML are stripped.
+- **All paths are relative** (`data/...`), so the same files work under any web path or inside an app.
+
+## Files
+
+### `manifest.json`
+`{ schema, built, counts: { surahs, ayahs, words, translations, tafsirs, hadith_linked, seerah_events, prophets }, datasets: [{ id, files, src }] }`
+
+### `sources.json`
+`{ <src id>: { title, publisher, url, fetched, via?, note?, lang? } }`
+- `title`, `publisher`, `url` and `fetched` (YYYY-MM-DD) are required.
+
+### `chapters.json`
+An array of 114 items:
+
+| Field | Meaning |
+|---|---|
+| `n` | Surah number |
+| `ar` | Arabic name |
+| `name` | Name, simple spelling |
+| `nameC` | Name, with diacritics |
+| `meaning` | `{ en, ur }` |
+| `place` | `"makkah"` or `"madinah"` |
+| `order` | Position in revelation order (1–114) |
+| `ayahs` | Number of ayahs |
+| `bismillah` | Whether the surah opens with the Bismillah |
+| `pages` | `[first, last]` mushaf page |
+| `src` | Source id |
+
+### `surah/NNN.json`
+`{ n, src: { text, wbw }, ayahs: [Ayah] }`
+- `Ayah`: `{ k, n, id, u, i, juz, page, sajdah, w: [Word] }`
+  - `id` is the global ayah id (1–6236), used for audio.
+  - `u` is the Uthmani text, unmodified (fingerprinted in `checksums.json`).
+  - `i` is Quran.com's IndoPak text, kept for reference. The reader uses `indopak/` instead.
+- `Word`: `{ u, i, tl, en, ur, a }`
+  - `u`, `i`: Uthmani and IndoPak spelling
+  - `tl`: transliteration
+  - `en`, `ur`: English and Urdu meaning
+  - `a`: relative audio path on `audio.qurancdn.com`
+
+### `indopak/NNN.json`
+`{ src, bismillah, ayahs: [[word, …], …] }`
+- The DigitalKhatt IndoPak text, with **exactly one entry per `surah/NNN.json` word**.
+- Fingerprinted in `checksums-indopak.json` (SHA-256 of the words joined with spaces, first 16 hex characters).
+
+### `checksums.json`, `checksums-indopak.json`
+`{ "<surah>": ["<16 hex>", …] }`, one entry per ayah.
+
+### `translations.json`, `tr/<id>/NNN.json`
+- `translations.json`: `{ default: [id…], list: [{ id, lang, name, src }] }`
+  - `lang` is `ur`, `ur-Latn` (Roman Urdu) or `en`.
+- `tr/<id>/NNN.json`: an array of strings, one per ayah. A string may be empty where the source has no text.
+
+### `info/NNN.json`
+`{ src, en: Intro, ur: Intro }`
+- `Intro`: `{ html, short, source, lang }`
+- `html` is third-party HTML and **must be sanitised** before display.
+- `source` names the original author, e.g. Tafhim al-Quran.
+
+### `tafsirs.json`
+`{ api, default: { ur, en }, list: [{ id, lang, name, author, src }] }`
+- Tafsir text isn't bundled. Fetch it from `api`, after replacing `{id}` and `{key}`.
+- The response's `tafsir.verses` lists every ayah the passage covers. Sanitise `tafsir.text` before display.
+
+### `hadith-index.json`, `hadith/NNN.json`
+- `hadith-index.json`: `{ "<surah>": { "<ayah key>": count } }`
+- `hadith/NNN.json`: `[{ c, num, book, bookName, inBook, en, ur, ar, refs: [key…], url }]`
+  - `c` is `"bukhari"` or `"muslim"`.
+  - `refs` lists only the ayahs the hadith's own text cites.
+- Source: `sahih-hadith-text`.
+
+### `seerah.json`, `seerah/<event id>.json`, `seerah-by-surah.json`
+- `seerah.json`: `{ src, frame, anchors, events, note }`
+  - `frame`: `{ years, makkah, madinah, hadith, text, ur, url }`
+  - `anchors`: `[{ id, year, hadith, how, url }]`. A year is given only where a hadith states the time.
+  - `events`: `[{ id, order, name: { en, ur }, period, range: [first, last], count, first, refs, surahs, year|null }]`
+    - `order` is Imam al-Bukhari's chapter order.
+- `seerah/<id>.json`: `[{ num, en, ur, ar, refs, url }]`
+- `seerah-by-surah.json`: `{ "<surah>": [event id…] }`
+
+### `stories.json`, `stories-by-surah.json`
+- `stories.json`: `{ src, prophets: [Prophet], names: { concept id: name }, filtered, unaligned }`
+- `Prophet`: `{ id, en, ar, cats, names: [{ id, en, ar }], relations: [[rel, a, b]], mentions: [{ k, w, as }], ayahs, surahs, url }`
+  - `w` is the word index the Quranic Arabic Corpus ontology tags.
+  - `as` is the name variant used (e.g. `"messiah"`).
+- `stories-by-surah.json`: `{ "<surah>": [prophet id…] }`
+
+### `search/ar.json`, `search/tr-<id>.json`
+Each is an array of 6,236 strings, in global ayah index order.
+- `ar.json`: Quran.com plain Arabic (`imlaei_simple`), used **only for matching**.
+- `tr-<id>.json`: the same text as `tr/<id>/*`, concatenated.
+
+## Live services (not bundled)
+
+| What | URL |
+|---|---|
+| Ayah audio | `https://cdn.islamic.network/quran/audio/128/ar.alafasy/<ayah id>.mp3` |
+| Word audio | `https://audio.qurancdn.com/<Word.a>` |
+| Tafsir | `tafsirs.json` → `api` |
+
+`scripts/check_links.py` checks all three weekly.

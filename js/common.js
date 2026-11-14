@@ -1,80 +1,46 @@
-// Tadabbur — shared helpers: data loading, settings, header, theme.
+// Tadabbur web UI layer: browser-only helpers on top of the DOM-free core.
+// Logic and data live in js/core/; interface text lives in js/i18n/.
 
-const cache = new Map();
-export async function getJSON(path) {
-  if (!cache.has(path)) {
-    cache.set(path, fetch(path).then(r => {
-      if (!r.ok) throw new Error(`${r.status} ${path}`);
-      return r.json();
-    }));
-  }
-  return cache.get(path);
+import * as core from "./core/index.js";
+import { t, setLanguage, language, direction } from "./i18n/index.js";
+
+// ---------- re-exports so pages import one module
+export * from "./core/index.js";
+export { t };
+export const { get, set, onChange } = core.settings;
+export const WORD_AUDIO = "https://audio.qurancdn.com/";      // kept for older call sites
+export const AYAH_AUDIO = core.audioUrl.ayah;
+
+// ---------- language + theme (applied to <html>)
+function applyLanguage() {
+  setLanguage(get().uiLang);
+  document.documentElement.lang = language();
+  document.documentElement.dir = direction();
 }
-export const pad3 = n => String(n).padStart(3, "0");
-export const chapters = () => getJSON("data/chapters.json");
-export const translations = () => getJSON("data/translations.json");
-export const sources = () => getJSON("data/sources.json");
-export const surah = n => getJSON(`data/surah/${pad3(n)}.json`);
-export const info = n => getJSON(`data/info/${pad3(n)}.json`);
-export const indopak = n => getJSON(`data/indopak/${pad3(n)}.json`);
-
-// Arabic text of one ayah / word in the reader's chosen script.
-// IndoPak words come from DigitalKhatt, aligned 1:1 to Quran.com's word list.
-export async function scriptText(n) {
-  if (settings.script !== "indopak") return null;
-  return indopak(n);
-}
-export const tr = (id, n) => getJSON(`data/tr/${id}/${pad3(n)}.json`);
-export const hadithIndex = () => getJSON("data/hadith-index.json");
-export const tafsirs = () => getJSON("data/tafsirs.json");
-// Tafsir is fetched live from Quran.com's public API (CORS-enabled), one ayah at a time.
-export async function tafsirFor(id, key) {
-  const t = await tafsirs();
-  return getJSON(t.api.replace("{id}", id).replace("{key}", key));
-}
-export const hadith = n => getJSON(`data/hadith/${pad3(n)}.json`).catch(() => []);
-
-export const WORD_AUDIO = "https://audio.qurancdn.com/";
-export const AYAH_AUDIO = id => `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${id}.mp3`;
-
-// ---------- settings (per-viewer convenience; safe if storage is blocked)
-const DEFAULTS = {
-  theme: "auto",          // auto | light | dark
-  script: "indopak",      // indopak (DigitalKhatt text + font) | uthmani (Quran.com text)
-  wbw: true,
-  wbwLang: "ur",          // ur | en | both
-  translations: null,     // null => defaults from translations.json
-  arSize: 34,
-  showTranslit: false,
-  uiMeaning: "ur",        // which language to show surah meanings in
-  tafsir: null,           // chosen tafsir id (null => default for uiMeaning)
-};
-let settings = { ...DEFAULTS };
-try { Object.assign(settings, JSON.parse(localStorage.getItem("tadabbur.settings") || "{}")); } catch {}
-const listeners = new Set();
-export const get = () => settings;
-export function set(patch) {
-  settings = { ...settings, ...patch };
-  try { localStorage.setItem("tadabbur.settings", JSON.stringify(settings)); } catch {}
-  applyTheme();
-  listeners.forEach(fn => fn(settings, patch));
-}
-export const onChange = fn => listeners.add(fn);
-
 export function applyTheme() {
-  const t = settings.theme === "auto"
+  const s = get();
+  const theme = s.theme === "auto"
     ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-    : settings.theme;
-  document.documentElement.dataset.theme = t;
-  document.documentElement.style.setProperty("--ar-size", settings.arSize + "px");
+    : s.theme;
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.setProperty("--ar-size", s.arSize + "px");
 }
+applyLanguage();
 applyTheme();
+onChange((_, patch) => {
+  if ("uiLang" in patch) applyLanguage();
+  applyTheme();
+});
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", applyTheme);
 
-export async function selectedTranslations() {
-  const t = await translations();
-  const ids = (settings.translations && settings.translations.length) ? settings.translations : t.default;
-  return ids.map(id => t.list.find(x => x.id === id)).filter(Boolean);
+/** Fill static HTML: data-i18n (text), data-i18n-html, data-i18n-placeholder, data-i18n-title, data-i18n-aria-label. */
+export function applyI18n(root = document) {
+  root.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  root.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  for (const attr of ["placeholder", "title", "aria-label"]) {
+    const k = "i18n" + attr.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
+    root.querySelectorAll(`[data-i18n-${attr}]`).forEach(el => el.setAttribute(attr, t(el.dataset[k])));
+  }
 }
 
 // ---------- tiny DOM helpers
@@ -95,7 +61,23 @@ export function h(tag, attrs = {}, ...kids) {
 }
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-export const isUrdu = lang => lang === "ur";
+export const placeName = place => t(place === "makkah" ? "common.makki" : "common.madani");
+
+// ---------- sanitise third-party HTML (surah intros, tafsir)
+const ALLOWED = new Set(["H1", "H2", "H3", "H4", "P", "DIV", "SPAN", "BR", "B", "I", "STRONG", "EM", "UL", "OL", "LI", "SUP", "SUB", "BLOCKQUOTE"]);
+export function sanitize(html) {
+  const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
+  const walk = node => {
+    for (const el of [...node.children]) {
+      if (!ALLOWED.has(el.tagName)) { el.replaceWith(...el.childNodes); continue; }
+      for (const a of [...el.attributes]) if (a.name !== "class") el.removeAttribute(a.name);
+      walk(el);
+    }
+  };
+  const root = doc.body.firstChild;
+  walk(root);
+  return root.innerHTML;
+}
 
 export const ICON = {
   sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
@@ -110,23 +92,24 @@ export const ICON = {
   speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>',
 };
 
-// ---------- header
+// ---------- page frame
 export function header(active = "") {
+  applyI18n();
   const theme = document.documentElement.dataset.theme;
   const el = h("header", { class: "top" },
     h("div", { class: "wrap" },
       h("a", { class: "brand", href: "index.html" },
         h("span", { class: "mark" }, "ت"),
-        h("span", { class: "t" }, "Tadabbur"),
-        h("span", { class: "ar" }, "تدبّر")),
+        h("span", { class: "t" }, t("app.name")),
+        h("span", { class: "ar" }, t("app.nameAr"))),
       h("nav", { class: "nav" },
-        h("a", { href: "index.html#surahs", class: active === "surahs" ? "on" : null }, "Surahs"),
-        h("a", { href: "search.html", class: "nav-search", title: "Search the Quran", "aria-label": "Search", html: ICON.search }),
-        h("a", { href: "stories.html" }, "Prophets"),
-        h("a", { href: "timeline.html" }, h("span", { class: "label" }, "Seerah "), "Timeline"),
-        h("a", { href: "sources.html" }, "Sources"),
+        h("a", { href: "index.html#surahs", class: active === "surahs" ? "on" : null }, t("nav.surahs")),
+        h("a", { href: "search.html", class: "nav-search", title: t("nav.search"), "aria-label": t("nav.search"), html: ICON.search }),
+        h("a", { href: "stories.html" }, t("nav.prophets")),
+        h("a", { href: "timeline.html" }, h("span", { class: "label" }, t("nav.seerahPrefix")), t("nav.timeline")),
+        h("a", { href: "sources.html" }, t("nav.sources")),
         h("button", {
-          class: "icon-btn", title: "Toggle theme", "aria-label": "Toggle theme",
+          class: "icon-btn", title: t("nav.theme"), "aria-label": t("nav.theme"),
           html: theme === "dark" ? ICON.sun : ICON.moon,
           onclick: e => {
             const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
@@ -139,8 +122,7 @@ export function header(active = "") {
 
 export function footer() {
   document.body.append(h("footer", { class: "foot" }, h("div", { class: "wrap" },
-    "Tadabbur shows only content from cited, established sources. Nothing religious here is written by us. ",
-    h("a", { href: "sources.html" }, "See every source and its licence."))));
+    t("footer.text"), h("a", { href: "sources.html" }, t("footer.link")))));
 }
 
 // ---------- tooltip
@@ -154,8 +136,11 @@ export function tip(e, html) {
   const y = Math.max(8, e.clientY - tipEl.offsetHeight - 12);
   tipEl.style.left = x + "px"; tipEl.style.top = y + "px";
 }
+export const surahTip = c =>
+  `<b>${c.n}. ${c.name}</b> <span style="font-family:var(--font-uthmani)">${c.ar}</span><br>` +
+  `${t("common.revealedOf", { n: c.order })} · ${placeName(c.place)}<br>${t("common.ayahs", { n: c.ayahs })}`;
 
-// ---------- revelation journey bars (shared by home + surah page)
+// ---------- revelation journey bars (home + surah page)
 export function journeyBars(chs, { current = null, onHover = true } = {}) {
   const byOrder = [...chs].sort((a, b) => a.order - b.order);
   const max = Math.sqrt(Math.max(...chs.map(c => c.ayahs)));
@@ -164,13 +149,11 @@ export function journeyBars(chs, { current = null, onHover = true } = {}) {
     const a = h("a", {
       href: `surah.html?n=${c.n}`, role: "listitem",
       class: `${c.place}${c.n === current ? " cur" : ""}`,
-      "aria-label": `${c.name}, revealed number ${c.order}, ${c.ayahs} ayahs, ${c.place}`,
+      "aria-label": t("aria.surahBar", { name: c.name, order: c.order, ayahs: c.ayahs, place: placeName(c.place) }),
     });
     a.style.height = Math.max(6, (Math.sqrt(c.ayahs) / max) * 100) + "%";
     if (onHover) {
-      a.addEventListener("mousemove", e => tip(e,
-        `<b>${c.n}. ${c.name}</b> <span style="font-family:var(--font-uthmani)">${c.ar}</span><br>` +
-        `Revealed #${c.order} of 114 · ${c.place === "makkah" ? "Makki" : "Madani"}<br>${c.ayahs} ayahs`));
+      a.addEventListener("mousemove", e => tip(e, surahTip(c)));
       a.addEventListener("mouseleave", () => tip(null));
     }
     wrap.append(a);

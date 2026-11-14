@@ -6,7 +6,9 @@ For each page, at desktop and phone (375px) width, fails if:
   - the page throws a JavaScript error or logs a console error;
   - any of our own files fail to load (404 etc.);
   - the expected content doesn't appear (e.g. all 7 ayahs of Al-Fatihah);
-  - the page scrolls sideways on a phone.
+  - the page scrolls sideways on a phone;
+  - any interface text key is missing (shown as ⟦key⟧).
+Also runs scripts/core_worker_test.js in a Web Worker to prove js/core works without a DOM.
 
 Third-party requests (fonts, audio, Quran.com API) are not required to succeed,
 so the test doesn't depend on outside services.
@@ -15,7 +17,7 @@ Usage:
   pip install playwright && python -m playwright install --with-deps chromium
   python3 scripts/smoke_test.py
 """
-import functools, http.server, os, sys, threading
+import functools, http.server, os, re, sys, threading
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -75,6 +77,9 @@ def main():
                 except Exception as e:  # noqa: BLE001
                     found = page.evaluate("s => document.querySelectorAll(s).length", selector)
                     problems.append(f"expected at least {minimum} × '{selector}', found {found} ({type(e).__name__})")
+                body = page.evaluate("document.body.innerText")
+                if "⟦" in body:
+                    problems.append("missing interface text: " + ", ".join(sorted(set(re.findall(r"⟦([^⟧]+)⟧", body)))))
                 if vname == "phone":
                     sw, iw = page.evaluate("[document.documentElement.scrollWidth, innerWidth]")
                     if sw > iw + 1:
@@ -86,6 +91,19 @@ def main():
                     failures.append(f"[{vname}] {path}: {pr}")
                 page.close()
             ctx.close()
+        # core runs with no DOM (as a mobile/desktop app would use it)
+        page = browser.new_page()
+        page.goto(base + "index.html", wait_until="domcontentloaded")
+        results = page.evaluate("""() => new Promise((resolve, reject) => {
+            const w = new Worker("scripts/core_worker_test.js", { type: "module" });
+            w.onmessage = e => resolve(e.data);
+            w.onerror = e => reject(e.message || "worker failed");
+            setTimeout(() => reject("worker timed out"), 60000);
+        })""")
+        for r in results:
+            print(f"{'✓' if r['ok'] else '✗'} [core, no DOM] {r['name']}" + ("" if r["ok"] else f"  ({r['detail']})"))
+            if not r["ok"]:
+                failures.append(f"[core] {r['name']}: {r['detail']}")
         browser.close()
     httpd.shutdown()
 

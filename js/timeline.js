@@ -1,55 +1,57 @@
 import * as C from "./common.js";
-const { h, $, $$, ICON } = C;
+const { h, $, $$, ICON, t } = C;
 
 C.header("timeline");
 C.footer();
+document.title = t("timeline.pageTitle");
 
-const [chs, S] = await Promise.all([C.chapters(), C.getJSON("data/seerah.json")]);
+const [chs, S] = await Promise.all([C.chapters(), C.seerah()]);
 const byN = Object.fromEntries(chs.map(c => [c.n, c]));
 const Y = S.frame.years;                       // 23
 const pct = y => (y / Y) * 100;
 let lang = C.get().uiMeaning === "en" ? "en" : "ur";
+const ayahLink = k => `surah.html?n=${k.split(":")[0]}#${k}`;
 
 // ---------------------------------------------------------------- frame quote (Bukhari 3902)
 function renderQuote() {
   const q = $("#frame-quote");
   q.innerHTML = "";
   q.append(
-    h("div", { class: "seg", style: "float:right;margin-left:10px" }, ...[["ur", "اردو"], ["en", "English"]].map(([v, l]) =>
-      h("button", { class: v === lang ? "on" : null, onclick: () => { lang = v; renderQuote(); renderEvents(); } }, l))),
+    h("div", { class: "seg", style: "float:right;margin-left:10px" }, ...["ur", "en"].map(v =>
+      h("button", { class: v === lang ? "on" : null, onclick: () => { lang = v; renderQuote(); renderEvents(); } }, t(`lang.${v}`)))),
     h("div", { class: lang === "ur" ? "urdu" : "", dir: lang === "ur" ? "rtl" : "ltr", style: "font-size:" + (lang === "ur" ? "17px" : "15px") },
       lang === "ur" ? S.frame.ur : S.frame.text),
-    h("div", { class: "source", style: "margin-top:8px;clear:both" }, "Sahih al-Bukhari 3902 · ",
-      h("a", { href: S.frame.url, target: "_blank", rel: "noopener" }, "verify on sunnah.com ↗")));
+    h("div", { class: "source", style: "margin-top:8px;clear:both" }, t("timeline.frameSource"),
+      h("a", { href: S.frame.url, target: "_blank", rel: "noopener" }, t("timeline.verify"))));
 }
 renderQuote();
 
 // ---------------------------------------------------------------- periods + ruler
 $("#tl-periods").append(
-  h("div", { class: "period makkah", style: `width:${pct(S.frame.makkah)}%` }, h("b", {}, "Makkah"), h("span", {}, ` · ${S.frame.makkah} years`)),
-  h("div", { class: "period madinah", style: `width:${pct(S.frame.madinah)}%` }, h("b", {}, "Madinah"), h("span", {}, ` · ${S.frame.madinah} years`)));
+  h("div", { class: "period makkah", style: `width:${pct(S.frame.makkah)}%` }, h("b", {}, t("common.makkah")), h("span", {}, t("timeline.years", { n: S.frame.makkah }))),
+  h("div", { class: "period madinah", style: `width:${pct(S.frame.madinah)}%` }, h("b", {}, t("common.madinah")), h("span", {}, t("timeline.years", { n: S.frame.madinah }))));
 const ruler = $("#tl-ruler");
 for (let y = 0; y <= Y; y++) {
-  const major = y % 5 === 0 || y === 13 || y === Y;
+  const major = y % 5 === 0 || y === S.frame.makkah || y === Y;
   ruler.append(h("span", { class: `tick${major ? " major" : ""}`, style: `left:${pct(y)}%` }, major ? h("i", {}, String(y)) : null));
 }
-ruler.append(h("span", { class: "ruler-cap" }, "years after the first revelation"));
+ruler.append(h("span", { class: "ruler-cap" }, t("timeline.rulerCap")));
 
 // ---------------------------------------------------------------- dated anchors
 const events = S.events;
 const evById = Object.fromEntries(events.map(e => [e.id, e]));
 const anchorBox = $("#tl-anchors");
-const SHORT = { revelation: "Revelation begins", khadija: "Death of Khadija", hijrah: "Hijrah", conquest: "Conquest of Makkah", death: "Passing of the Prophet" };
 const ROW = { revelation: 0, khadija: 1, hijrah: 0, conquest: 2, death: 3 };   // label rows so labels never collide
 S.anchors.forEach(a => {
   const ev = evById[a.id];
   const pos = a.year === 0 ? " start" : pct(a.year) > 70 ? " end" : "";
   const row = ROW[a.id] ?? 0;
+  const label = t(`timeline.anchor.${a.id}`);
   const el = h("button", {
     class: `anchor${pos}`, style: `left:${pct(a.year)}%`,
     onclick: () => openEvent(ev.id), title: a.how,
   }, h("span", { class: "pin" }), h("span", { class: "stem", style: `height:${4 + row * 24}px` }),
-    h("span", { class: "lbl" }, SHORT[a.id] || ev.name.en, h("em", {}, ` · yr ${a.year}`)));
+    h("span", { class: "lbl" }, label.startsWith("⟦") ? ev.name.en : label, h("em", {}, t("common.yr", { n: a.year }))));
   el.addEventListener("mousemove", e => C.tip(e, `<b>${ev.name.en}</b><br>${a.how}`));
   el.addEventListener("mouseleave", () => C.tip(null));
   anchorBox.append(el);
@@ -58,7 +60,6 @@ S.anchors.forEach(a => {
 // ---------------------------------------------------------------- surah lane (order within each period)
 const lane = $("#tl-surahs");
 const ordered = [...chs].sort((a, b) => a.order - b.order);
-const mk = ordered.filter(c => c.place === "makkah"), md = ordered.filter(c => c.place === "madinah");
 const maxA = Math.sqrt(Math.max(...chs.map(c => c.ayahs)));
 function placeGroup(list, from, span) {
   list.forEach((c, i) => {
@@ -66,16 +67,15 @@ function placeGroup(list, from, span) {
     const bar = h("a", {
       class: `sbar ${c.place}`, href: `surah.html?n=${c.n}`, "data-n": c.n,
       style: `left:${pct(x)}%;height:${Math.max(8, Math.sqrt(c.ayahs) / maxA * 100)}%`,
-      "aria-label": `${c.name}, revealed number ${c.order}`,
+      "aria-label": t("aria.surahBar", { name: c.name, order: c.order, ayahs: c.ayahs, place: C.placeName(c.place) }),
     });
-    bar.addEventListener("mousemove", e => C.tip(e,
-      `<b>${c.n}. ${c.name}</b> <span style="font-family:var(--font-uthmani)">${c.ar}</span><br>Revealed #${c.order} of 114 · ${c.ayahs} ayahs`));
+    bar.addEventListener("mousemove", e => C.tip(e, C.surahTip(c)));
     bar.addEventListener("mouseleave", () => C.tip(null));
     lane.append(bar);
   });
 }
-placeGroup(mk, 0, S.frame.makkah);
-placeGroup(md, S.frame.makkah, S.frame.madinah);
+placeGroup(ordered.filter(c => c.place === "makkah"), 0, S.frame.makkah);
+placeGroup(ordered.filter(c => c.place === "madinah"), S.frame.makkah, S.frame.madinah);
 
 function highlight(surahs) {
   const set = new Set(surahs || []);
@@ -92,10 +92,10 @@ function eventCard(e) {
       h("div", { class: "ev-name" }, e.name.en),
       h("div", { class: "ev-ur urdu" }, e.name.ur),
       h("div", { class: "ev-meta" },
-        e.year != null ? h("span", { class: "chip dated" }, `Year ${e.year}`) : null,
-        h("span", { class: "chip" }, `${e.count} hadith`),
-        e.surahs.length ? h("span", { class: "chip hadith-chip" }, `Cites ${e.refs.length} ayah${e.refs.length > 1 ? "s" : ""}: ` +
-          e.surahs.map(n => byN[n].name).join(", ")) : null)));
+        e.year != null ? h("span", { class: "chip dated" }, t("common.year", { n: e.year })) : null,
+        h("span", { class: "chip" }, t("common.hadith", { n: e.count })),
+        e.surahs.length ? h("span", { class: "chip hadith-chip" },
+          t("timeline.cites", { n: e.refs.length, surahs: e.surahs.map(n => byN[n].name).join(", ") })) : null)));
   card.addEventListener("mouseenter", () => highlight(e.surahs));
   card.addEventListener("mouseleave", () => highlight(null));
   return card;
@@ -103,9 +103,9 @@ function eventCard(e) {
 function renderEvents() {
   const box = $("#events");
   box.innerHTML = "";
-  for (const [p, label] of [["makkah", "Makkah period"], ["madinah", "Madinah period"]]) {
+  for (const p of ["makkah", "madinah"]) {
     box.append(h("div", { class: "ev-col" },
-      h("h3", { class: `ev-h ${p}` }, label),
+      h("h3", { class: `ev-h ${p}` }, t(`timeline.${p}Period`)),
       ...events.filter(e => e.period === p).map(eventCard)));
   }
 }
@@ -120,33 +120,33 @@ document.addEventListener("keydown", e => e.key === "Escape" && close());
 
 async function openEvent(id) {
   const e = evById[id];
-  const recs = await C.getJSON(`data/seerah/${id}.json`);
+  const recs = await C.seerahEvent(id);
   const anchor = S.anchors.find(a => a.id === id);
-  let hl = lang === "en" ? "en" : lang;
+  let hl = lang;
   let shown = 8;
   const body = h("div");
   function fill() {
     body.innerHTML = "";
     body.append(...[
       h("div", { class: "ev-ur urdu", style: "font-size:20px" }, e.name.ur),
-      anchor ? h("div", { class: "note", style: "margin:10px 0" }, h("b", {}, `Year ${anchor.year} after the first revelation. `), anchor.how) : null,
+      anchor ? h("div", { class: "note", style: "margin:10px 0" }, h("b", {}, t("timeline.anchorYear", { n: anchor.year })), anchor.how) : null,
       h("div", { class: "note", style: "margin:10px 0" },
-        `Sahih al-Bukhari ${e.range[0]}–${e.range[1]}: ${e.count} hadith in the chapter Imam al-Bukhari gave to this event. `,
-        "We quote them as published. Check each one on sunnah.com."),
-      e.refs.length ? h("div", { style: "margin:12px 0" }, h("h4", { class: "tiny", style: "text-transform:uppercase;letter-spacing:1px;margin:0 0 6px" }, "Ayahs these hadith cite"),
-        h("div", { class: "ev-meta" }, ...e.refs.map(k => h("a", { class: "chip hadith-chip", href: `surah.html?n=${k.split(":")[0]}#${k}` }, `${byN[+k.split(":")[0]].name} ${k}`)))) : null,
-      h("div", { class: "seg", style: "margin:6px 0 4px" }, ...[["ur", "اردو"], ["en", "English"], ["ar", "العربية"]].map(([v, l]) =>
-        h("button", { class: v === hl ? "on" : null, onclick: () => { hl = v; fill(); } }, l))),
+        t("timeline.chapterNote", { from: e.range[0], to: e.range[1], n: e.count }), t("timeline.quoteNote")),
+      e.refs.length ? h("div", { style: "margin:12px 0" },
+        h("h4", { class: "tiny", style: "text-transform:uppercase;letter-spacing:1px;margin:0 0 6px" }, t("timeline.ayahsCited")),
+        h("div", { class: "ev-meta" }, ...e.refs.map(k => h("a", { class: "chip hadith-chip", href: ayahLink(k) }, `${byN[+k.split(":")[0]].name} ${k}`)))) : null,
+      h("div", { class: "seg", style: "margin:6px 0 4px" }, ...["ur", "en", "ar"].map(v =>
+        h("button", { class: v === hl ? "on" : null, onclick: () => { hl = v; fill(); } }, t(`lang.${v}`)))),
       ...recs.slice(0, shown).map(x => h("div", { class: "hadith" },
-        h("div", { class: "h-ref" }, h("b", {}, `Sahih al-Bukhari ${x.num}`),
-          h("a", { href: x.url, target: "_blank", rel: "noopener" }, "Verify on sunnah.com ↗")),
+        h("div", { class: "h-ref" }, h("b", {}, t("surah.hadithRef", { collection: t("collection.bukhari"), num: x.num })),
+          h("a", { href: x.url, target: "_blank", rel: "noopener" }, t("common.verifySunnah"))),
         h("div", { class: `h-txt ${hl === "ur" ? "urdu" : hl === "ar" ? "ar" : ""}`, dir: hl === "en" ? "ltr" : "rtl", lang: hl },
-          (hl === "ur" ? x.ur : hl === "ar" ? x.ar : x.en) || "(not available in this language)"),
-        x.refs.length ? h("div", { class: "tiny", style: "margin-top:6px" }, "Cites: ",
-          ...x.refs.map((k, i) => [i ? ", " : "", h("a", { href: `surah.html?n=${k.split(":")[0]}#${k}` }, k)])) : null)),
+          (hl === "ur" ? x.ur : hl === "ar" ? x.ar : x.en) || t("common.notInLanguage")),
+        x.refs.length ? h("div", { class: "tiny", style: "margin-top:6px" }, t("timeline.citesShort"),
+          ...x.refs.map((k, i) => [i ? ", " : "", h("a", { href: ayahLink(k) }, k)])) : null)),
       recs.length > shown ? h("button", { class: "btn", style: "margin-top:14px", onclick: () => { shown += 10; fill(); } },
-        `Show more (${recs.length - shown} left)`) : null,
-      h("div", { class: "source", style: "margin-top:14px" }, "Sahih al-Bukhari · fawazahmed0/hadith-api")].filter(Boolean));
+        t("common.showMore", { n: recs.length - shown })) : null,
+      h("div", { class: "source", style: "margin-top:14px" }, t("timeline.source"))].filter(Boolean));
   }
   fill();
   $("#drawer-title").textContent = e.name.en;

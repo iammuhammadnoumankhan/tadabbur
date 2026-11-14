@@ -19,6 +19,7 @@ import glob, hashlib, json, os, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
+SCHEMA = 1          # must match scripts/build_manifest.py, js/core/data.js and docs/DATA.md
 errors, notes = [], []
 
 
@@ -190,6 +191,20 @@ def main():
                 err(f"stories.json: {p['id']} {m['k']} word {m['w']} doesn't exist")
         if p["ayahs"] != len({m["k"] for m in p["mentions"]}):
             err(f"stories.json: {p['id']} ayah count is wrong")
+
+    # 9. manifest (docs/DATA.md): schema version and counts match the data
+    man = load("manifest.json") or {}
+    if man.get("schema") != SCHEMA:
+        err(f"manifest.json: schema {man.get('schema')}, expected {SCHEMA} (see docs/DATA.md)")
+    expect = {"surahs": 114, "ayahs": 6236, "words": sum(words_per_ayah.values()),
+              "translations": len(trs["list"]), "tafsirs": len(taf["list"]),
+              "seerah_events": len(se["events"]), "prophets": len(st["prophets"])}
+    for k, v in expect.items():
+        if (man.get("counts") or {}).get(k) != v:
+            err(f"manifest.json: counts.{k} is {(man.get('counts') or {}).get(k)}, data has {v} — rerun scripts/build_manifest.py")
+    for ds in man.get("datasets", []):
+        for sid in ds["src"]:
+            need_src(sid, f"manifest.json dataset {ds['id']}")
 
     # 8. search index = translations, re-packed
     ar = load("search/ar.json")
