@@ -89,8 +89,18 @@ export const ICON = {
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg>',
   speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>',
 };
+
+// ---------- "Report a problem" (opens a pre-filled GitHub issue form; see js/core/report.js)
+export function reportLink(opts, { label = true, cls = "" } = {}) {
+  const href = core.reportUrl({ page: location.href, ...opts });
+  return h("a", {
+    class: `report-link ${cls}`.trim(), href, target: "_blank", rel: "noopener",
+    title: t("report.title"), "aria-label": t("report.title"),
+  }, h("span", { html: ICON.flag }), label ? t("report.label") : null);
+}
 
 // ---------- page frame
 function installBtn() {
@@ -128,7 +138,8 @@ export function header(active = "") {
 
 export function footer() {
   document.body.append(h("footer", { class: "foot" }, h("div", { class: "wrap" },
-    t("footer.text"), h("a", { href: "sources.html" }, t("footer.link")))));
+    t("footer.text"), h("a", { href: "sources.html" }, t("footer.link")), " ",
+    h("span", { class: "foot-report" }, t("report.footerAsk"), reportLink({ kind: "other" })))));
 }
 
 // ---------- installable app + offline (service worker: sw.js)

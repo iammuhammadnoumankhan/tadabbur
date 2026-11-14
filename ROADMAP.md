@@ -33,7 +33,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
     - **Mobile:** wrap the same site with Capacitor or a Trusted Web Activity for the Play Store and App Store.
     - **Desktop:** wrap it with Tauri.
     - No rewrite either way.
-- [ ] **4. "Report an issue" button [#16]**
+- [x] **4. "Report an issue" button [#16]** *(done 2026-11-15)*
   - On every ayah, translation, tafsir and hadith.
   - Opens a pre-filled GitHub issue with the exact reference and source id. Free, no server.
 

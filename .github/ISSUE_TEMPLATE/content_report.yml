@@ -1,0 +1,54 @@
+name: Report a content problem
+description: Something wrong in the Quran text, a translation, word meaning, tafsir, hadith, introduction, Seerah or prophets data.
+title: "[Content] "
+labels: ["content-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping keep Tadabbur accurate. Tadabbur writes no religious content itself. Everything comes from a cited source, so a problem is either in **how we show it** or in **the source itself**. We check every report against the original source.
+        The fields below are filled in automatically when you use the **Report** button on the site.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of content?
+      options:
+        - Quran text (Arabic)
+        - Translation
+        - Word-by-word meaning
+        - Tafsir
+        - Hadith
+        - Surah introduction
+        - Seerah timeline
+        - Prophets
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: reference
+    attributes:
+      label: Reference
+      description: Ayah, word, hadith or event (filled in by the site).
+      placeholder: "e.g. 2:255, word 3 of 1:1, Sahih al-Bukhari 4953"
+  - type: input
+    id: source
+    attributes:
+      label: Source shown on the site
+      description: The translation, tafsir or dataset (filled in by the site).
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: Link to the page where you saw it (filled in by the site).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What looks wrong?
+      description: Describe the problem. You can write in Urdu or English.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Correct version and where it comes from (optional)
+      description: If you know the correct text, please name an authentic source we can check (book, edition, page or link).

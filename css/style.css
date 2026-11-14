@@ -287,6 +287,17 @@ input[type=search] {
 .src-item h3 { margin: 0 0 4px; font-size: 16px; }
 .src-item code { font-size: 12px; color: var(--ink-3); }
 
+/* ---------- report a problem */
+.report-link { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+.report-link:hover { color: var(--accent-2); text-decoration: none; }
+.report-link svg { width: 13px; height: 13px; }
+.report-link.icon { padding: 6px 8px; border-radius: 10px; }
+.report-link.icon svg { width: 16px; height: 16px; }
+.report-link.icon:hover { background: var(--bg-2); }
+.foot-report { white-space: nowrap; }
+.row-between { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.foot-report .report-link { font-size: 13px; }
+
 /* ---------- toast */
 .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); z-index: 100;

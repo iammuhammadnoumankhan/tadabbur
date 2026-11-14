@@ -40,6 +40,13 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
   - from Google Fonts: Amiri Quran, Noto Naskh Arabic, Noto Nastaliq Urdu, Inter, Fraunces
 - **Live (not bundled):** tafsir text and audio (Quran.com API and CDNs) are fetched at runtime. Everything else is in `data/`.
 
+## "Report a problem"
+- **Where the buttons are:** every ayah (flag icon), word popover, tafsir panel, each hadith, surah introduction, Seerah event, prophet, tagged ayah, and the footer.
+- **How they're built:** `C.reportLink({ kind, reference, source, page })`, with URLs from `js/core/report.js`.
+- **Where they go:** a GitHub issue form, `.github/ISSUE_TEMPLATE/content_report.yml`, with its fields pre-filled. Reports get the `content-report` label. Readers need a free GitHub account.
+- **Keep in sync:** `KINDS` in `report.js` must match the form's dropdown options exactly; the smoke test checks this.
+- **Handling a report:** check it against the original source (see `data/sources.json`). Never "fix" religious content from general knowledge. If the source itself is wrong, say so and link the source's own correction channel.
+
 ## Installable app and offline (PWA)
 - **Files:**
   - `manifest.webmanifest`;

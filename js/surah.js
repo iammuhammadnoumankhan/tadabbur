@@ -70,7 +70,8 @@ async function renderGate() {
       source.append(d?.source || "", t("surah.viaQuranCom"));
       $$("button", seg).forEach(b => b.classList.toggle("on", b.dataset.v === lang));
     }
-    right.append(h("h3", {}, t("surah.introTitle"), seg), body, h("div", { class: "intro-actions" }, more, source));
+    right.append(h("h3", {}, t("surah.introTitle"), seg), body, h("div", { class: "intro-actions" }, more, source,
+      C.reportLink({ kind: "intro", reference: `${t("common.surahNum", { n: ch.n })} ${ch.name}`, source: "Quran.com chapter info" })));
     fill();
   }
   gate.append(h("div", { class: "card gate-card" }, left, right));
@@ -83,6 +84,11 @@ let hadithData = null;
 let ip = null;          // IndoPak text for this surah (when that script is chosen)
 
 const isIP = () => C.get().script === "indopak" && ip;
+const pageUrl = key => `${location.origin}${location.pathname}?n=${N}#${key}`;
+const ayahSources = () => t("report.ayahSource", {
+  script: isIP() ? "DigitalKhatt IndoPak" : "Quran.com Uthmani",
+  translations: trList.map(tr => tr.name).join(", "),
+});
 const ayahText = idx => isIP() ? ip.ayahs[idx].join(" ") : data.ayahs[idx].u;
 const wordText = (idx, i) => isIP() ? ip.ayahs[idx][i] : data.ayahs[idx].w[i].u;
 
@@ -114,7 +120,8 @@ function ayahEl(a, idx) {
     hc ? h("button", { class: "chip hadith-chip", onclick: () => openHadith(a.k), title: t("surah.hadithBadgeTitle") }, t("surah.hadithBadge", { n: hc })) : null,
     h("button", { class: "chip tafsir-chip", onclick: () => openTafsir(a.k), title: t("surah.tafsirTitle") }, t("surah.tafsir")),
     h("button", { class: "icon-btn", title: t("surah.playAyah"), "aria-label": t("surah.playAyahAria", { key: a.k }), html: ICON.play, onclick: () => player.playFrom(idx, true) }),
-    h("button", { class: "icon-btn", title: t("surah.copyAyah"), "aria-label": t("surah.copy"), html: ICON.copy, onclick: () => copyAyah(a, idx) }));
+    h("button", { class: "icon-btn", title: t("surah.copyAyah"), "aria-label": t("surah.copy"), html: ICON.copy, onclick: () => copyAyah(a, idx) }),
+    C.reportLink({ kind: "translation", reference: a.k, page: pageUrl(a.k), source: ayahSources() }, { label: false, cls: "icon" }));
 
   const line = h("div", { class: "arabic-line", lang: "ar" },
     a.w.map((w, i) => wordEl(w, a, i, idx)),
@@ -183,7 +190,10 @@ function showPop(el) {
       h("button", { class: "btn", onclick: () => { wordAudio.src = C.audioUrl.word(w.a); wordAudio.play(); } },
         h("span", { html: ICON.speaker }), t("surah.wordListen")),
       h("span", { class: "tiny" }, t("surah.wordRef", { key: a.k, n: +el.dataset.i + 1 }))),
-    h("div", { class: "source", style: "margin-top:10px" }, t("surah.wordSource")));
+    h("div", { class: "row", style: "margin-top:10px" },
+      h("div", { class: "source" }, t("surah.wordSource")),
+      C.reportLink({ kind: "word", reference: t("report.wordRef", { key: a.k, n: +el.dataset.i + 1, word: wordText(idx, +el.dataset.i) }),
+        source: t("report.wordSource"), page: pageUrl(a.k) })));
   pop.classList.add("show");
   const r = el.getBoundingClientRect();
   const pw = pop.offsetWidth, ph = pop.offsetHeight;
@@ -295,7 +305,9 @@ async function openTafsir(key) {
         html.trim()
           ? h("div", { class: `tafsir-body${ur ? " urdu" : ""}`, dir: ur ? "rtl" : "ltr", lang: meta.lang, html })
           : h("div", { class: "note", style: "margin-top:12px" }, t("surah.tafsirNone")),
-        h("div", { class: "source", style: "margin-top:16px" }, t("surah.tafsirSource", { name: meta.name, author: meta.author || "" }))));
+        h("div", { class: "row-between", style: "margin-top:16px" },
+          h("div", { class: "source" }, t("surah.tafsirSource", { name: meta.name, author: meta.author || "" })),
+          C.reportLink({ kind: "tafsir", reference: key, source: `${meta.name} (Quran.com tafsir ${meta.id})`, page: pageUrl(key) }))));
     } catch {
       body.lastChild.replaceWith(h("div", { class: "note", style: "margin-top:12px" }, t("surah.tafsirError")));
     }
@@ -324,7 +336,10 @@ async function openHadith(key) {
           h("a", { href: x.url, target: "_blank", rel: "noopener" }, t("common.verifySunnah"))),
         h("div", { class: `h-txt ${lang === "ur" ? "urdu" : lang === "ar" ? "ar" : ""}`, dir: lang === "en" ? "ltr" : "rtl", lang },
           (lang === "ur" ? x.ur : lang === "ar" ? x.ar : x.en) || t("common.notInLanguage")),
-        h("div", { class: "tiny", style: "margin-top:6px" }, t("surah.alsoCites"), x.refs.filter(r => r !== key).slice(0, 12).join(", ") || "—"))),
+        h("div", { class: "row-between", style: "margin-top:6px" },
+          h("div", { class: "tiny" }, t("surah.alsoCites"), x.refs.filter(r => r !== key).slice(0, 12).join(", ") || "—"),
+          C.reportLink({ kind: "hadith", reference: t("report.hadithRef", { collection: t(`collection.${x.c}`), num: x.num, key }),
+            source: t("report.hadithSource"), page: pageUrl(key) })))),
       h("div", { class: "source", style: "margin-top:14px" }, src["sahih-hadith-text"].publisher));
   }
   fill();

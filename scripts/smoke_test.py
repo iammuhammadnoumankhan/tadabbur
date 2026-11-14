@@ -17,7 +17,7 @@ Usage:
   pip install playwright && python -m playwright install --with-deps chromium
   python3 scripts/smoke_test.py
 """
-import functools, http.server, os, re, sys, threading
+import functools, glob, http.server, os, re, sys, threading
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -91,6 +91,22 @@ def main():
                     failures.append(f"[{vname}] {path}: {pr}")
                 page.close()
             ctx.close()
+        for name, ok, detail in static_checks():
+            print(f"{'✓' if ok else '✗'} [files] {name}" + ("" if ok else f"  ({detail})"))
+            if not ok:
+                failures.append(f"[files] {name}: {detail}")
+
+        # "Report" buttons open the pre-filled GitHub form
+        page = browser.new_page()
+        page.goto(base + "surah.html?n=1", wait_until="domcontentloaded")
+        page.wait_for_selector(".ayah .report-link")
+        href = page.get_attribute(".ayah .report-link", "href")
+        ok = all(s in href for s in ("/issues/new?", "template=content_report.yml", "reference=1%3A1", "kind=Translation"))
+        print(f"{'✓' if ok else '✗'} [report] ayah Report button pre-fills the GitHub form" + ("" if ok else f"  ({href})"))
+        if not ok:
+            failures.append(f"[report] ayah link: {href}")
+        page.close()
+
         # installable app + offline reading (service worker)
         for name, ok, detail in offline_checks(browser, base):
             print(f"{'✓' if ok else '✗'} [offline] {name}" + ("" if ok else f"  ({detail})"))
@@ -117,6 +133,27 @@ def main():
         print(f"\n{len(failures)} problem(s)")
         sys.exit(1)
     print("\n✓ all pages load cleanly on desktop and phone")
+
+
+def static_checks():
+    """Checks on the source files themselves (no browser)."""
+    out = []
+    sw = open(os.path.join(ROOT, "sw.js"), encoding="utf-8").read()
+    listed = set(re.findall(r'"([^"]+\.(?:html|js|css|woff2|png|webmanifest))"', sw.split("const DATA_FILES")[0]))
+    app_files = {os.path.relpath(p, ROOT) for pat in ("*.html", "js/**/*.js", "css/*.css")
+                 for p in glob.glob(os.path.join(ROOT, pat), recursive=True)}
+    missing = sorted(app_files - listed)
+    out.append(("every page, script and stylesheet is in sw.js SHELL_FILES (works offline)", not missing, missing))
+    gone = sorted(f for f in listed if not os.path.exists(os.path.join(ROOT, f)))
+    out.append(("every file in sw.js SHELL_FILES exists", not gone, gone))
+
+    tpl = open(os.path.join(ROOT, ".github", "ISSUE_TEMPLATE", "content_report.yml"), encoding="utf-8").read()
+    options = re.findall(r"^\s+- (.+)$", tpl.split("id: kind")[1].split("validations")[0], re.M)
+    report_js = open(os.path.join(ROOT, "js", "core", "report.js"), encoding="utf-8").read()
+    kinds_block = report_js.split("export const KINDS")[1].split("});")[0]
+    kinds = re.findall(r'^\s+\w+: "([^"]+)",$', kinds_block, re.M)
+    out.append(("report kinds match the GitHub issue form options", options == kinds, f"form={options} code={kinds}"))
+    return out
 
 
 def offline_checks(browser, base):

@@ -45,6 +45,20 @@ export default {
   "lang.romanUrdu": "Roman Urdu",
   "aria.surahBar": "{name}, revealed number {order}, {ayahs} ayahs, {place}",
 
+  // ---------------------------------------------------------------- report a problem
+  "report.label": "Report",
+  "report.title": "Report a problem with this (opens a short form on GitHub)",
+  "report.footerAsk": "Spotted a mistake? ",
+  "report.ayahSource": "Arabic: {script}; translations: {translations}",
+  "report.wordRef": "{key}, word {n} ({word})",
+  "report.hadithRef": "{collection} {num}, linked to {key}",
+  "report.eventRef": "{name} (Sahih al-Bukhari {from}–{to})",
+  "report.mentionRef": "{key}, tagged as referring to {name}",
+  "report.wordSource": "Quran.com word-by-word",
+  "report.hadithSource": "fawazahmed0/hadith-api",
+  "report.seerahSource": "Seerah timeline from Sahih al-Bukhari",
+  "report.prophetsSource": "Quranic Arabic Corpus Ontology",
+
   // ---------------------------------------------------------------- app + offline
   "pwa.install": "Install app",
   "pwa.installTitle": "Install Tadabbur on this device",
