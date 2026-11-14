@@ -1,0 +1,21 @@
+# Weekly check that outside sources and live services still respond.
+# Separate from CI so an outside outage never blocks a deploy.
+name: Source links
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Mondays 06:00 UTC (11:00 in Pakistan)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: python3 scripts/check_links.py

@@ -1,0 +1,2 @@
+# Tools for checks only (the site itself needs nothing installed)
+playwright==1.65.2

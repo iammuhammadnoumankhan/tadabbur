@@ -8,6 +8,14 @@ python3 scripts/serve.py 8765
 ```
 Then open http://localhost:8765.
 
+## Checks
+Every push runs these on GitHub Actions. The site deploys from `main` only when they pass.
+```bash
+python3 scripts/validate_data.py   # Quran text fingerprints, counts, sources, links between data
+python3 scripts/smoke_test.py      # every page in a headless browser, desktop + phone (needs requirements-dev.txt)
+python3 scripts/check_links.py     # outside sources still respond (weekly in CI)
+```
+
 ## Rebuild the data
 ```bash
 python3 scripts/build_data.py

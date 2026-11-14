@@ -20,7 +20,7 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 
 ## Git
 - **No Claude attribution:** no `Co-Authored-By: Claude` trailers in commits, no "Generated with Claude Code" in PRs. Commit as the user only.
-- Commit and push only when the user asks. A push to `main` deploys the live site.
+- Commit and push only when the user asks. A push to `main` deploys the live site, but only if CI passes.
 
 ## Architecture
 - Static site in plain **HTML, CSS and vanilla JS (ES modules)**. No framework and no build step. Must work from any static host and inside future app wrappers.
@@ -53,6 +53,23 @@ python3 scripts/build_search.py    # search index
 ```
 - Scripts must **merge into** `data/sources.json`, never overwrite it.
 - Scripts **assert** their invariants (6,236 ayahs, alignment, anchor text) so the build fails loudly when something drifts.
+
+## Checks and deployment (CI/CD)
+- `.github/workflows/ci.yml` runs on every push and pull request:
+  - **validate-data:** `scripts/validate_data.py`, covering Arabic fingerprints, 114 surahs and 6,236 ayahs everywhere, IndoPak word alignment, every `src` listed, valid ayah links, and the search index matching the translations;
+  - **smoke-test:** `scripts/smoke_test.py`, which loads every page in headless Chromium at desktop and 375px, and fails on JS errors, missing files, missing content or sideways scroll.
+- **Deploy:** only from `main`, only after both checks pass. GitHub Pages is set to "GitHub Actions" as its source, and only `*.html`, `css/`, `js/`, `fonts/` and `data/` are published.
+- `.github/workflows/links.yml` runs weekly (Mondays) and on demand: `scripts/check_links.py` confirms every source URL and live service (tafsir API, audio, sunnah.com) still responds.
+- **Run all checks locally before pushing:**
+  ```bash
+  python3 scripts/validate_data.py
+  pip install -r requirements-dev.txt && python -m playwright install chromium
+  python3 scripts/smoke_test.py
+  python3 scripts/check_links.py
+  ```
+- **When adding a page or data file:**
+  - add the page to `PAGES` in `smoke_test.py`;
+  - add invariants for the new data to `validate_data.py`.
 
 ## Run and verify locally
 ```bash

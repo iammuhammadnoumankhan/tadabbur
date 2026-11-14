@@ -299,8 +299,9 @@ def build_sources(tr_meta, hadith_stats):
             "title": "Word-by-word meanings (English & Urdu) and transliteration",
             "publisher": "Quran.com", "url": "https://quran.com", "via": f"{QC}/verses/by_chapter?words=true"},
         "qc-word-audio": {
-            "title": "Word-by-word pronunciation audio", "publisher": "Quran.com CDN",
-            "url": "https://audio.qurancdn.com/"},
+            "title": "Word-by-word pronunciation audio", "publisher": "Quran.com",
+            "url": "https://quran.com", "via": "https://audio.qurancdn.com/wbw/{surah}_{ayah}_{word}.mp3",
+            "note": "Streamed live when a word is played."},
         "ayah-audio": {
             "title": "Ayah recitation audio — Mishary Rashid Alafasy",
             "publisher": "Islamic Network CDN (alquran.cloud)", "url": "https://alquran.cloud/cdn"},
