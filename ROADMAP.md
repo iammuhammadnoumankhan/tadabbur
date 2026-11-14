@@ -13,7 +13,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
 
 ## Phase 1: Foundations (ready for web, mobile and desktop)
 
-- [ ] **1. Automatic checks and deployment (CI/CD) [#18]**
+- [x] **1. Automatic checks and deployment (CI/CD) [#18]** *(done 2026-11-15)*
   - GitHub Actions on every push and pull request:
     - every ayah's Arabic text still matches `data/checksums.json` and `checksums-indopak.json`;
     - 114 surahs and 6,236 ayahs, with nothing missing, in every data file;
