@@ -295,6 +295,17 @@ input[type=search] {
   max-width: calc(100% - 32px);
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.has-action { pointer-events: auto; display: flex; gap: 12px; align-items: center; }
+.toast-btn { border: 0; background: var(--accent-2); color: #1f1b14; font-weight: 600; padding: 6px 12px; border-radius: 8px; }
+
+/* ---------- install + offline */
+#offline { margin-bottom: 60px; }
+#offline .section-h { margin-top: 0; }
+.install-btn { padding: 6px 12px; font-size: 13px; border-color: var(--accent); color: var(--accent); white-space: nowrap; }
+.offline-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.progress { height: 6px; border-radius: 6px; background: var(--bg-2); margin-top: 10px; overflow: hidden; display: none; }
+.progress.show { display: block; }
+.progress span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
 
 /* ---------- tafsir */
 .tafsir-chip { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); color: var(--accent); background: none; }

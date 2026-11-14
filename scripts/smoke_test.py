@@ -91,6 +91,12 @@ def main():
                     failures.append(f"[{vname}] {path}: {pr}")
                 page.close()
             ctx.close()
+        # installable app + offline reading (service worker)
+        for name, ok, detail in offline_checks(browser, base):
+            print(f"{'✓' if ok else '✗'} [offline] {name}" + ("" if ok else f"  ({detail})"))
+            if not ok:
+                failures.append(f"[offline] {name}: {detail}")
+
         # core runs with no DOM (as a mobile/desktop app would use it)
         page = browser.new_page()
         page.goto(base + "index.html", wait_until="domcontentloaded")
@@ -111,6 +117,56 @@ def main():
         print(f"\n{len(failures)} problem(s)")
         sys.exit(1)
     print("\n✓ all pages load cleanly on desktop and phone")
+
+
+def offline_checks(browser, base):
+    """Install the service worker, read some pages, go offline, and check they still work."""
+    out = []
+    ctx = browser.new_context(viewport=VIEWPORTS["desktop"])
+    page = ctx.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+
+    def count(sel):
+        return page.evaluate("s => document.querySelectorAll(s).length", sel)
+
+    try:
+        page.goto(base + "index.html?sw=1", wait_until="domcontentloaded")
+        page.wait_for_function("navigator.serviceWorker && navigator.serviceWorker.controller", timeout=60000)
+        out.append(("service worker installed and controls the page", True, ""))
+
+        man = page.evaluate("fetch('manifest.webmanifest').then(r => r.json())")
+        need = all(man.get(k) for k in ("name", "short_name", "start_url", "display", "icons"))
+        sizes = {i["sizes"] for i in man.get("icons", [])}
+        out.append(("web app manifest is complete", need and {"192x192", "512x512"} <= sizes, man.get("icons")))
+        icons_ok = page.evaluate("""m => Promise.all(m.icons.map(i => fetch(i.src).then(r => r.ok))).then(a => a.every(Boolean))""", man)
+        out.append(("all manifest icons load", icons_ok, ""))
+
+        # read two pages online, so they get saved
+        page.goto(base + "surah.html?n=2", wait_until="domcontentloaded")
+        page.wait_for_function("document.querySelectorAll('.ayah').length >= 286", timeout=60000)
+        page.goto(base + "timeline.html", wait_until="domcontentloaded")
+        page.wait_for_function("document.querySelectorAll('.ev').length >= 24", timeout=60000)
+
+        ctx.set_offline(True)
+        page.goto(base + "surah.html?n=2", wait_until="domcontentloaded")
+        page.wait_for_function("document.querySelectorAll('.ayah').length >= 286", timeout=30000)
+        out.append(("offline: a surah you've read opens (Al-Baqarah, 286 ayahs)", count(".ayah") >= 286, count(".ayah")))
+        page.goto(base + "timeline.html", wait_until="domcontentloaded")
+        page.wait_for_function("document.querySelectorAll('.ev').length >= 24", timeout=30000)
+        out.append(("offline: Seerah timeline opens", True, ""))
+        out.append(("no JavaScript errors while reading", not errors, errors[:3]))
+        # a surah that was never opened can't load offline: the page must say so, not hang on "Loading…"
+        page.goto(base + "surah.html?n=50", wait_until="domcontentloaded")
+        page.wait_for_function("document.querySelector('.toast.show') && document.querySelector('.offline-msg')", timeout=30000)
+        msg = page.inner_text(".offline-msg")
+        out.append(("offline: an unsaved surah explains it isn't saved yet", "offline" in msg.lower(), msg))
+        ctx.set_offline(False)
+    except Exception as e:  # noqa: BLE001
+        out.append(("offline flow completed", False, f"{type(e).__name__}: {e}"[:300]))
+    finally:
+        ctx.close()
+    return out
 
 
 def _third_party_msg(text):

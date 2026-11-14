@@ -27,7 +27,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
   - Document every `data/*.json` format in `docs/DATA.md`, with a version number.
   - Move data loading, search and settings into a DOM-free `js/core/` module, so a mobile or desktop app can reuse the same logic.
   - Keep all interface text in one place (`js/i18n/en.js`), so the Urdu interface (item 20) is a translation job, not a rewrite.
-- [ ] **3. Installable app, works offline (PWA) [#13]**
+- [x] **3. Installable app, works offline (PWA) [#13]** *(done 2026-11-15)*
   - Web app manifest, icons, and a service worker that caches the pages and the surahs you have read.
   - *Path to the apps later:*
     - **Mobile:** wrap the same site with Capacitor or a Trusted Web Activity for the Play Store and App Store.

@@ -29,6 +29,9 @@ const src = await C.sources();
 $("#journey-bars").append(C.journeyBars(chs));
 $("#journey-src").textContent = t("home.journeySource", { publisher: src["qc-chapters"].publisher });
 
+// ----- offline reading
+$("#offline-panel").append(C.offlinePanel());
+
 // ----- grid
 let order = "mushaf", place = "all", q = "";
 

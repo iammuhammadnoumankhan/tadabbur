@@ -45,6 +45,27 @@ export default {
   "lang.romanUrdu": "Roman Urdu",
   "aria.surahBar": "{name}, revealed number {order}, {ayahs} ayahs, {place}",
 
+  // ---------------------------------------------------------------- app + offline
+  "pwa.install": "Install app",
+  "pwa.installTitle": "Install Tadabbur on this device",
+  "pwa.updated": "Tadabbur has been updated.",
+  "pwa.reload": "Reload",
+  "pwa.offline": "You're offline. Saved surahs still work.",
+  "pwa.online": "Back online.",
+  "pwa.offlineMissing": "You're offline and this hasn't been saved yet. Use “Save for offline” when you're online.",
+  "pwa.offlineTitle": "Read offline",
+  "pwa.explain": "Save every surah with your chosen translations, word-by-word meanings, surah introductions, linked hadith and search, so Tadabbur works without internet. Tafsir and audio still need a connection.",
+  "pwa.notSupported": "Offline reading works on the installed app and the live site (https). It's off in this local preview.",
+  "pwa.checking": "Checking what's saved…",
+  "pwa.save": "Save for offline",
+  "pwa.update": "Check for updates",
+  "pwa.saving": "Saving… {done} of {total} files",
+  "pwa.saved": "Saved. Tadabbur now works offline.",
+  "pwa.savedSome": "Saved, but {failed} files couldn't be downloaded. Try again when your connection is better.",
+  "pwa.status": "{saved} of {total} files saved",
+  "pwa.allSaved": "Everything is saved for offline reading",
+  "pwa.size": " · {mb} MB used on this device",
+
   // ---------------------------------------------------------------- home
   "home.title": "Tadabbur — Understand the Quran as you read",
   "home.heroHtml": "Don't just recite the Quran.<br><em>Understand</em> it as you read.",

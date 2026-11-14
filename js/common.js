@@ -93,6 +93,11 @@ export const ICON = {
 };
 
 // ---------- page frame
+function installBtn() {
+  const b = h("button", { class: "btn install-btn hidden", title: t("pwa.installTitle"), onclick: () => promptInstall() }, t("pwa.install"));
+  onInstallAvailable(on => b.classList.toggle("hidden", !on));
+  return b;
+}
 export function header(active = "") {
   applyI18n();
   const theme = document.documentElement.dataset.theme;
@@ -108,6 +113,7 @@ export function header(active = "") {
         h("a", { href: "stories.html" }, t("nav.prophets")),
         h("a", { href: "timeline.html" }, h("span", { class: "label" }, t("nav.seerahPrefix")), t("nav.timeline")),
         h("a", { href: "sources.html" }, t("nav.sources")),
+        installBtn(),
         h("button", {
           class: "icon-btn", title: t("nav.theme"), "aria-label": t("nav.theme"),
           html: theme === "dark" ? ICON.sun : ICON.moon,
@@ -123,6 +129,114 @@ export function header(active = "") {
 export function footer() {
   document.body.append(h("footer", { class: "foot" }, h("div", { class: "wrap" },
     t("footer.text"), h("a", { href: "sources.html" }, t("footer.link")))));
+}
+
+// ---------- installable app + offline (service worker: sw.js)
+// Not registered on localhost (so development always shows fresh files), unless ?sw=1.
+const SW_ON = "serviceWorker" in navigator &&
+  (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || new URLSearchParams(location.search).has("sw"));
+export const offlineSupported = () => SW_ON;
+let installPrompt = null;
+const installListeners = new Set();
+export const onInstallAvailable = fn => { installListeners.add(fn); if (installPrompt) fn(true); };
+export async function promptInstall() {
+  if (!installPrompt) return false;
+  installPrompt.prompt();
+  const { outcome } = await installPrompt.userChoice;
+  installPrompt = null;
+  installListeners.forEach(fn => fn(false));
+  return outcome === "accepted";
+}
+
+if (SW_ON) {
+  const wasControlled = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (wasControlled) toast(t("pwa.updated"), { action: t("pwa.reload"), onAction: () => location.reload(), ms: 15000 });
+  });
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); installPrompt = e; installListeners.forEach(fn => fn(true)); });
+}
+addEventListener("offline", () => toast(t("pwa.offline")));
+addEventListener("online", () => toast(t("pwa.online")));
+// A page whose data isn't saved fails to load while offline: say so instead of "Loading…" forever.
+function offlineFailure() {
+  if (navigator.onLine) return;
+  toast(t("pwa.offlineMissing"), { ms: 8000 });
+  document.querySelectorAll("main .skeleton").forEach(el => {
+    el.classList.add("offline-msg");
+    el.textContent = t("pwa.offlineMissing");
+  });
+}
+addEventListener("unhandledrejection", offlineFailure);
+addEventListener("error", offlineFailure);
+
+/** URLs needed to read every surah offline with the reader's current choices. */
+export async function offlineUrls() {
+  const [chs, trs, hIndex, se] = await Promise.all([core.chapters(), core.selectedTranslations(), core.hadithIndex(), core.seerah()]);
+  const urls = [];
+  for (const c of chs) {
+    const n = core.pad3(c.n);
+    urls.push(`data/surah/${n}.json`, `data/indopak/${n}.json`, `data/info/${n}.json`,
+      ...trs.map(tr => `data/tr/${tr.id}/${n}.json`));
+    if (hIndex[c.n]) urls.push(`data/hadith/${n}.json`);
+  }
+  urls.push("data/search/ar.json", ...trs.map(tr => `data/search/tr-${tr.id}.json`),
+    ...se.events.map(e => `data/seerah/${e.id}.json`));
+  return urls;
+}
+function askWorker(msg, onMessage) {
+  return navigator.serviceWorker.ready.then(reg => new Promise(resolve => {
+    const handler = e => { if (onMessage(e.data)) { navigator.serviceWorker.removeEventListener("message", handler); resolve(e.data); } };
+    navigator.serviceWorker.addEventListener("message", handler);
+    reg.active.postMessage(msg);
+  }));
+}
+/** How many of the offline files are already saved: { saved, total }. */
+export async function offlineStatus() {
+  if (!SW_ON) return null;
+  const urls = await offlineUrls();
+  return askWorker({ type: "status", urls }, d => d.type === "status");
+}
+/** Save everything for offline reading; onProgress({ done, failed, total }). */
+export async function saveOffline(onProgress) {
+  const urls = await offlineUrls();
+  try { await navigator.storage?.persist?.(); } catch { /* not supported */ }
+  return askWorker({ type: "save", urls }, d => {
+    if (d.type !== "save-progress") return false;
+    onProgress?.(d);
+    return d.done >= d.total;
+  });
+}
+
+/** A small offline panel: status, "Save for offline" button, progress. Used on home + reader settings. */
+export function offlinePanel() {
+  const box = h("div", { class: "offline-panel" });
+  if (!SW_ON) { box.append(h("div", { class: "tiny" }, t("pwa.notSupported"))); return box; }
+  const status = h("div", { class: "tiny" }, t("pwa.checking"));
+  const bar = h("div", { class: "progress" }, h("span"));
+  const btn = h("button", { class: "btn" }, t("pwa.save"));
+  btn.onclick = async () => {
+    btn.disabled = true;
+    bar.classList.add("show");
+    const res = await saveOffline(p => {
+      bar.firstChild.style.width = `${Math.round(p.done / p.total * 100)}%`;
+      status.textContent = t("pwa.saving", { done: p.done, total: p.total });
+    });
+    btn.disabled = false;
+    status.textContent = res.failed ? t("pwa.savedSome", { failed: res.failed }) : t("pwa.saved");
+    refresh();
+  };
+  async function refresh() {
+    const s = await offlineStatus().catch(() => null);
+    if (!s) return;
+    let size = "";
+    try { const est = await navigator.storage.estimate(); size = t("pwa.size", { mb: Math.round(est.usage / 1048576) }); } catch { /* ignore */ }
+    status.textContent = (s.saved >= s.total ? t("pwa.allSaved") : t("pwa.status", { saved: s.saved, total: s.total })) + size;
+    btn.textContent = s.saved >= s.total ? t("pwa.update") : t("pwa.save");
+  }
+  refresh();
+  box.append(h("p", { class: "muted", style: "margin:0 0 8px" }, t("pwa.explain")), h("div", { class: "offline-row" }, btn, status), bar);
+  return box;
 }
 
 // ---------- clipboard + toast
@@ -143,12 +257,15 @@ export async function copyText(text) {
   }
 }
 let toastEl, toastTimer;
-export function toast(msg) {
+export function toast(msg, { action, onAction, ms = 2200 } = {}) {
   if (!toastEl) { toastEl = h("div", { class: "toast", role: "status", "aria-live": "polite" }); document.body.append(toastEl); }
-  toastEl.textContent = msg;
+  toastEl.innerHTML = "";
+  toastEl.append(msg);
+  if (action) toastEl.append(h("button", { class: "toast-btn", onclick: () => { toastEl.classList.remove("show"); onAction?.(); } }, action));
+  toastEl.classList.toggle("has-action", !!action);
   toastEl.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), ms);
 }
 
 // ---------- tooltip

@@ -9,6 +9,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500&family=Noto+Nastaliq+Urdu:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0f6b5c">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tadabbur">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -63,6 +69,11 @@
         </div>
       </div>
       <div class="grid" id="grid"></div>
+    </section>
+
+    <section class="wrap" id="offline">
+      <div class="section-h"><div><h2 data-i18n="pwa.offlineTitle"></h2></div></div>
+      <div class="card" style="padding:18px" id="offline-panel"></div>
     </section>
   </main>
   <script type="module" src="js/home.js"></script>

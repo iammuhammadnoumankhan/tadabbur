@@ -253,7 +253,8 @@ $("#open-settings").onclick = () => {
         h("input", { type: "checkbox", checked: st.showTranslit, onchange: e => C.set({ showTranslit: e.target.checked }) }), t("surah.setTranslit"))),
     h("div", { class: "opt-group" }, h("h4", {}, t("surah.setMeaningLang")), seg("uiMeaning", [["ur", t("lang.ur")], ["en", t("lang.en")]])),
     h("div", { class: "opt-group" }, h("h4", {}, t("surah.setTheme")),
-      seg("theme", [["auto", t("surah.themeAuto")], ["light", t("surah.themeLight")], ["dark", t("surah.themeDark")]])));
+      seg("theme", [["auto", t("surah.themeAuto")], ["light", t("surah.themeLight")], ["dark", t("surah.themeDark")]])),
+    h("div", { class: "opt-group" }, h("h4", {}, t("pwa.offlineTitle")), C.offlinePanel()));
   openDrawer(t("surah.settingsTitle"), body);
 };
 

@@ -40,6 +40,19 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
   - from Google Fonts: Amiri Quran, Noto Naskh Arabic, Noto Nastaliq Urdu, Inter, Fraunces
 - **Live (not bundled):** tafsir text and audio (Quran.com API and CDNs) are fetched at runtime. Everything else is in `data/`.
 
+## Installable app and offline (PWA)
+- **Files:**
+  - `manifest.webmanifest`;
+  - icons in `icons/`, made by `scripts/make_icons.py`;
+  - `sw.js`, the service worker.
+- **How `sw.js` caches:**
+  - The **app shell** (`SHELL_FILES`) is cached per deploy. CI replaces `__BUILD__` with the commit, so an update installs a complete new shell.
+  - **Data** goes in `tadabbur-data-schema-1`, kept across deploys and refreshed in the background. Rename it when the data schema changes.
+  - Fonts and tafsir you've read go in `tadabbur-runtime`.
+- **When adding a page, JS module or core data file,** add it to `SHELL_FILES` / `DATA_FILES` in `sw.js`, or it won't work offline. The offline test catches most misses.
+- **"Save for offline"** (`offlinePanel()` in `common.js`) asks the service worker to cache every surah file for the reader's chosen translations (about 658 files, about 30 MB).
+- **The service worker is NOT registered on localhost,** so development always shows fresh files. Add `?sw=1` to test it, then unregister it in the browser afterwards.
+
 ## Keep it ready for mobile and desktop apps
 Web first, then mobile (Capacitor/TWA) and desktop (Tauri) wrapping the same code. So:
 - use only **relative paths** (`data/...`, never `/data/...`), so it works under `/tadabbur/` and inside app wrappers;
@@ -64,8 +77,8 @@ python3 scripts/build_manifest.py  # data/manifest.json (schema version + counts
 ## Checks and deployment (CI/CD)
 - `.github/workflows/ci.yml` runs on every push and pull request:
   - **validate-data:** `scripts/validate_data.py`, covering Arabic fingerprints, 114 surahs and 6,236 ayahs everywhere, IndoPak word alignment, every `src` listed, valid ayah links, and the search index matching the translations;
-  - **smoke-test:** `scripts/smoke_test.py`, which loads every page in headless Chromium at desktop and 375px, and fails on JS errors, missing files, missing content, missing text keys or sideways scroll. It also runs `scripts/core_worker_test.js` in a Web Worker (no DOM) to prove the core works as an app would use it.
-- **Deploy:** only from `main`, only after both checks pass. GitHub Pages is set to "GitHub Actions" as its source, and only `*.html`, `css/`, `js/`, `fonts/` and `data/` are published.
+  - **smoke-test:** `scripts/smoke_test.py`, which loads every page in headless Chromium at desktop and 375px, and fails on JS errors, missing files, missing content, missing text keys or sideways scroll. It also runs `scripts/core_worker_test.js` in a Web Worker (no DOM) to prove the core works as an app would use it, and an **offline test**: it installs the service worker, reads pages, goes offline, and checks that saved pages open and an unsaved surah shows a clear message.
+- **Deploy:** only from `main`, only after both checks pass. GitHub Pages is set to "GitHub Actions" as its source, and only `*.html`, `sw.js`, `manifest.webmanifest`, `css/`, `js/`, `fonts/`, `icons/` and `data/` are published.
 - `.github/workflows/links.yml` runs weekly (Mondays) and on demand: `scripts/check_links.py` confirms every source URL and live service (tafsir API, audio, sunnah.com) still responds.
 - **Run all checks locally before pushing:**
   ```bash

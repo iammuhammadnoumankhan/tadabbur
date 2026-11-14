@@ -59,8 +59,12 @@ jobs:
       - name: Collect the site (pages, assets and data only)
         run: |
           mkdir _site
-          cp *.html .nojekyll _site/
-          cp -r css js fonts data _site/
+          cp *.html .nojekyll sw.js manifest.webmanifest _site/
+          cp -r css js fonts icons data _site/
+      - name: Stamp the app version into the service worker
+        run: |
+          sed -i "s/__BUILD__/${GITHUB_SHA::7}/" _site/sw.js
+          grep -q "${GITHUB_SHA::7}" _site/sw.js
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
