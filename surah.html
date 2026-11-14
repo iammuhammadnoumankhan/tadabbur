@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google" content="notranslate">
+  <title>Surah — Tadabbur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500&family=Noto+Nastaliq+Urdu:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <section class="gate" id="gate"><div class="skeleton">Loading surah…</div></section>
+
+    <div class="toolbar card" id="toolbar">
+      <button class="btn primary" id="play-all"></button>
+      <div class="seg" id="script-seg" title="Arabic script">
+        <button data-v="indopak">IndoPak</button>
+        <button data-v="uthmani">Uthmani</button>
+      </div>
+      <div class="seg" id="wbw-seg" title="Word-by-word meaning under each word">
+        <button data-v="off">No WBW</button>
+        <button data-v="ur">اردو</button>
+        <button data-v="en">English</button>
+        <button data-v="both">Both</button>
+      </div>
+      <span class="grow"></span>
+      <button class="btn" id="open-tr">Translations <span class="chip" id="tr-count"></span></button>
+      <button class="btn" id="open-settings" aria-label="Reading settings"></button>
+    </div>
+
+    <div id="reader" translate="no"></div>
+    <nav class="pager" id="pager"></nav>
+  </main>
+
+  <!-- word popover -->
+  <div class="pop card" id="pop" role="dialog" aria-label="Word details"></div>
+
+  <!-- drawers -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-h"><h3 id="drawer-title"></h3><button class="icon-btn" id="drawer-close" aria-label="Close"></button></div>
+    <div class="drawer-b" id="drawer-body"></div>
+  </aside>
+
+  <audio id="audio" preload="none"></audio>
+  <script type="module" src="js/surah.js"></script>
+</body>
+</html>

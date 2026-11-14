@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google" content="notranslate">
+  <title>Tadabbur — Understand the Quran as you read</title>
+  <meta name="description" content="Read the Quran word by word in Urdu and English, with its revelation context, from cited authentic sources.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500&family=Noto+Nastaliq+Urdu:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <section class="hero wrap">
+      <h1>Don't just recite the Quran.<br><em>Understand</em> it as you read.</h1>
+      <p class="lead">See the meaning of every word in Urdu and English, learn when and where each surah was revealed, and read the Sahih hadith connected to it. Every line comes from a cited source.</p>
+      <div class="hero-ayah card" id="hero-ayah" translate="no">
+        <div class="skeleton">Loading…</div>
+      </div>
+    </section>
+
+    <section class="wrap" id="journey">
+      <div class="section-h">
+        <div>
+          <h2>The Revelation Journey</h2>
+          <p>All 114 surahs in the order they were revealed, from the first to the last. Bar height shows length. Notice that the mushaf order is not the order of revelation.</p>
+        </div>
+      </div>
+      <div class="card journey">
+        <div id="journey-bars"></div>
+        <div class="journey-axis"><span>← First revealed</span><span>Last revealed →</span></div>
+        <div class="journey-legend">
+          <span class="chip makkah"><span class="dot"></span>Makki: revealed in Makkah period</span>
+          <span class="chip madinah"><span class="dot"></span>Madani: revealed in Madinah period</span>
+          <span class="tiny" id="journey-src"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" id="surahs">
+      <div class="section-h">
+        <div>
+          <h2>Surahs</h2>
+          <p id="surah-count">114 surahs · 6,236 ayahs</p>
+        </div>
+        <div class="controls">
+          <div class="seg" id="order-seg">
+            <button data-v="mushaf" class="on">Mushaf order</button>
+            <button data-v="revelation">Revelation order</button>
+          </div>
+          <div class="seg" id="place-seg">
+            <button data-v="all" class="on">All</button>
+            <button data-v="makkah">Makki</button>
+            <button data-v="madinah">Madani</button>
+          </div>
+          <input type="search" id="q" placeholder="Search name, number, meaning…" aria-label="Search surahs">
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </section>
+  </main>
+  <script type="module" src="js/home.js"></script>
+</body>
+</html>

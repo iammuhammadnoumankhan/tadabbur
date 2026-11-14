@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sources — Tadabbur</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero" style="text-align:left;padding-bottom:0">
+      <h1>Sources &amp; citations</h1>
+      <p class="lead" style="margin:0">Tadabbur writes no religious content itself. Everything you read here comes from the sources below. We download each one, keep it unchanged, and show where it came from. Where scholars differ, we say so.</p>
+    </section>
+    <div class="src-list" id="list"></div>
+  </main>
+  <script type="module">
+    import * as C from "./js/common.js";
+    C.header(); C.footer();
+    const s = await C.sources();
+    const list = document.getElementById("list");
+    for (const [id, v] of Object.entries(s)) {
+      list.append(C.h("div", { class: "card src-item" },
+        C.h("h3", {}, v.title),
+        C.h("div", { class: "muted" }, v.publisher, " · ", C.h("a", { href: v.url, target: "_blank", rel: "noopener" }, v.url)),
+        v.note ? C.h("p", { style: "margin:8px 0 0" }, v.note) : null,
+        C.h("div", { class: "tiny", style: "margin-top:6px" }, C.h("code", {}, id), v.via ? ` · fetched via ${v.via}` : "", ` · retrieved ${v.fetched}`)));
+    }
+  </script>
+</body>
+</html>

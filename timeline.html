@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google" content="notranslate">
+  <title>Revelation & Seerah Timeline — Tadabbur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500&family=Noto+Nastaliq+Urdu:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero" style="text-align:left;padding-bottom:10px">
+      <h1>The 23 years of <em>revelation</em></h1>
+      <p class="lead" style="margin:0">The Quran was revealed over 23 years: 13 in Makkah, then 10 in Madinah. Below, the surahs are shown in order of revelation, alongside the events of the Prophet's ﷺ life as narrated in Sahih al-Bukhari.</p>
+      <blockquote class="card frame-quote" id="frame-quote"></blockquote>
+    </section>
+
+    <section class="card tl" id="tl">
+      <div class="tl-periods" id="tl-periods"></div>
+      <div class="tl-ruler" id="tl-ruler"></div>
+      <div class="tl-anchors" id="tl-anchors"></div>
+      <div class="tl-lane-label">Surahs in order of revelation <span class="tiny">· spacing shows order, not exact dates · tap one to read it</span></div>
+      <div class="tl-surahs" id="tl-surahs"></div>
+      <div class="journey-legend">
+        <span class="chip makkah"><span class="dot"></span>Makki</span>
+        <span class="chip madinah"><span class="dot"></span>Madani</span>
+        <span class="chip"><span class="dot" style="color:var(--accent-2)"></span>Dated by a hadith that states the time</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-h">
+        <div>
+          <h2>Events narrated in Sahih al-Bukhari</h2>
+          <p id="order-note"></p>
+        </div>
+      </div>
+      <div class="events" id="events"></div>
+    </section>
+  </main>
+
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-h"><h3 id="drawer-title"></h3><button class="icon-btn" id="drawer-close" aria-label="Close"></button></div>
+    <div class="drawer-b" id="drawer-body"></div>
+  </aside>
+  <script type="module" src="js/timeline.js"></script>
+</body>
+</html>
