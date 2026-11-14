@@ -11,6 +11,10 @@ const [chs, data, hIndex, src, trMeta, seerah, seerahBySurah] = await Promise.al
   C.chapters(), C.surah(N), C.hadithIndex(), C.sources(), C.translations(),
   C.getJSON("data/seerah.json").catch(() => null), C.getJSON("data/seerah-by-surah.json").catch(() => ({})),
 ]);
+const [stories, storiesBySurah] = await Promise.all([
+  C.getJSON("data/stories.json").catch(() => null), C.getJSON("data/stories-by-surah.json").catch(() => ({})),
+]);
+const surahProphets = (storiesBySurah[N] || []).map(id => stories.prophets.find(p => p.id === id)).filter(Boolean);
 const seerahEvents = (seerahBySurah[N] || []).map(id => seerah.events.find(e => e.id === id)).filter(Boolean);
 const ch = chs.find(c => c.n === N);
 const hCounts = hIndex[N] || {};
@@ -57,6 +61,10 @@ async function renderGate() {
       h("span", { class: "tiny" }, "Seerah events whose hadith cite this surah:"),
       ...seerahEvents.map(e => h("a", { class: "chip", href: `timeline.html#${e.id}` },
         `${e.name.en}${e.year != null ? ` · yr ${e.year}` : ""} →`))) : null,
+    surahProphets.length ? h("div", { class: "seerah-links" },
+      h("span", { class: "tiny" }, "Prophets referred to in this surah:"),
+      ...surahProphets.map(p => h("a", { class: "chip", href: `stories.html?p=${p.id}` },
+        p.en, h("span", { style: "font-family:var(--font-uthmani);margin-left:4px", translate: "no" }, p.ar)))) : null,
   );
 
   const right = h("div", { class: "intro" });

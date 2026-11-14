@@ -120,6 +120,7 @@ export function header(active = "") {
         h("span", { class: "ar" }, "تدبّر")),
       h("nav", { class: "nav" },
         h("a", { href: "index.html#surahs", class: active === "surahs" ? "on" : null }, "Surahs"),
+        h("a", { href: "stories.html" }, "Prophets"),
         h("a", { href: "timeline.html" }, h("span", { class: "label" }, "Seerah "), "Timeline"),
         h("a", { href: "sources.html" }, "Sources"),
         h("button", {
