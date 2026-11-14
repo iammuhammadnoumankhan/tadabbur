@@ -24,6 +24,10 @@ Then build the prophets data (Quranic Arabic Corpus ontology):
 ```bash
 python3 scripts/build_stories.py
 ```
+Then build the search index:
+```bash
+python3 scripts/build_search.py
+```
 Raw downloads are cached in `.cache/` (git-ignored). The output goes to `data/`:
 
 | File | What |
@@ -36,6 +40,7 @@ Raw downloads are cached in `.cache/` (git-ignored). The output goes to `data/`:
 | `hadith/NNN.json`, `hadith-index.json` | Sahih al-Bukhari hadith whose own text cites an ayah reference |
 | `seerah.json`, `seerah/<id>.json`, `seerah-by-surah.json` | 24 Seerah events (each one a chapter of Sahih al-Bukhari, given by hadith-number range) and 5 dated moments, each dated only by a hadith that states the time |
 | `stories.json`, `stories-by-surah.json` | The 24 prophets and messengers in the Quranic Arabic Corpus ontology, with every ayah it tags as referring to each (name variants grouped only where the ontology says so) |
+| `search/ar.json`, `search/tr-<id>.json` | Search index: plain Arabic (Quran.com "imlaei simple", used only for matching) and each translation packed into one file. Search runs in the browser |
 | `tafsirs.json` | The 7 tafsirs offered (4 Urdu, 3 English). The commentary itself is too large to bundle (hundreds of MB), so the reader fetches each ayah's tafsir live from Quran.com's public API and shows it as published |
 | `sources.json` | Citation registry: every source, its publisher, URL and retrieval date |
 | `checksums.json` | SHA-256 fingerprint of every ayah's Arabic text |
@@ -49,6 +54,7 @@ Raw downloads are cached in `.cache/` (git-ignored). The output goes to `data/`:
 - **Sahih Muslim:** its English edition doesn't write ayah references inside the hadith text, so none of its hadith are linked yet. We need a source that maps Muslim's hadith to ayahs.
 - **Seerah order:** apart from the 5 dated moments, events follow Imam al-Bukhari's chapter order, which isn't strictly chronological (e.g. Tabuk comes after the Farewell Hajj). Surahs on the timeline are spaced by revelation order, not by date.
 - **Prophets:** the Corpus tags mostly where a prophet is named, so ayahs that continue his story without naming him aren't listed. Each ayah links to its full passage. Dhul-Kifl is classed in the ontology as a "historic person", not a prophet, so he isn't included.
-- Not built yet: map, asbab al-nuzul, search (see the roadmap).
+- **Search** matches exact word parts in the selected translations, so "patience" doesn't find "patient", and "Yusuf" won't match Saheeh International's "Joseph" (the surah and prophet links still appear).
+- Not built yet: map, asbab al-nuzul (see the roadmap).
 
 See [RESEARCH_AND_PLAN.md](RESEARCH_AND_PLAN.md) for the research and roadmap.

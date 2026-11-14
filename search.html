@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google" content="notranslate">
+  <title>Search the Quran — Tadabbur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500&family=Noto+Nastaliq+Urdu:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero" style="text-align:left;padding-bottom:6px">
+      <h1>Search the <em>Quran</em></h1>
+      <p class="lead" style="margin:0">Search by meaning in Urdu or English, by Arabic word (with or without harakat), by reference like <b>2:255</b> or <b>Baqarah 255</b>, or by surah or prophet name.</p>
+    </section>
+    <form class="search-box card" id="form" role="search">
+      <input type="search" id="q" name="q" autocomplete="off" placeholder="صبر · patience · رحمة · 2:255 · Yusuf" aria-label="Search the Quran" dir="auto">
+      <button class="btn primary" type="submit">Search</button>
+    </form>
+    <div class="search-scope" id="scope"></div>
+    <div id="results"></div>
+  </main>
+  <script type="module" src="js/search.js"></script>
+</body>
+</html>

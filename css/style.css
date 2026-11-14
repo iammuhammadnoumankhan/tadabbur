@@ -301,6 +301,21 @@ input[type=search] {
 .tafsir-body.urdu { font-size: 17px; line-height: 2.4; text-align: right; }
 .tafsir-body.urdu h1, .tafsir-body.urdu h2, .tafsir-body.urdu h3, .tafsir-body.urdu h4 { font-family: var(--font-urdu); line-height: 2.2; }
 
+/* ---------- search */
+.search-box { display: flex; gap: 8px; padding: 8px; margin: 20px 0 10px; }
+.search-box input { flex: 1; border: 0; background: none; font-size: 18px; padding: 8px 10px; outline: none; }
+.search-scope { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.seg.wrap-seg { flex-wrap: wrap; }
+.jump { display: flex; align-items: center; gap: 8px; padding: 14px 16px; margin-top: 14px; color: var(--ink); font-weight: 600; }
+.jump-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+.results { display: grid; gap: 12px; }
+.result { padding: 16px 18px; }
+.result-ref { color: var(--ink); font-weight: 600; }
+.matched-ar { font-family: var(--font-naskh); font-size: 17px; line-height: 2; color: var(--ink-2); margin: -2px 0 6px; }
+mark { background: color-mix(in srgb, var(--accent-2) 30%, transparent); color: inherit; border-radius: 4px; padding: 0 2px; }
+.nav-search svg { width: 18px; height: 18px; vertical-align: -3px; }
+.hero-search { max-width: 620px; margin: 24px auto 0; }
+
 /* ---------- prophets */
 .p-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 22px 0 60px; }
 .p-card { padding: 16px; color: var(--ink); display: grid; gap: 4px; transition: border-color .15s, transform .15s; }
