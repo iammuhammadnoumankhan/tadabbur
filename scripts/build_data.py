@@ -46,6 +46,18 @@ TRANSLATIONS = {
 }
 DEFAULT_TRANSLATIONS = [234, 20]
 
+# Tafsirs (Quran.com resource ids) offered in Urdu and English.
+TAFSIRS = {
+    160: ("ur", "Tafsir Ibn Kathir (Urdu)"),
+    159: ("ur", "Bayan ul Quran — Dr. Israr Ahmad"),
+    818: ("ur", "Tazkir ul Quran — Maulana Wahiduddin Khan"),
+    157: ("ur", "Fi Zilal al-Quran — Sayyid Qutb (Urdu)"),
+    169: ("en", "Tafsir Ibn Kathir (Abridged)"),
+    168: ("en", "Ma'arif al-Qur'an — Mufti Muhammad Shafi"),
+    817: ("en", "Tazkirul Quran — Maulana Wahiduddin Khan"),
+}
+TAFSIR_DEFAULT = {"ur": 160, "en": 169}
+
 HADITH = {
     "bukhari": ("Sahih al-Bukhari", "Muhammad ibn Isma'il al-Bukhari (d. 256 AH)"),
     "muslim":  ("Sahih Muslim", "Muslim ibn al-Hajjaj (d. 261 AH)"),
@@ -306,7 +318,36 @@ def build_sources(tr_meta, hadith_stats):
                        "note": "Footnote markers removed for display; text otherwise unmodified."}
     for k in s:
         s[k]["fetched"] = TODAY
-    write("sources.json", s)
+    merge_sources(s)
+
+
+def merge_sources(new):
+    """Update data/sources.json without dropping entries other build scripts added."""
+    p = os.path.join(DATA, "sources.json")
+    cur = json.load(open(p, encoding="utf-8")) if os.path.exists(p) else {}
+    cur.update(new)
+    write("sources.json", cur)
+
+
+def build_tafsirs():
+    """Tafsir is large, so only the list and citations are bundled. The reader fetches each
+    ayah's commentary live from Quran.com's public API, unmodified, and names the author."""
+    print("tafsir list …")
+    res = fetch(f"{QC}/resources/tafsirs", "qc/tafsirs.json")["tafsirs"]
+    by_id = {t["id"]: t for t in res}
+    meta, srcs = [], {}
+    for tid, (lang, label) in TAFSIRS.items():
+        t = by_id.get(tid)
+        assert t, f"tafsir {tid} no longer offered by Quran.com"
+        meta.append({"id": tid, "lang": lang, "name": label, "author": t.get("author_name"), "src": f"qc-tafsir-{tid}"})
+        srcs[f"qc-tafsir-{tid}"] = {
+            "title": f"Tafsir — {label}", "lang": lang, "publisher": "Quran.com",
+            "url": "https://quran.com", "via": f"{QC}/tafsirs/{tid}/by_ayah/{{key}}",
+            "note": ("Loaded live, ayah by ayah, and shown as published (only unsafe HTML is stripped). "
+                     f"Author as listed by Quran.com: {t.get('author_name')}."),
+            "fetched": TODAY}
+    write("tafsirs.json", {"api": f"{QC}/tafsirs/{{id}}/by_ayah/{{key}}", "default": TAFSIR_DEFAULT, "list": meta})
+    merge_sources(srcs)
 
 
 def main():
@@ -319,6 +360,7 @@ def main():
     tr = build_translations(chapters)
     hs = build_hadith(chapters)
     build_sources(tr, hs)
+    build_tafsirs()
     print("done.")
 
 

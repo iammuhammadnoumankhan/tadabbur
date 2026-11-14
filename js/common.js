@@ -26,6 +26,12 @@ export async function scriptText(n) {
 }
 export const tr = (id, n) => getJSON(`data/tr/${id}/${pad3(n)}.json`);
 export const hadithIndex = () => getJSON("data/hadith-index.json");
+export const tafsirs = () => getJSON("data/tafsirs.json");
+// Tafsir is fetched live from Quran.com's public API (CORS-enabled), one ayah at a time.
+export async function tafsirFor(id, key) {
+  const t = await tafsirs();
+  return getJSON(t.api.replace("{id}", id).replace("{key}", key));
+}
 export const hadith = n => getJSON(`data/hadith/${pad3(n)}.json`).catch(() => []);
 
 export const WORD_AUDIO = "https://audio.qurancdn.com/";
@@ -41,6 +47,7 @@ const DEFAULTS = {
   arSize: 34,
   showTranslit: false,
   uiMeaning: "ur",        // which language to show surah meanings in
+  tafsir: null,           // chosen tafsir id (null => default for uiMeaning)
 };
 let settings = { ...DEFAULTS };
 try { Object.assign(settings, JSON.parse(localStorage.getItem("tadabbur.settings") || "{}")); } catch {}

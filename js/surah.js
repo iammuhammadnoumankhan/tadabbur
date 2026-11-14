@@ -17,7 +17,7 @@ const hCounts = hIndex[N] || {};
 document.title = `${ch.name} (${ch.n}) · Tadabbur`;
 
 // ======================================================= sanitize 3rd-party HTML
-const ALLOWED = new Set(["H2", "H3", "P", "SPAN", "BR", "B", "I", "STRONG", "EM", "UL", "OL", "LI", "SUP", "SUB", "BLOCKQUOTE"]);
+const ALLOWED = new Set(["H1", "H2", "H3", "H4", "P", "DIV", "SPAN", "BR", "B", "I", "STRONG", "EM", "UL", "OL", "LI", "SUP", "SUB", "BLOCKQUOTE"]);
 function sanitize(html) {
   const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
   const walk = node => {
@@ -120,6 +120,7 @@ function ayahEl(a, idx) {
     h("span", { class: "tiny" }, `Juz ${a.juz} · Page ${a.page}`),
     h("span", { class: "sp" }),
     hc ? h("button", { class: "chip hadith-chip", onclick: () => openHadith(a.k), title: "Sahih hadith that cite this ayah" }, `${hc} Sahih hadith`) : null,
+    h("button", { class: "chip tafsir-chip", onclick: () => openTafsir(a.k), title: "Read tafsir (commentary) of this ayah" }, "Tafsir"),
     h("button", { class: "icon-btn", title: "Play this ayah", "aria-label": `Play ayah ${a.k}`, html: ICON.play, onclick: () => player.playFrom(idx, true) }),
     h("button", { class: "icon-btn", title: "Copy ayah with translations", "aria-label": "Copy", html: ICON.copy, onclick: () => copyAyah(a, idx) }));
 
@@ -265,6 +266,56 @@ $("#open-settings").onclick = () => {
   openDrawer("Reading settings", body);
 };
 
+// --- tafsir panel (fetched live from Quran.com, shown as published)
+async function openTafsir(key) {
+  const T = await C.tafsirs();
+  const pick = () => C.get().tafsir || T.default[C.get().uiMeaning === "en" ? "en" : "ur"];
+  const body = h("div");
+  openDrawer(`Tafsir of ${key}`, body);
+
+  async function fill() {
+    const id = pick();
+    const meta = T.list.find(t => t.id === id) || T.list[0];
+    const ur = meta.lang === "ur";
+    const select = h("select", { class: "tafsir-select", "aria-label": "Choose tafsir", onchange: e => { C.set({ tafsir: +e.target.value }); } },
+      ...[["ur", "اردو — Urdu"], ["en", "English"]].map(([lang, label]) =>
+        h("optgroup", { label }, ...T.list.filter(t => t.lang === lang).map(t =>
+          h("option", { value: t.id, selected: t.id === meta.id }, t.name)))));
+    const nav = (dir) => {
+      const i = data.ayahs.findIndex(x => x.k === key) + dir;
+      if (i >= 0 && i < data.ayahs.length) { key = data.ayahs[i].k; $("#drawer-title").textContent = `Tafsir of ${key}`; fill(); }
+    };
+    body.innerHTML = "";
+    body.append(
+      h("div", { class: "tafsir-bar" }, select,
+        h("button", { class: "btn", onclick: () => nav(-1), "aria-label": "Previous ayah" }, "←"),
+        h("button", { class: "btn", onclick: () => nav(1), "aria-label": "Next ayah" }, "→")),
+      h("div", { class: "skeleton" }, "Loading tafsir…"));
+    $("#drawer-body").scrollTop = 0;
+    try {
+      const res = await C.tafsirFor(meta.id, key);
+      const t = res.tafsir || {};
+      const covers = Object.keys(t.verses || {});
+      const html = sanitize(t.text || "");
+      body.lastChild.replaceWith(h("div", {},
+        covers.length > 1 ? h("div", { class: "note", style: "margin:12px 0" },
+          `This commentary explains ayahs ${covers[0]}–${covers[covers.length - 1].split(":")[1]} together.`) : null,
+        html.trim()
+          ? h("div", { class: `tafsir-body${ur ? " urdu" : ""}`, dir: ur ? "rtl" : "ltr", lang: meta.lang, html })
+          : h("div", { class: "note", style: "margin-top:12px" }, "This tafsir has no separate commentary for this ayah."),
+        h("div", { class: "source", style: "margin-top:16px" },
+          `${meta.name} · ${meta.author || ""} · loaded live from Quran.com, shown as published`)));
+    } catch {
+      body.lastChild.replaceWith(h("div", { class: "note", style: "margin-top:12px" },
+        "Couldn't load the tafsir. It's fetched live from Quran.com, so please check your internet connection and try again."));
+    }
+  }
+  tafsirListener = fill;
+  fill();
+}
+let tafsirListener = null;
+C.onChange((_, patch) => { if ("tafsir" in patch && drawer.classList.contains("show") && tafsirListener) tafsirListener(); });
+
 // --- hadith panel
 async function openHadith(key) {
   hadithData ||= await C.hadith(N);
@@ -335,7 +386,7 @@ $$("#wbw-seg button").forEach(b => b.onclick = () =>
   b.dataset.v === "off" ? C.set({ wbw: false }) : C.set({ wbw: true, wbwLang: b.dataset.v }));
 
 C.onChange(async (_, patch) => {
-  if ("arSize" in patch || "theme" in patch) return;
+  if ("arSize" in patch || "theme" in patch || "tafsir" in patch) return;
   if ("translations" in patch) await loadTranslations();
   if ("uiMeaning" in patch) await renderGate();
   const keep = player.idx;
