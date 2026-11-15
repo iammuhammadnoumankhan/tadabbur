@@ -19,16 +19,28 @@ function quranStrip(surahs) {
   return el;
 }
 
+// Ontology links + links an ayah or Sahih hadith states (each with its evidence)
+const TREE_RELS = new Set(["son-of", "daughter-of", "adopted-son-of"]);
+const EV = FAM?.evidenced || [];
+const LINKS = FAM ? [...FAM.links, ...EV.filter(e => TREE_RELS.has(e.rel)).map(e => [e.rel, e.a, e.b])] : [];
+const EV_KEYS = new Set(EV.map(e => `${e.a}|${e.b}`));
+const list = ids => ids.flatMap((c, i) => [i ? ", " : "", personLink(c)]);
+
 const link = id => byId[id] ? h("a", { href: `stories.html?p=${id}` }, nameOf(id)) : h("span", {}, nameOf(id));
 function relations(p) {
   if (!FAM) return [];
   const out = [];
-  for (const [rel, child, parent] of FAM.links) {
+  for (const [rel, child, parent] of LINKS) {
     if (child === p.id) out.push(h("span", {}, t(`family.${rel}`), personLink(parent)));
   }
-  const kids = FAM.links.filter(([rel, , parent]) => parent === p.id && rel !== "adopted-son-of").map(([, c]) => c);
-  if (kids.length) out.push(h("span", {}, t("family.children"), ...kids.flatMap((c, i) => [i ? ", " : "", personLink(c)])));
-  const adopted = FAM.links.filter(([rel, , parent]) => parent === p.id && rel === "adopted-son-of").map(([, c]) => c);
+  const kids = LINKS.filter(([rel, , parent]) => parent === p.id && rel !== "adopted-son-of").map(([, c]) => c);
+  if (kids.length) out.push(h("span", {}, t("family.children"), ...list(kids)));
+  const brothers = EV.filter(e => e.rel === "brother-of" && (e.a === p.id || e.b === p.id)).map(e => e.a === p.id ? e.b : e.a);
+  if (brothers.length) out.push(h("span", {}, t("family.brother"), ...list(brothers)));
+  const uncles = EV.filter(e => e.rel === "uncle-of" && e.b === p.id).map(e => e.a);
+  if (uncles.length) out.push(h("span", {}, t("family.uncles"), ...list(uncles)));
+  for (const e of EV.filter(e => e.rel === "descendant-of" && e.a === p.id)) out.push(h("span", {}, t("family.descendant-of"), personLink(e.b)));
+  const adopted = LINKS.filter(([rel, , parent]) => parent === p.id && rel === "adopted-son-of").map(([, c]) => c);
   if (adopted.length) out.push(h("span", {}, t("family.adoptedChild"), ...adopted.flatMap((c, i) => [i ? ", " : "", personLink(c)])));
   return out;
 }
@@ -37,10 +49,10 @@ const personLink = id => byId[id] ? h("a", { href: `stories.html?p=${id}` }, nam
 // ------------------------------------------------------------------ family tree (only the ontology's stated links)
 function familyTree() {
   if (!FAM) return null;
-  const parentOf = new Map(FAM.links.map(([rel, c, p]) => [c, { p, rel }]));
+  const parentOf = new Map(LINKS.map(([rel, c, p]) => [c, { p, rel }]));
   const childrenOf = new Map();
-  for (const [rel, c, p] of FAM.links) (childrenOf.get(p) || childrenOf.set(p, []).get(p)).push({ c, rel });
-  const inTree = new Set(FAM.links.flatMap(([, c, p]) => [c, p]));
+  for (const [rel, c, p] of LINKS) (childrenOf.get(p) || childrenOf.set(p, []).get(p)).push({ c, rel });
+  const inTree = new Set(LINKS.flatMap(([, c, p]) => [c, p]));
   const roots = [...inTree].filter(id => !parentOf.has(id))
     .sort((a, b) => (childrenOf.get(b)?.length || 0) - (childrenOf.get(a)?.length || 0));
   const node = id => {
@@ -54,6 +66,7 @@ function familyTree() {
     childrenOf.has(id) ? h("ul", {}, ...childrenOf.get(id).map(({ c, rel }) => {
       const li = branch(c);
       if (rel !== "son-of") li.classList.add(`rel-${rel}`), li.prepend(h("span", { class: "ft-rel" }, t(`family.edge.${rel}`)));
+      if (EV_KEYS.has(`${c}|${id}`)) li.classList.add("rel-ev");
       return li;
     })) : null);
   const alone = D.prophets.filter(p => !inTree.has(p.id));
@@ -62,11 +75,29 @@ function familyTree() {
     h("div", { class: "ft-forest" }, ...roots.map(r => h("div", { class: "card ft-card" }, h("ul", { class: "ftree" }, branch(r))))),
     h("div", { class: "ft-legend" },
       h("span", { class: "ft-node prophet ft-mini" }, t("family.legendProphet")),
-      h("span", { class: "ft-node ft-mini" }, t("family.legendOther"))),
+      h("span", { class: "ft-node ft-mini" }, t("family.legendOther")),
+      EV.length ? h("span", { class: "ft-legend-ev" }, t("family.legendEvidence")) : null),
     alone.length ? h("div", { class: "jump-row" }, h("span", { class: "tiny" }, t("family.noLinks")),
       ...alone.map(p => h("a", { class: "chip", href: `stories.html?p=${p.id}` }, p.en))) : null,
+    EV.length ? evidenceList() : null,
     h("div", { class: "source", style: "margin-top:12px" }, t("family.source"), " ",
       h("a", { href: "https://corpus.quran.com/concept.jsp?id=prophet", target: "_blank", rel: "noopener" }, "corpus.quran.com ↗")));
+}
+
+// Every link added beyond the ontology, with the ayahs / hadith that state it
+function evidenceList() {
+  const evLink = x => x.type === "ayah"
+    ? h("a", { class: "chip", href: `surah.html?n=${x.key.split(":")[0]}#${x.key}`, title: x.quote }, x.key)
+    : h("a", { class: "chip", href: x.url, target: "_blank", rel: "noopener", title: x.quote }, `${t(`collection.${x.c}`)} ${x.num} ↗`);
+  return h("div", { class: "card ft-evidence" },
+    h("h3", {}, t("family.evidenceTitle")),
+    h("p", { class: "tiny" }, t("family.evidenceLead")),
+    ...EV.map(e => h("div", { class: "ft-ev-row" },
+      h("div", {}, personLink(e.a), ` ${t(`family.rel.${e.rel}`)} `, personLink(e.b)),
+      h("div", { class: "ft-ev-src" }, ...e.evidence.map(evLink)),
+      ...e.evidence.filter(x => x.type === "hadith").slice(0, 1).map(x =>
+        h("div", { class: "ft-ev-quote", lang: "ar", dir: "rtl", translate: "no" }, `«${x.quote}»`)),
+      C.reportLink({ kind: "prophets", reference: `${FAM.people[e.a].en} ${t(`family.rel.${e.rel}`)} ${FAM.people[e.b].en}`, source: e.evidence.map(x => x.key || `${t(`collection.${x.c}`)} ${x.num}`).join(", ") }))));
 }
 const counts = p => ({ ayahs: t("common.ayahs", { n: p.ayahs }), surahs: t("common.surahs", { n: p.surahs.length }) });
 

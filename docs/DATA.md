@@ -161,8 +161,11 @@ Sources: `tadabbur-vocab` (counts) and `qac-morphology`.
   - Incomplete or backwards entries from the source are dropped.
 
 ### `family.json` (prophets family tree)
-`{ src, people: { id: { en, ar, prophet } }, links: [[rel, child, parent], …] }`
-- `rel` is one of `son-of`, `daughter-of` or `adopted-son-of`, **only as the Quranic Arabic Corpus ontology states it**. Nothing is inferred (no siblings or grandparents).
+`{ src: [...], people: { id: { en, ar, prophet } }, links: [[rel, child, parent], …], evidenced: [{ rel, a, b, evidence }] }`
+- `links`: `rel` is one of `son-of`, `daughter-of` or `adopted-son-of`, **only as the Quranic Arabic Corpus ontology states it**. Nothing is inferred (no siblings or grandparents).
+- `evidenced`: extra links where an ayah or a Sahih hadith states the relation itself, approved by the project owner (see `docs/FAMILY_CANDIDATES.md`). "`a` `rel` `b`", with `rel` one of `son-of`, `daughter-of`, `brother-of`, `uncle-of`, `descendant-of`.
+  - `evidence`: `[{ type: "ayah", key, quote } | { type: "hadith", c, num, url, quote }]`. `quote` is the wording the build checked: Saheeh International for an ayah, the hadith's Arabic (harakat removed) for a hadith. `num` is the sunnah.com number.
+  - `son-of`/`daughter-of` ones are drawn in the tree; `brother-of`, `uncle-of` and `descendant-of` are listed with the person.
 - `people` holds all 24 prophets, plus the relatives the links reach (e.g. Azar, Imran, Maryam), with the ontology's English and Arabic names.
 
 ### `places.json` (places named in the Quran, with a map)

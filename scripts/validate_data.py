@@ -375,12 +375,29 @@ def main():
 
     # 15. family links: only stated relation types, between known people; prophets match stories.json
     fam = load("family.json") or {"people": {}, "links": []}
-    need_src(fam.get("src", ""), "family.json")
+    for sid in (fam.get("src") if isinstance(fam.get("src"), list) else [fam.get("src", "")]):
+        need_src(sid, "family.json")
     for rel, child, parent in fam["links"]:
         if rel not in ("son-of", "daughter-of", "adopted-son-of"):
             err(f"family.json: unknown relation {rel!r}")
         if child not in fam["people"] or parent not in fam["people"]:
             err(f"family.json: link {child} -> {parent} names someone not in people")
+    # links beyond the ontology: each must carry evidence (a real ayah, or a Bukhari/Muslim hadith on sunnah.com)
+    for e in fam.get("evidenced", []):
+        where = f"family.json: {e['a']} {e['rel']} {e['b']}"
+        if e["rel"] not in ("son-of", "daughter-of", "brother-of", "uncle-of", "descendant-of"):
+            err(f"{where}: unknown relation")
+        if e["a"] not in fam["people"] or e["b"] not in fam["people"]:
+            err(f"{where}: names someone not in people")
+        if not e["evidence"]:
+            err(f"{where}: no evidence")
+        for x in e["evidence"]:
+            if x["type"] == "ayah" and not valid_key(x["key"]):
+                err(f"{where}: invalid ayah {x['key']}")
+            if x["type"] == "hadith" and (x["c"] not in ("bukhari", "muslim") or not x["url"].startswith("https://sunnah.com/")):
+                err(f"{where}: evidence must be Sahih al-Bukhari or Sahih Muslim on sunnah.com")
+            if not x.get("quote"):
+                err(f"{where}: evidence has no quoted wording")
     sp_ids = {p["id"] for p in st["prophets"]}
     if {k for k, v in fam["people"].items() if v.get("prophet")} != sp_ids:
         err("family.json: prophets don't match stories.json")

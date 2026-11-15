@@ -1,9 +1,33 @@
 {
- "src": "qac-ontology",
+ "src": [
+  "qac-ontology",
+  "sahih-hadith-text",
+  "qc-tr-20"
+ ],
  "people": {
+  "abbas": {
+   "en": "Al-Abbas",
+   "ar": "العباس",
+   "prophet": false
+  },
+  "abdul-muttalib": {
+   "en": "Abdul-Muttalib",
+   "ar": "عبد المطلب",
+   "prophet": false
+  },
+  "abdullah": {
+   "en": "Abdullah",
+   "ar": "عبد الله",
+   "prophet": false
+  },
   "abel": {
    "en": "Abel",
    "ar": "هابيل",
+   "prophet": false
+  },
+  "abu-talib": {
+   "en": "Abu Talib",
+   "ar": "أبو طالب",
    "prophet": false
   },
   "adam": {
@@ -41,6 +65,11 @@
    "ar": "اليسع",
    "prophet": true
   },
+  "fatimah": {
+   "en": "Fatimah",
+   "ar": "فاطمة",
+   "prophet": false
+  },
   "harun": {
    "en": "Harun",
    "ar": "هارون",
@@ -55,6 +84,11 @@
    "en": "Ibrahim",
    "ar": "إبراهيم",
    "prophet": true
+  },
+  "ibrahim-son-of-muhammad": {
+   "en": "Ibrahim",
+   "ar": "إبراهيم",
+   "prophet": false
   },
   "idris": {
    "en": "Idris",
@@ -121,6 +155,11 @@
    "ar": "سليمان",
    "prophet": true
   },
+  "umamah": {
+   "en": "Umamah",
+   "ar": "أمامة",
+   "prophet": false
+  },
   "yahya": {
    "en": "Yahya",
    "ar": "يحيى",
@@ -140,6 +179,11 @@
    "en": "Yusuf",
    "ar": "يوسف",
    "prophet": true
+  },
+  "zainab": {
+   "en": "Zainab",
+   "ar": "زينب",
+   "prophet": false
   },
   "zayd": {
    "en": "Zayd",
@@ -213,5 +257,167 @@
    "yusuf",
    "yaqub"
   ]
+ ],
+ "evidenced": [
+  {
+   "rel": "brother-of",
+   "a": "harun",
+   "b": "musa",
+   "evidence": [
+    {
+     "type": "ayah",
+     "key": "20:30",
+     "quote": "Aaron, my brother"
+    },
+    {
+     "type": "ayah",
+     "key": "19:53",
+     "quote": "his brother Aaron"
+    },
+    {
+     "type": "ayah",
+     "key": "28:34",
+     "quote": "my brother Aaron"
+    },
+    {
+     "type": "ayah",
+     "key": "20:94",
+     "quote": "O son of my mother"
+    }
+   ]
+  },
+  {
+   "rel": "son-of",
+   "a": "ibrahim-son-of-muhammad",
+   "b": "muhammad",
+   "evidence": [
+    {
+     "type": "hadith",
+     "c": "muslim",
+     "num": "2315",
+     "url": "https://sunnah.com/muslim/43/83",
+     "quote": "ولد لي الليلة غلام فسميته باسم أبي إبراهيم"
+    },
+    {
+     "type": "hadith",
+     "c": "bukhari",
+     "num": "1063",
+     "url": "https://sunnah.com/bukhari:1063",
+     "quote": "أن ابنا للنبي صلى الله عليه وسلم مات، يقال له إبراهيم"
+    }
+   ]
+  },
+  {
+   "rel": "daughter-of",
+   "a": "fatimah",
+   "b": "muhammad",
+   "evidence": [
+    {
+     "type": "hadith",
+     "c": "bukhari",
+     "num": "3092",
+     "url": "https://sunnah.com/bukhari:3092",
+     "quote": "فاطمة ـ عليها السلام ـ ابنة رسول الله"
+    },
+    {
+     "type": "hadith",
+     "c": "muslim",
+     "num": "1759",
+     "url": "https://sunnah.com/muslim/32/61",
+     "quote": "فاطمة بنت رسول الله"
+    }
+   ]
+  },
+  {
+   "rel": "daughter-of",
+   "a": "zainab",
+   "b": "muhammad",
+   "evidence": [
+    {
+     "type": "hadith",
+     "c": "bukhari",
+     "num": "516",
+     "url": "https://sunnah.com/bukhari:516",
+     "quote": "أمامة بنت زينب بنت رسول الله"
+    },
+    {
+     "type": "hadith",
+     "c": "muslim",
+     "num": "939",
+     "url": "https://sunnah.com/muslim/11/51",
+     "quote": "لما ماتت زينب بنت رسول الله"
+    }
+   ]
+  },
+  {
+   "rel": "daughter-of",
+   "a": "umamah",
+   "b": "zainab",
+   "evidence": [
+    {
+     "type": "hadith",
+     "c": "bukhari",
+     "num": "516",
+     "url": "https://sunnah.com/bukhari:516",
+     "quote": "أمامة بنت زينب بنت رسول الله"
+    }
+   ]
+  },
+  {
+   "rel": "son-of",
+   "a": "muhammad",
+   "b": "abdullah",
+   "evidence": [
+    {
+     "type": "hadith",
+     "c": "bukhari",
+     "num": "2699",
+     "url": "https://sunnah.com/bukhari:2699",
+     "quote": "أنا رسول الله وأنا محمد بن عبد الله"
+    }
+   ]
+  },
+  {
+   "rel": "uncle-of",
+   "a": "abbas",
+   "b": "muhammad",
+   "evidence": [
+    {
+     "type": "hadith",
+     "c": "bukhari",
+     "num": "1468",
+     "url": "https://sunnah.com/bukhari:1468",
+     "quote": "العباس بن عبد المطلب فعم رسول الله"
+    }
+   ]
+  },
+  {
+   "rel": "uncle-of",
+   "a": "abu-talib",
+   "b": "muhammad",
+   "evidence": [
+    {
+     "type": "hadith",
+     "c": "bukhari",
+     "num": "3884",
+     "url": "https://sunnah.com/bukhari:3884",
+     "quote": "أن أبا طالب، لما حضرته الوفاة دخل عليه النبي"
+    }
+   ]
+  },
+  {
+   "rel": "descendant-of",
+   "a": "muhammad",
+   "b": "abdul-muttalib",
+   "evidence": [
+    {
+     "type": "hadith",
+     "c": "bukhari",
+     "num": "2864",
+     "url": "https://sunnah.com/bukhari:2864",
+     "quote": "أنا النبي لا كذب أنا ابن عبد المطلب"
+    }
+   ]
+  }
  ]
 }

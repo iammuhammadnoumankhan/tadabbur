@@ -453,7 +453,7 @@ export default {
 
   // ---------------------------------------------------------------- prophets family tree
   "family.title": "Family links",
-  "family.lead": "Parent and child links between the prophets and their relatives, exactly as the Quranic Arabic Corpus ontology records them. Tap a prophet to read the ayahs about him.",
+  "family.lead": "Parent and child links between the prophets and their relatives, as the Quranic Arabic Corpus ontology records them, plus links that an ayah or a Sahih hadith states itself (marked, with their evidence below). Tap a prophet to read the ayahs about him.",
   "family.son-of": "Son of ",
   "family.daughter-of": "Daughter of ",
   "family.adopted-son-of": "Adopted son of ",
@@ -463,8 +463,19 @@ export default {
   "family.edge.daughter-of": "daughter",
   "family.legendProphet": "Prophet or messenger",
   "family.legendOther": "Other person",
-  "family.noLinks": "No parent–child link recorded in the ontology:",
-  "family.source": "Source: Quranic Arabic Corpus ontology (son-of, daughter-of, adopted-son-of). Only stated links are shown; nothing is inferred.",
+  "family.noLinks": "No parent–child link recorded:",
+  "family.source": "Sources: Quranic Arabic Corpus ontology (son-of, daughter-of, adopted-son-of), and the ayahs and Sahih hadith listed above. Only stated links are shown; nothing is inferred.",
+  "family.brother": "Brother: ",
+  "family.uncles": "Uncles: ",
+  "family.descendant-of": "Descendant of ",
+  "family.legendEvidence": "From an ayah or Sahih hadith",
+  "family.evidenceTitle": "Links added from the Quran and Sahih hadith",
+  "family.evidenceLead": "Each link below is stated by the ayah or hadith itself (for a hadith, in its Arabic text). “Descendant of” is used where the Prophet ﷺ says “I am the son of Abdul-Muttalib”, since in Arabic “son of” there can also mean grandson.",
+  "family.rel.son-of": "is the son of",
+  "family.rel.daughter-of": "is the daughter of",
+  "family.rel.brother-of": "is the brother of",
+  "family.rel.uncle-of": "is the uncle of",
+  "family.rel.descendant-of": "is a descendant of",
 
   // ---------------------------------------------------------------- search
   "search.pageTitle": "Search the Quran — Tadabbur",
