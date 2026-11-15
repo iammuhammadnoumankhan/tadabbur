@@ -299,6 +299,42 @@ def main():
         if got != sums_tj.get(str(c["n"])):
             err(f"{rel}: tajweed text changed — fingerprint mismatch")
 
+    # 14. mushaf page layouts: every word exactly once, in order; every ayah ends; index matches
+    order = [f"{c['n']}:{a}:{w}" for c in chs for a in range(1, count[c["n"]] + 1)
+             for w in range(1, words_per_ayah[f"{c['n']}:{a}"] + 1)]
+    need_src("qc-layout-madani", "layout/madani")
+    for m in ("madani", "indopak"):
+        ix = load(f"layout/{m}/index.json")
+        if ix is None:
+            continue
+        need_src(ix["src"], f"layout/{m}")
+        seen, ends, heads = [], [], []
+        for p in range(1, ix["pages"] + 1):
+            d = load(f"layout/{m}/{p:03d}.json")
+            if d is None:
+                break
+            for ln in d["lines"]:
+                if ln["t"] == "w":
+                    for ref in ln["w"]:
+                        s, a, w = ref.split(":")
+                        if w == "e":
+                            ends.append(f"{s}:{a}")
+                        else:
+                            seen.append(ref)
+                            if ix["ayah"][s][int(a) - 1] > p:
+                                err(f"layout/{m}: index puts {s}:{a} on a later page than its words")
+                elif ln["t"] == "s":
+                    heads.append(ln["s"])
+                elif ln["t"] not in ("b", "x"):
+                    err(f"layout/{m}/{p:03d}.json: unknown line type {ln['t']!r}")
+        if seen != order:
+            first = next((i for i, (x, y) in enumerate(zip(seen, order)) if x != y), min(len(seen), len(order)))
+            err(f"layout/{m}: words not all placed once in order ({len(seen)} of {len(order)}; first difference at {order[first] if first < len(order) else 'end'})")
+        if ends != [f"{c['n']}:{a}" for c in chs for a in range(1, count[c["n"]] + 1)]:
+            err(f"layout/{m}: ayah-end markers missing or out of order ({len(ends)} of 6236)")
+        if sorted(heads) != list(range(1, 115)):
+            err(f"layout/{m}: surah headings should be 1–114 once each")
+
     # 9. manifest (docs/DATA.md): schema version and counts match the data
     man = load("manifest.json") or {}
     if man.get("schema") != SCHEMA:

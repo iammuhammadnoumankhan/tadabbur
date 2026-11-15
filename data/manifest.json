@@ -12,7 +12,9 @@
   "prophets": 24,
   "roots": 1642,
   "vocab": 4824,
-  "reciters": 6
+  "reciters": 6,
+  "pages_madani": 604,
+  "pages_indopak": 610
  },
  "datasets": [
   {
@@ -44,6 +46,17 @@
    "src": [
     "dk-indopak-text",
     "dk-indopak-font"
+   ]
+  },
+  {
+   "id": "layout",
+   "files": [
+    "layout/<madani|indopak>/index.json",
+    "layout/<madani|indopak>/PPP.json"
+   ],
+   "src": [
+    "qc-layout-madani",
+    "dk-indopak-text"
    ]
   },
   {

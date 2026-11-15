@@ -38,6 +38,7 @@ python3 scripts/build_roots.py
 python3 scripts/build_vocab.py     # most frequent words, from the roots
 python3 scripts/build_audio.py     # recitation word timings for 6 reciters
 python3 scripts/build_tajweed.py   # tajweed-coloured text
+python3 scripts/build_layout.py    # mushaf page layouts (Madani + IndoPak 15-line)
 ```
 Then build the search index, and finally the manifest:
 ```bash

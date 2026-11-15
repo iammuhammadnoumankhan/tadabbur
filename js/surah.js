@@ -526,6 +526,13 @@ C.onChange(async (_, patch) => {
   player.word = null;
 });
 
+// ======================================================= mushaf page view link (opens at the ayah in view)
+$("#open-mushaf").addEventListener("click", e => {
+  const inView = [...document.querySelectorAll(".ayah")].find(el => el.getBoundingClientRect().bottom > 140);
+  const key = inView ? inView.id : `${N}:1`;
+  e.currentTarget.href = `page.html?k=${key}&m=${C.get().script === "indopak" ? "indopak" : "madani"}`;
+});
+
 // ======================================================= pager
 function pager() {
   const p = $("#pager");

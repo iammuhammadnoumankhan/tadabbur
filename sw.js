@@ -14,9 +14,9 @@ const DATA = "tadabbur-data-schema-1";
 const RUNTIME = "tadabbur-runtime";
 
 const SHELL_FILES = [
-  "./", "index.html", "surah.html", "timeline.html", "stories.html", "search.html", "sources.html", "root.html", "learn.html",
+  "./", "index.html", "surah.html", "timeline.html", "stories.html", "search.html", "sources.html", "root.html", "learn.html", "page.html",
   "css/style.css",
-  "js/common.js", "js/home.js", "js/surah.js", "js/timeline.js", "js/stories.js", "js/search.js", "js/sources.js", "js/root.js", "js/learn.js",
+  "js/common.js", "js/home.js", "js/surah.js", "js/timeline.js", "js/stories.js", "js/search.js", "js/sources.js", "js/root.js", "js/learn.js", "js/page.js",
   "js/core/index.js", "js/core/data.js", "js/core/quran.js", "js/core/search.js", "js/core/settings.js", "js/core/report.js", "js/core/learn.js",
   "js/i18n/index.js", "js/i18n/en.js",
   "fonts/DigitalKhatt-IndoPak.woff2",

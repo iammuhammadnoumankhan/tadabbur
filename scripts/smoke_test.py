@@ -38,6 +38,8 @@ PAGES = [
     ("root.html", ".r-card", 1000),
     ("root.html?r=0", ".result", 1),
     ("learn.html", ".v-row:not(.v-head)", 50),
+    ("page.html?m=madani&p=3", ".m-line", 15),
+    ("page.html?m=indopak&p=3", ".m-line", 15),
 ]
 VIEWPORTS = {"desktop": {"width": 1280, "height": 900}, "phone": {"width": 375, "height": 812}}
 

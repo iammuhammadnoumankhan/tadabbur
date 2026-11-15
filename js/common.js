@@ -214,7 +214,10 @@ export async function offlineUrls() {
     if (hIndex[c.n]) urls.push(`data/hadith/${n}.json`);
     if (core.settings.get().script === "tajweed") urls.push(`data/tajweed/${n}.json`);
   }
-  urls.push("data/search/ar.json", "data/roots/index.json", "data/vocab.json", ...trs.map(tr => `data/search/tr-${tr.id}.json`),
+  const mushaf = core.settings.get().script === "indopak" ? "indopak" : "madani";
+  const ix = await core.layoutIndex(mushaf).catch(() => null);
+  if (ix) for (let p = 1; p <= ix.pages; p++) urls.push(`data/layout/${mushaf}/${core.pad3(p)}.json`);
+  urls.push(`data/layout/${mushaf}/index.json`, "data/search/ar.json", "data/roots/index.json", "data/vocab.json", ...trs.map(tr => `data/search/tr-${tr.id}.json`),
     ...se.events.map(e => `data/seerah/${e.id}.json`));
   return urls;
 }

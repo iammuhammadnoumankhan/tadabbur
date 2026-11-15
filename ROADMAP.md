@@ -49,7 +49,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
   - Source: Quran.com word-timing segments for a recitation.
 - [x] **8. Tajweed colours [#10]** *(done 2026-11-15)*
   - Source: Quran.com's tajweed text, plus a colour key.
-- [ ] **9. Mushaf page view [#9]**
+- [x] **9. Mushaf page view [#9]** *(done 2026-11-15: Madani 604 + IndoPak 15-line)*
   - 604 pages in Madani layout, plus IndoPak 13- and 15-line layouts.
   - Source: QUL mushaf layouts; licence to be checked. The biggest item in this phase.
 

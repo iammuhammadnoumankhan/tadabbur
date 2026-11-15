@@ -170,6 +170,25 @@ export default {
   "tajweed.idgham_mutaqaribayn": "Idgham mutaqaribayn",
   "tajweed.ar.idgham_mutaqaribayn": "إدغام متقاربين",
 
+  // ---------------------------------------------------------------- mushaf page view
+  "nav.mushaf": "Mushaf",
+  "page.title": "Page {page} · {name} · Tadabbur",
+  "page.info": "Page {page} of {pages} · Juz {juz}",
+  "page.next": "Next page",
+  "page.prev": "Previous page",
+  "page.nextShort": "Next",
+  "page.prevShort": "Previous",
+  "page.madani": "Madani (604 pages)",
+  "page.indopak": "IndoPak (15 lines)",
+  "page.goto": "Page",
+  "page.surah": "Go to surah",
+  "page.openReader": "Open in reader",
+  "page.surahWord": "سُورَةُ",
+  "page.srcMadani": "Page layout: Madani mushaf (604 pages, 15 lines) as used by Quran.com. Text: Quran.com Uthmani (or tajweed). Turn pages with the buttons, the arrow keys or by swiping.",
+  "page.srcIndopak": "Page layout and text: DigitalKhatt IndoPak 15-line mushaf (610 pages). Turn pages with the buttons, the arrow keys or by swiping.",
+  "surah.mushafView": "Mushaf",
+  "surah.mushafViewTitle": "Read this surah page by page, like a printed mushaf",
+
   // ---------------------------------------------------------------- report a problem
   "report.label": "Report",
   "report.title": "Report a problem with this (opens a short form on GitHub)",

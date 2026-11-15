@@ -137,6 +137,17 @@ An array of 114 items:
 
 Sources: `tadabbur-vocab` (counts) and `qac-morphology`.
 
+### `layout/<mushaf>/index.json`, `layout/<mushaf>/PPP.json` (mushaf page view)
+- `<mushaf>` is `madani` (604 pages, from Quran.com word page/line numbers) or `indopak` (15-line, 610 pages, from the DigitalKhatt text's own pages and lines).
+- `PPP.json`: `{ page, lines: [Line, …] }`. Line is one of:
+  - `{ t: "w", w: ["s:a:w" | "s:a:e", …] }`: words in reading order, where `e` is an ayah-end marker;
+  - `{ t: "s", s }`: a surah name line;
+  - `{ t: "b" }`: the Bismillah;
+  - `{ t: "x" }`: a blank line.
+- `index.json`: `{ pages, src, surah: { n: first page }, ayah: { n: [page of each ayah] } }`
+- Only **positions** are stored. The words are our existing text (Uthmani, tajweed or IndoPak), never copied.
+- `validate_data.py` checks that every word appears exactly once and in order, every ayah has its end marker, and every surah has one heading.
+
 ### `audio/reciters.json`, `audio/<reciter id>/NNN.json` (recitations with word timings)
 - `audio/reciters.json`: `{ default, list: [{ id, name, style, src }] }`. `id` is the Quran.com recitation id.
 - `audio/<id>/NNN.json`: `{ src, url, ms, ayahs: [[fromMs, toMs, [[word, startMs, endMs], …]], …] }`

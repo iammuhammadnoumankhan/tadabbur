@@ -91,6 +91,12 @@ export async function rootByLetters(r) {
 /** Corpus dictionary page for a root, e.g. https://corpus.quran.com/qurandictionary.jsp?q=Sbr */
 export const corpusRootUrl = bw => `https://corpus.quran.com/qurandictionary.jsp?q=${encodeURIComponent(bw)}`;
 
+// ---------------------------------------------------------------- mushaf page layouts
+/** { pages, src, surah: {n: first page}, ayah: {n: [page per ayah]} } for "madani" or "indopak". */
+export const layoutIndex = m => getJSON(`data/layout/${m}/index.json`);
+/** { page, lines: [{t:"w", w:["s:a:w"|"s:a:e"]} | {t:"s", s} | {t:"b"} | {t:"x"}] } */
+export const layoutPage = (m, p) => getJSON(`data/layout/${m}/${pad3(p)}.json`);
+
 // ---------------------------------------------------------------- recitations with word timings
 export const reciters = () => getJSON("data/audio/reciters.json");
 /** { url, ms, ayahs: [[fromMs, toMs, [[word, startMs, endMs], …]], …] } for one reciter + surah. */
