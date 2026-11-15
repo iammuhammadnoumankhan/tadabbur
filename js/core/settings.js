@@ -15,6 +15,7 @@ export const DEFAULTS = Object.freeze({
   uiMeaning: "ur",        // language for surah meanings, intros, hadith and tafsir defaults
   uiLang: "en",           // interface language (Urdu interface comes later, see ROADMAP)
   tafsir: null,           // chosen tafsir id; null = default for uiMeaning
+  known: [],              // vocabulary keys ("lemma|root") the reader has marked as known
 });
 
 function browserStorage() {

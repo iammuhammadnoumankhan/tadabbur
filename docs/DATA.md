@@ -115,6 +115,22 @@ An array of 114 items:
 - `roots/<id>.json`: every occurrence of that root, as `["s:a:w", …]`.
 - Source: `qac-morphology` (Quranic Arabic Corpus v0.4, used unchanged).
 
+### `vocab.json` (most frequent words)
+`{ src, total, items: [{ k, l, r, p, n, en, ur, ex }] }`, with items **sorted by `n`, most frequent first**.
+
+| Field | Meaning |
+|---|---|
+| `total` | All words in the Quran (77,429) |
+| `k` | `"lemma|root"`: the key for a reader's known words (settings `known`) |
+| `l` | Dictionary form (lemma) |
+| `r` | Root, or `null` |
+| `p` | Most common part-of-speech tag |
+| `n` | Occurrences |
+| `en`, `ur` | `[[gloss, count], …]`: the top 3 Quran.com word-by-word meanings used for this form, as published |
+| `ex` | `"s:a:w"`, the first occurrence |
+
+Sources: `tadabbur-vocab` (counts) and `qac-morphology`.
+
 ### `search/ar.json`, `search/tr-<id>.json`
 Each is an array of 6,236 strings, in global ayah index order.
 - `ar.json`: Quran.com plain Arabic (`imlaei_simple`), used **only for matching**.

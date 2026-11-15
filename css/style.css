@@ -307,6 +307,47 @@ input[type=search] {
 .r-meaning { font-size: 14px; color: var(--ink-2); margin: 2px 0 6px; }
 .r-meaning .urdu { font-size: 16px; }
 
+/* ---------- learn (most frequent words) */
+.learn-top { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; margin-top: 22px; }
+.learn-meter, .learn-curve, .learn-practice { padding: 20px; }
+.lm-num { font-family: var(--font-display); font-size: 30px; }
+.lm-sub { color: var(--ink-2); margin: 4px 0 6px; }
+.progress.big { height: 12px; }
+.learn-curve h3, .learn-practice h3 { margin: 0 0 10px; font-size: 16px; }
+.lc-row { display: grid; grid-template-columns: 160px 1fr; gap: 10px; align-items: center; font-size: 13px; margin: 5px 0; }
+.lc-bar { height: 10px; background: var(--bg-2); border-radius: 6px; overflow: hidden; }
+.lc-bar span { display: block; height: 100%; background: var(--accent-2); border-radius: 6px; }
+.learn-practice { margin-top: 14px; }
+.flashcard { text-align: center; padding: 22px 10px; margin: 12px 0; background: var(--bg-2); border-radius: var(--r); display: grid; gap: 8px; justify-items: center; }
+.fc-word { font-family: var(--font-uthmani); font-size: 56px; line-height: 1.6; color: var(--accent); direction: rtl; }
+.fc-back { display: grid; gap: 6px; justify-items: center; width: 100%; }
+.fc-meaning { font-size: 18px; }
+.fc-meaning.urdu { font-size: 22px; line-height: 2.2; }
+.fc-example { margin-top: 8px; width: 100%; text-align: right; }
+.fc-example .tiny { text-align: left; }
+.fc-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.root-letters.small { font-size: 14px; letter-spacing: 1px; }
+.v-list { display: grid; gap: 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); overflow: hidden; }
+.v-row { display: grid; grid-template-columns: 44px 120px 1fr 170px 64px 70px 54px; gap: 10px; align-items: center; padding: 8px 12px; border-top: 1px solid var(--line); }
+.v-row.v-head { border-top: 0; font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--ink-3); background: var(--bg-2); }
+.v-row.known { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.v-rank { color: var(--ink-3); font-size: 13px; }
+.v-word { font-family: var(--font-uthmani); font-size: 24px; direction: rtl; text-align: right; }
+.v-mean { display: grid; font-size: 14px; min-width: 0; }
+.v-mean .urdu { font-size: 16px; line-height: 2; text-align: left; }
+.v-count { font-variant-numeric: tabular-nums; text-align: right; }
+.v-cum { text-align: right; }
+.v-known { text-align: center; }
+.v-known input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+@media (max-width: 820px) {
+  .learn-top { grid-template-columns: 1fr; }
+  .lc-row { grid-template-columns: 140px 1fr; }
+  .v-row { grid-template-columns: 34px 84px 1fr 44px; }
+  .v-type, .v-cum, .v-count { display: none; }
+  .v-row.v-head span:nth-child(4), .v-row.v-head span:nth-child(5), .v-row.v-head span:nth-child(6) { display: none; }
+}
+
 /* ---------- report a problem */
 .report-link { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
 .report-link:hover { color: var(--accent-2); text-decoration: none; }

@@ -10,7 +10,8 @@
   "hadith_linked": 386,
   "seerah_events": 24,
   "prophets": 24,
-  "roots": 1642
+  "roots": 1642,
+  "vocab": 4824
  },
  "datasets": [
   {
@@ -143,6 +144,16 @@
     "roots/<id>.json"
    ],
    "src": [
+    "qac-morphology"
+   ]
+  },
+  {
+   "id": "vocab",
+   "files": [
+    "vocab.json"
+   ],
+   "src": [
+    "tadabbur-vocab",
     "qac-morphology"
    ]
   }

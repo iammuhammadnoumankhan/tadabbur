@@ -42,7 +42,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
 - [x] **5. Word roots [#2]** *(done 2026-11-15)*
   - Tap a word to see its root, lemma and form, and every other ayah where that root appears.
   - Source: Quranic Arabic Corpus morphology (GPL), aligned to our word list as we did for IndoPak.
-- [ ] **6. Most frequent words [#3]** *(needs item 5)*
+- [x] **6. Most frequent words [#3]** *(done 2026-11-15)*
   - Words ranked by how often they appear, with flashcards.
   - A "how much of the Quran you now recognise" meter, computed from the text.
 - [ ] **7. Audio that highlights each word as it's recited [#8]**

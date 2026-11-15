@@ -142,6 +142,7 @@ export function header(active = "") {
         h("a", { href: "search.html", class: "nav-search", title: t("nav.search"), "aria-label": t("nav.search"), html: ICON.search }),
         h("a", { href: "stories.html" }, t("nav.prophets")),
         h("a", { href: "root.html" }, t("nav.roots")),
+        h("a", { href: "learn.html" }, t("nav.learn")),
         h("a", { href: "timeline.html" }, h("span", { class: "label" }, t("nav.seerahPrefix")), t("nav.timeline")),
         h("a", { href: "sources.html" }, t("nav.sources")),
         installBtn(),
@@ -212,7 +213,7 @@ export async function offlineUrls() {
       ...trs.map(tr => `data/tr/${tr.id}/${n}.json`));
     if (hIndex[c.n]) urls.push(`data/hadith/${n}.json`);
   }
-  urls.push("data/search/ar.json", "data/roots/index.json", ...trs.map(tr => `data/search/tr-${tr.id}.json`),
+  urls.push("data/search/ar.json", "data/roots/index.json", "data/vocab.json", ...trs.map(tr => `data/search/tr-${tr.id}.json`),
     ...se.events.map(e => `data/seerah/${e.id}.json`));
   return urls;
 }

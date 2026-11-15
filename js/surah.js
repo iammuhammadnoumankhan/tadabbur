@@ -422,7 +422,7 @@ $$("#wbw-seg button").forEach(b => b.onclick = () =>
   b.dataset.v === "off" ? C.set({ wbw: false }) : C.set({ wbw: true, wbwLang: b.dataset.v }));
 
 C.onChange(async (_, patch) => {
-  if ("arSize" in patch || "theme" in patch || "tafsir" in patch) return;
+  if ("arSize" in patch || "theme" in patch || "tafsir" in patch || "known" in patch) return;
   if ("translations" in patch) await loadTranslations();
   if ("uiMeaning" in patch) await renderGate();
   const keep = player.idx;

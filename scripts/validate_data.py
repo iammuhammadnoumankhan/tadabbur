@@ -228,13 +228,33 @@ def main():
                 err(f"roots/{r['id']}.json: {key} isn't a word with root {r['r']}")
                 break
 
+    # 11. most frequent words: counts add up and every example points at that word
+    voc = load("vocab.json") or {"items": [], "total": 0}
+    need_src(voc.get("src", ""), "vocab.json")
+    need_src("tadabbur-vocab", "vocab.json")
+    if voc["total"] != sum(words_per_ayah.values()):
+        err(f"vocab.json: total {voc['total']}, the Quran has {sum(words_per_ayah.values())} words")
+    with_lemma = sum(1 for rows in morph.values() for row in rows for e in row if e and e[1])
+    if sum(it["n"] for it in voc["items"]) != with_lemma:
+        err("vocab.json: counts don't add up to the words that have a dictionary form")
+    if len({it["k"] for it in voc["items"]}) != len(voc["items"]):
+        err("vocab.json: duplicate keys")
+    if any(a["n"] < b["n"] for a, b in zip(voc["items"], voc["items"][1:])):
+        err("vocab.json: not sorted by frequency")
+    for it in voc["items"]:
+        s, a, w = map(int, it["ex"].split(":"))
+        e = (morph.get(s) or [])[a - 1][w - 1] if s in morph and a <= len(morph[s]) and w <= len(morph[s][a - 1]) else None
+        if not e or e[1] != it["l"] or (e[0] or None) != it["r"]:
+            err(f"vocab.json: example {it['ex']} isn't the word {it['l']}")
+            break
+
     # 9. manifest (docs/DATA.md): schema version and counts match the data
     man = load("manifest.json") or {}
     if man.get("schema") != SCHEMA:
         err(f"manifest.json: schema {man.get('schema')}, expected {SCHEMA} (see docs/DATA.md)")
     expect = {"surahs": 114, "ayahs": 6236, "words": sum(words_per_ayah.values()),
               "translations": len(trs["list"]), "tafsirs": len(taf["list"]),
-              "seerah_events": len(se["events"]), "prophets": len(st["prophets"]), "roots": len(rix["roots"])}
+              "seerah_events": len(se["events"]), "prophets": len(st["prophets"]), "roots": len(rix["roots"]), "vocab": len(voc["items"])}
     for k, v in expect.items():
         if (man.get("counts") or {}).get(k) != v:
             err(f"manifest.json: counts.{k} is {(man.get('counts') or {}).get(k)}, data has {v} — rerun scripts/build_manifest.py")

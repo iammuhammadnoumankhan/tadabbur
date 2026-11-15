@@ -37,6 +37,7 @@ PAGES = [
     ("sources.html", ".src-item", 20),
     ("root.html", ".r-card", 1000),
     ("root.html?r=0", ".result", 1),
+    ("learn.html", ".v-row:not(.v-head)", 50),
 ]
 VIEWPORTS = {"desktop": {"width": 1280, "height": 900}, "phone": {"width": 375, "height": 812}}
 

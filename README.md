@@ -35,6 +35,7 @@ python3 scripts/build_stories.py
 Then build the word roots. This needs `quranic-corpus-morphology-0.4.txt` in the project root: download it from https://corpus.quran.com/download/ (a form asks for a contact email). It's git-ignored and used unchanged.
 ```bash
 python3 scripts/build_roots.py
+python3 scripts/build_vocab.py     # most frequent words, from the roots
 ```
 Then build the search index, and finally the manifest:
 ```bash
