@@ -162,6 +162,25 @@ Each is an array of 6,236 strings, in global ayah index order.
 - `ar.json`: Quran.com plain Arabic (`imlaei_simple`), used **only for matching**.
 - `tr-<id>.json`: the same text as `tr/<id>/*`, concatenated.
 
+## Stored on the reader's device (not in `data/`)
+Clients keep two small records through the same storage adapter: `localStorage` on the web, or an app's own store via `settings.configureStorage()`, followed by `progress.reload()`.
+
+- **`tadabbur.settings`:** reader choices; see `DEFAULTS` in `js/core/settings.js`.
+- **`tadabbur.progress`** (`js/core/progress.js`), version 1:
+
+  | Field | Shape |
+  |---|---|
+  | `v` | `1` |
+  | `last` | `{ key, at, where: "reader" | "mushaf", mushaf?, page? }` or `null` |
+  | `bookmarks` | `[{ key, at }]` |
+  | `notes` | `{ "s:a": { text, at } }` |
+  | `khatm` | `{ start: "YYYY-MM-DD", days, read: <base64 bitset of the 6,236 ayahs by global index> }` or `null` |
+  | `done` | `[{ start, end }]` |
+  | `log` | `{ "YYYY-MM-DD": ayahs read that day }` |
+
+  - The backup file is the same object plus `"app": "tadabbur"`.
+  - It's designed to sync later: times are epoch milliseconds, keys are ayah keys, and reading is a fixed-size bitset.
+
 ## Live services (not bundled)
 
 | What | URL |

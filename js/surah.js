@@ -150,6 +150,8 @@ function ayahEl(a, idx) {
     h("button", { class: "chip tafsir-chip", onclick: () => openTafsir(a.k), title: t("surah.tafsirTitle") }, t("surah.tafsir")),
     h("button", { class: "icon-btn", title: t("surah.playAyah"), "aria-label": t("surah.playAyahAria", { key: a.k }), html: ICON.play, onclick: () => player.playFrom(idx, true) }),
     h("button", { class: "icon-btn", title: t("surah.copyAyah"), "aria-label": t("surah.copy"), html: ICON.copy, onclick: () => copyAyah(a, idx) }),
+    bookmarkBtn(a.k),
+    h("button", { class: `icon-btn note-btn${P.note(a.k) ? " on" : ""}`, title: t("progress.noteTitle"), "aria-label": t("progress.noteTitle"), html: ICON.note, onclick: () => openNote(a.k) }),
     C.reportLink({ kind: "translation", reference: a.k, page: pageUrl(a.k), source: ayahSources() }, { label: false, cls: "icon" }));
 
   const line = h("div", { class: "arabic-line", lang: "ar" },
@@ -164,7 +166,9 @@ function ayahEl(a, idx) {
       h("div", { class: `txt ${ur ? "urdu" : ""}`, dir: ur ? "rtl" : "ltr" }, trTexts[tr.id]?.[idx] ?? ""),
       h("div", { class: "who" }, `— ${tr.name}`));
   }));
-  return h("article", { class: "ayah", id: a.k, "data-idx": idx }, head, line, trs);
+  const myNote = P.note(a.k);
+  return h("article", { class: "ayah", id: a.k, "data-idx": idx }, head, line, trs,
+    myNote ? h("div", { class: "my-note" }, h("span", { class: "tiny" }, t("progress.yourNote")), h("div", { dir: "auto" }, myNote)) : null);
 }
 
 async function renderReader() {
@@ -188,6 +192,7 @@ async function renderReader() {
   r.append(frag);
   syncToolbar();
   if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ block: "start" });
+  observeAyahs();
 }
 
 async function copyAyah(a, idx) {
@@ -454,6 +459,7 @@ const player = {
   },
   setAyah(i) {
     if (i === this.idx) return;
+    if (this.idx >= 0 && this.playing) P.markRead([OFFSET + this.idx]);
     this.idx = i;
     $$(".ayah.playing").forEach(x => x.classList.remove("playing"));
     const el = document.getElementById(data.ayahs[i].k);
@@ -533,6 +539,64 @@ $("#open-mushaf").addEventListener("click", e => {
   e.currentTarget.href = `page.html?k=${key}&m=${C.get().script === "indopak" ? "indopak" : "madani"}`;
 });
 
+// ======================================================= reading progress (stored on this device)
+const P = C.progress;
+const OFFSET = chs.slice(0, N - 1).reduce((s, c) => s + c.ayahs, 0);   // global index of this surah's first ayah
+function bookmarkBtn(key) {
+  const on = P.isBookmarked(key);
+  return h("button", { class: `icon-btn bm-btn${on ? " on" : ""}`, title: t(on ? "progress.unbookmark" : "progress.bookmark"),
+    "aria-label": t(on ? "progress.unbookmark" : "progress.bookmark"), "aria-pressed": on ? "true" : "false", html: on ? ICON.bookmarkOn : ICON.bookmark,
+    onclick: e => {
+      const now = P.toggleBookmark(key);
+      e.currentTarget.replaceWith(bookmarkBtn(key));
+      C.toast(t(now ? "progress.bookmarked" : "progress.unbookmarked", { key }));
+    } });
+}
+function openNote(key) {
+  const ta = h("textarea", { class: "note-input", rows: 6, dir: "auto", placeholder: t("progress.notePlaceholder") });
+  ta.value = P.note(key);
+  const saveIt = () => {
+    P.setNote(key, ta.value);
+    closeDrawer();
+    const el = document.getElementById(key);
+    const idx = data.ayahs.findIndex(x => x.k === key);
+    if (el && idx >= 0) el.replaceWith(ayahEl(data.ayahs[idx], idx));
+    observeAyahs();
+  };
+  openDrawer(t("progress.noteFor", { key }), h("div", {},
+    h("p", { class: "muted", style: "margin-top:0" }, t("progress.notePrivate")), ta,
+    h("div", { class: "row-between", style: "margin-top:10px" },
+      h("button", { class: "btn", onclick: () => { ta.value = ""; saveIt(); } }, t("progress.noteDelete")),
+      h("button", { class: "btn primary", onclick: saveIt }, t("progress.noteSave")))));
+  setTimeout(() => ta.focus(), 50);
+}
+
+// an ayah counts as read after 1.5 s on screen; the topmost visible ayah is "last read"
+const seenTimers = new Map();
+const io = "IntersectionObserver" in window ? new IntersectionObserver(entries => {
+  for (const e of entries) {
+    const idx = +e.target.dataset.idx;
+    if (e.isIntersecting) {
+      if (!seenTimers.has(idx)) seenTimers.set(idx, setTimeout(() => { P.markRead([OFFSET + idx]); seenTimers.delete(idx); }, 1500));
+    } else if (seenTimers.has(idx)) {
+      clearTimeout(seenTimers.get(idx)); seenTimers.delete(idx);
+    }
+  }
+}, { threshold: 0.6 }) : null;
+function observeAyahs() {
+  if (!io) return;
+  io.disconnect();
+  document.querySelectorAll(".ayah").forEach(el => io.observe(el));
+}
+let lastTimer;
+addEventListener("scroll", () => {
+  clearTimeout(lastTimer);
+  lastTimer = setTimeout(() => {
+    const top = [...document.querySelectorAll(".ayah")].find(el => el.getBoundingClientRect().bottom > 140);
+    if (top) P.setLast(top.id, "reader");
+  }, 800);
+}, { passive: true });
+
 // ======================================================= pager
 function pager() {
   const p = $("#pager");
@@ -546,3 +610,4 @@ await renderGate();
 await loadTranslations();
 await renderReader();
 pager();
+P.setLast(location.hash ? decodeURIComponent(location.hash.slice(1)) : `${N}:1`, "reader");

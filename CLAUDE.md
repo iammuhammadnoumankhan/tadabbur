@@ -24,7 +24,7 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 
 ## Architecture
 - Static site in plain **HTML, CSS and vanilla JS (ES modules)**. No framework and no build step. Must work from any static host and inside future app wrappers.
-- Pages: `index.html`, `surah.html`, `page.html` (mushaf page view), `timeline.html`, `stories.html`, `search.html`, `root.html`, `learn.html`, `sources.html`.
+- Pages: `index.html`, `surah.html`, `page.html` (mushaf page view), `progress.html` (my reading), `timeline.html`, `stories.html`, `search.html`, `root.html`, `learn.html`, `sources.html`.
 - JS has three layers:
   - **`js/core/`**: no DOM. Data loading (`data.js`), settings with pluggable storage (`settings.js`), search engine (`search.js`) and Quran reference helpers (`quran.js`). Mobile and desktop apps reuse it; an app calls `configure({ base, fetch })` and `settings.configureStorage(adapter)`.
   - **`js/i18n/`**: every interface string, in `en.js`, through `t(key, vars)`. Static HTML uses `data-i18n`, `data-i18n-html`, `data-i18n-placeholder`, `data-i18n-title` or `data-i18n-aria-label`. A missing key shows as `⟦key⟧`, and the smoke test fails on it.
@@ -68,6 +68,10 @@ Web first, then mobile (Capacitor/TWA) and desktop (Tauri) wrapping the same cod
 - keep all UI text in `js/i18n/en.js`, ready for the Urdu interface;
 - put `localStorage` access behind try/catch (`common.js` already does), and store settings and progress in a shape that can sync later;
 - design mobile-first: test at 375px wide with no horizontal scroll.
+- **Reading progress** (`js/core/progress.js`) is per-device and private:
+  - Never send it anywhere.
+  - An account and sync are later roadmap work.
+  - Its shape is documented in `docs/DATA.md`; keep it backward compatible (bump `v` only with a migration).
 
 ## Data pipeline (run in this order; raw downloads are cached in `.cache/`, which git ignores)
 ```bash

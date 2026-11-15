@@ -50,6 +50,8 @@ export function configureStorage(adapter) {
 }
 
 export const get = () => settings;
+/** The storage adapter in use (shared with other per-device stores, e.g. reading progress). */
+export const storageAdapter = () => storage;
 
 export function set(patch) {
   settings = { ...settings, ...patch };

@@ -53,6 +53,7 @@ function wordEl(ref, T) {
 
 // ------------------------------------------------------------------ render one page
 let token = 0;
+let readTimer;
 async function render(p) {
   const my = ++token;
   page = Math.min(IX.pages, Math.max(1, p));
@@ -100,6 +101,14 @@ async function render(p) {
   history.replaceState(null, "", `?m=${mushaf}&p=${page}`);
   await document.fonts.ready;
   fitLines(sheet);
+  if (firstRef) C.progress.setLast(`${fs}:${fa}`, "mushaf", { mushaf, page });
+  clearTimeout(readTimer);
+  readTimer = setTimeout(() => {                       // after 8 s on a page, ayahs that end on it count as read
+    const offs = []; let acc = 0;
+    for (const c of chs) { offs[c.n] = acc; acc += c.ayahs; }
+    const ends = lay.lines.flatMap(l => (l.w || []).filter(r => r.endsWith(":e")));
+    C.progress.markRead(ends.map(r => { const [s, a] = r.split(":").map(Number); return offs[s] + a - 1; }));
+  }, 8000);
   prefetch(page + 1); prefetch(page - 1);
 }
 

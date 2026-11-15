@@ -40,6 +40,7 @@ PAGES = [
     ("learn.html", ".v-row:not(.v-head)", 50),
     ("page.html?m=madani&p=3", ".m-line", 15),
     ("page.html?m=indopak&p=3", ".m-line", 15),
+    ("progress.html", ".pr-card", 5),
 ]
 VIEWPORTS = {"desktop": {"width": 1280, "height": 900}, "phone": {"width": 375, "height": 812}}
 

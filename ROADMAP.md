@@ -55,7 +55,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
 
 ## Phase 3: Daily habit and sharing
 
-- [ ] **10. Reading progress [#11]**
+- [x] **10. Reading progress [#11]** *(done 2026-11-15)*
   - Last read, bookmarks, personal notes, khatm tracker and daily goal.
   - Saved on the device first, with a format that can sync to an account later (sync needs a server, so it waits for budget).
 - [ ] **11. Share an ayah as an image [#12]**

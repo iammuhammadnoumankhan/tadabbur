@@ -5,4 +5,5 @@ export * from "./quran.js";
 export * as settings from "./settings.js";
 export * as searchEngine from "./search.js";
 export * as learn from "./learn.js";
+export * as progress from "./progress.js";
 export { reportUrl, KINDS as REPORT_KINDS, REPO } from "./report.js";

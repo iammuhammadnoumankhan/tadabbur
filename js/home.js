@@ -25,6 +25,22 @@ const src = await C.sources();
     h("span", { class: "tiny" }, t("home.heroTranslation", { names: trs.slice(0, 2).map(x => x.name).join(" / ") }))));
 })();
 
+// ----- continue reading (saved on this device)
+(() => {
+  const l = C.progress.get().last;
+  if (!l) return;
+  const name = chs[+l.key.split(":")[0] - 1].name;
+  const href = l.where === "mushaf" ? `page.html?m=${l.mushaf}&p=${l.page}` : `surah.html?n=${l.key.split(":")[0]}#${l.key}`;
+  const k = C.progress.khatmStatus();
+  $("#continue").append(h("div", { class: "card continue-card" },
+    h("div", {}, h("div", { class: "tiny" }, t("progress.continueTitle")),
+      h("b", {}, l.where === "mushaf"
+        ? t("progress.continueMushaf", { name, page: l.page, mushaf: t(l.mushaf === "indopak" ? "page.indopak" : "page.madani") })
+        : t("progress.continueAt", { name, key: l.key })),
+      k ? h("div", { class: "tiny" }, `${t("progress.readOf", { read: k.read.toLocaleString(), total: C.progress.TOTAL.toLocaleString() })} · ${t("progress.today", { n: k.today })}`) : null),
+    h("a", { class: "btn primary", href }, t("progress.continue"))));
+})();
+
 // ----- revelation journey
 $("#journey-bars").append(C.journeyBars(chs));
 $("#journey-src").textContent = t("home.journeySource", { publisher: src["qc-chapters"].publisher });

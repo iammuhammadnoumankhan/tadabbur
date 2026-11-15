@@ -89,6 +89,9 @@ export const ICON = {
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
   copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+  bookmark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+  bookmarkOn: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',
+  note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>',
   flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg>',
   speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>',
 };
@@ -143,6 +146,7 @@ export function header(active = "") {
         h("a", { href: "stories.html" }, t("nav.prophets")),
         h("a", { href: "root.html" }, t("nav.roots")),
         h("a", { href: "learn.html" }, t("nav.learn")),
+        h("a", { href: "progress.html" }, t("nav.progress")),
         h("a", { href: "timeline.html" }, h("span", { class: "label" }, t("nav.seerahPrefix")), t("nav.timeline")),
         h("a", { href: "sources.html" }, t("nav.sources")),
         installBtn(),
@@ -275,6 +279,13 @@ export function offlinePanel() {
   box.append(h("p", { class: "muted", style: "margin:0 0 8px" }, t("pwa.explain")), h("div", { class: "offline-row" }, btn, status), bar);
   return box;
 }
+
+// ---------- reading progress: celebrate a finished khatm wherever it happens
+let doneCount = core.progress.get().done.length;
+core.progress.onChange(s => {
+  if (s.done.length > doneCount) toast(t("progress.khatmDone"), { ms: 8000 });
+  doneCount = s.done.length;
+});
 
 // ---------- clipboard + toast
 /** Copy text; falls back to a hidden textarea when the Clipboard API is blocked. Returns true on success. */

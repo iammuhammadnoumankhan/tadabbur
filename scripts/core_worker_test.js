@@ -45,6 +45,26 @@ try {
   const r2 = await se.search("Yusuf", { translations: sel });
   check("search Yusuf finds surah + prophet", r2.surahs.some(c => c.n === 12) && r2.prophets.some(p => p.id === "yusuf"));
 
+  // reading progress (same app-style storage adapter)
+  const P = core.progress;
+  P.reload();
+  check("progress starts empty", !P.get().last && P.get().bookmarks.length === 0);
+  const bits = P.decodeBits(P.encodeBits(new Set([0, 7, 255, 6235])));
+  check("ayah bitset round-trips", [...bits].sort((a, b) => a - b).join() === "0,7,255,6235", [...bits]);
+  P.startKhatm(30);
+  P.markRead([0, 1, 2, 3, 4, 5, 6]);
+  P.markRead([0, 1]);                               // already read: not counted twice
+  const ks = P.khatmStatus();
+  check("khatm counts each ayah once", ks.read === 7 && ks.today === 7, `${ks.read}/${ks.today}`);
+  check("daily target = remaining / days", ks.perDay === Math.ceil((6236 - 7) / 30), ks.perDay);
+  check("bookmark toggles", P.toggleBookmark("2:255") === true && P.isBookmarked("2:255") && P.toggleBookmark("2:255") === false);
+  P.setNote("1:1", "note"); P.setLast("1:7");
+  const backup = P.exportJSON();
+  P.clearAll();
+  P.importJSON(backup);
+  check("backup restores notes, last place and khatm", P.note("1:1") === "note" && P.get().last.key === "1:7" && P.khatmStatus().read === 7);
+  check("progress saved through the adapter", JSON.parse(mem.get("tadabbur.progress")).notes["1:1"].text === "note");
+
   check("i18n plural", t("common.ayahs", { n: 1 }) === "1 ayah" && t("common.ayahs", { n: 2 }) === "2 ayahs");
   check("i18n missing key is visible", t("no.such.key") === "⟦no.such.key⟧");
 } catch (e) {
