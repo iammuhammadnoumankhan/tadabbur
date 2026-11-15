@@ -161,9 +161,20 @@ def main():
         for r in recs:
             if r["c"] not in ("bukhari", "muslim"):
                 err(f"hadith/{int(s):03d}.json: collection '{r['c']}' is not Sahih al-Bukhari or Sahih Muslim")
+            where = f"hadith/{int(s):03d}.json: {r['c']} {r['num']}"
             for k in r["refs"]:
                 if not valid_key(k):
-                    err(f"hadith/{int(s):03d}.json: Bukhari {r['num']} cites invalid ayah {k}")
+                    err(f"{where} links invalid ayah {k}")
+            # every link comes from the hadith itself: a cited reference or an Arabic quote
+            if set(r["refs"]) != set(r.get("cited", [])) | set(r.get("quoted", [])):
+                err(f"{where}: refs must be exactly its cited + quoted ayahs")
+            if r["c"] == "muslim" and r.get("cited"):
+                err(f"{where}: Muslim's translation has no ayah references; only quotes may link it")
+            ok_url = (f"https://sunnah.com/bukhari:" if r["c"] == "bukhari" else "https://sunnah.com/muslim/")
+            if not str(r.get("url", "")).startswith(ok_url):
+                err(f"{where}: url {r.get('url')} is not a sunnah.com {r['c']} link")
+            if r["c"] == "muslim" and r["url"] != f"https://sunnah.com/muslim/{'introduction' if r['book'] == 0 else r['book']}/{r['inBook']}":
+                err(f"{where}: url doesn't match book {r['book']}, hadith {r['inBook']}")
 
     # 6. Seerah
     se = load("seerah.json")

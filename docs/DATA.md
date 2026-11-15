@@ -86,9 +86,12 @@ An array of 114 items:
 
 ### `hadith-index.json`, `hadith/NNN.json`
 - `hadith-index.json`: `{ "<surah>": { "<ayah key>": count } }`
-- `hadith/NNN.json`: `[{ c, num, book, bookName, inBook, en, ur, ar, refs: [key…], url }]`
+- `hadith/NNN.json`: `[{ c, num, book, bookName, inBook, en, ur, ar, refs: [key…], cited: [key…], quoted: [key…], url }]`
   - `c` is `"bukhari"` or `"muslim"`.
-  - `refs` lists only the ayahs the hadith's own text cites.
+  - `refs` = `cited` ∪ `quoted`, and lists only ayahs the hadith itself points to:
+    - `cited`: its English translation names the ayah reference, e.g. "(8.24)";
+    - `quoted`: its Arabic text contains 6+ consecutive words of the ayah (harakat removed, letter variants unified). Phrases found in more than 3 ayahs are ignored; if a phrase fits several ayahs, only the one with the longest quoted run is linked, none on a tie.
+  - `url`: `https://sunnah.com/bukhari:<num>`, or for Muslim `https://sunnah.com/muslim/<book>/<inBook>` (book 0 → `introduction`). Muslim is shown as "Book, Hadith" like sunnah.com.
 - Source: `sahih-hadith-text`.
 
 ### `seerah.json`, `seerah/<event id>.json`, `seerah-by-surah.json`

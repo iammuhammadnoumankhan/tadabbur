@@ -13,7 +13,7 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 3. **Never modify the Quran text.** Each script (Uthmani, IndoPak, tajweed) is shown exactly as its source publishes it and is fingerprinted separately; never merge or "fix" one script with another.
    - Arabic is shown exactly as fetched; `data/checksums*.json` holds SHA-256 fingerprints.
    - Only *re-shape* data: split, align or index it.
-4. **Hadith come only from Sahih al-Bukhari and Sahih Muslim** (the user's decision). Link a hadith to an ayah only when the hadith's own text cites that ayah. Each hadith links to sunnah.com.
+4. **Hadith come only from Sahih al-Bukhari and Sahih Muslim** (the user's decision). Link a hadith to an ayah only when the hadith itself points to it: its translation cites the ayah number, or its Arabic quotes 6+ consecutive words of it. Each hadith links to sunnah.com.
 5. **Be honest about limits and disagreement.** Revelation order is approximate. Seerah events follow Bukhari's chapter order, and only moments a hadith dates have a year. Say so in the UI.
 6. **Check licences before bundling.** Some sources say "no modification", "credit with version" or "no ads". Respect them; when in doubt, link instead of copying.
 7. When a source is missing, **mark the gap** ("needs source"). Don't fill it from general knowledge.

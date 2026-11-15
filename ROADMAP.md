@@ -61,19 +61,45 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
 - [x] **11. Share an ayah as an image [#12]** *(done 2026-11-15)*
   - Arabic plus Urdu or English, with the source shown on the card. Made in the browser, no server.
 
-## Phase 4: More context (each needs a confirmed source first)
+## Phase 4: More context (sources researched 2026-11-15)
 
 - [ ] **12. Similar ayahs [#5]**
-  - Source: QUL similar-ayahs and mutashabihat data. Check the licence first.
-- [ ] **13. Sahih Muslim links [#7]**
-  - Find an authentic mapping from Muslim's hadith to ayahs. Muslim's English edition doesn't cite ayah numbers in the text.
-- [ ] **14. Asbab al-nuzul [#6]**
-  - **Decision needed.** Al-Wahidi's Arabic original is classical and free to use; the English translation (Guezzou) is copyrighted, so it needs permission; there is no Urdu yet.
-  - Alternative: limit it to Sahih hadith that state a reason for revelation.
+  - **12a. Similar wording (ready).** Ayahs that share an identical phrase of 5 or more words, computed directly from the Quran text. No outside source, nothing to license, fully checkable. Useful for memorisers (mutashabihat lafziyya).
+  - **12b. Related meaning (needs permission).**
+    - Best source: QurSim (Sharaf & Atwell, University of Leeds, LREC 2012). It has 7,679 related-verse pairs taken from Ibn Kathir's tafsir, rated strong or weak.
+    - Its download link is dead and its licence unstated, so it needs the authors' permission.
+    - Tarteel QUL "Similar Ayah" has no creator or licence stated, so it's not used.
+- [x] **13. Sahih Muslim links [#7]** *(done 2026-11-15)*
+  - A hadith links to an ayah only when its **Arabic text quotes at least 6 consecutive words** of that ayah (or, as before, its translation cites the ayah number). Common phrases are ignored; an ambiguous quote links the ayah with the longest quoted run, or none on a tie.
+  - **Result:** 246 Sahih Muslim hadith and 559 Bukhari hadith (386 cite, 340 quote) are linked.
+  - Each hadith shows how it is linked ("quotes" or "cites"); Muslim links to sunnah.com by book and hadith number.
+- [ ] **14. Asbab al-nuzul [#6]** *(skipped: no open source)*
+  - **Rule (the owner's):** add it only if an open, authentic, non-copyrighted source exists.
+  - **Findings:**
+    - Quran.com doesn't publish it, and neither does quran-tafseer.com.
+    - The English translation (Guezzou) is copyrighted.
+    - The only public-domain copy is an image scan (1316 AH Cairo print on Wikisource) that would need error-prone OCR.
+  - Sahih reasons for revelation are already covered where Bukhari and Muslim hadith quote or cite the ayah (items 13 and the existing links).
 - [ ] **15. Map of places in the Quran [#14]**
-  - Places from the Corpus ontology; map coordinates from a cited geographic source.
+  - **Places (ready):** the Corpus ontology names them, e.g.:
+    - cities: Makkah, Bakkah, Yathrib, Badr, Hunayn, Babylon, Iram;
+    - lands: Egypt, al-Ahqaf;
+    - mountains: Mount Sinai;
+    - mosques: the Kaaba, al-Masjid al-Haram.
+  - Each comes with the ayahs that mention it.
+  - **Coordinates:** Wikidata (CC0, no restrictions). Ancient places whose location is debated are marked as approximate or left off the map.
 - [x] **16. Prophets family tree [#15]** *(done 2026-11-15)*
-  - Drawn only from the ontology's `son-of` relations, which we already have.
+  - Drawn only from the ontology's stated son-of / daughter-of / adopted-son-of relations.
+- [ ] **16b. Fuller family tree with evidence** *(proposed)*
+  - Add parent, child and sibling links **only where an ayah or a Sahih hadith states them**, each link showing its evidence. Example: the Prophet's ﷺ son Ibrahim, named in Bukhari 1060, 1063, 1303, 3255 and 6194.
+  - Candidate links are listed for the owner's (and ideally a scholar's) approval before they're added.
+- [ ] **16c. Person cards** *(proposed)*
+  - Tap anyone in the tree to see:
+    - name (Arabic and English);
+    - prophet or messenger, per the ontology;
+    - how many ayahs mention them, with links;
+    - family links with their evidence.
+  - No biography written by us.
 
 ## Phase 5: Trust and reach
 

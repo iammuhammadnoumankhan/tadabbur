@@ -450,6 +450,8 @@ main > .pr-card { margin: 18px 0 60px; }
 .share-preview { width: 100%; height: auto; border-radius: 12px; box-shadow: var(--shadow); display: block; }
 .share-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 
+.h-how { display: inline-block; margin-top: 6px; font-size: 11px; letter-spacing: .3px; color: var(--accent-2); border: 1px solid color-mix(in srgb, var(--accent-2) 40%, var(--line)); border-radius: 999px; padding: 1px 8px; }
+
 /* ---------- toast */
 .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); z-index: 100;

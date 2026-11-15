@@ -398,6 +398,11 @@ async function openTafsir(key) {
 C.onChange((_, patch) => { if ("tafsir" in patch && drawer.classList.contains("show") && tafsirListener) tafsirListener(); });
 
 // --- hadith panel
+// Sahih Muslim is referred to by book + in-book number (as on sunnah.com), Bukhari by its standard number
+const hadithLabel = x => x.c === "muslim"
+  ? t("surah.hadithRefMuslim", { collection: t("collection.muslim"), book: x.book, inBook: x.inBook })
+  : t("surah.hadithRef", { collection: t("collection.bukhari"), num: x.num });
+
 async function openHadith(key) {
   hadithData ||= await C.hadith(N);
   const list = hadithData.filter(x => x.refs.includes(key));
@@ -411,14 +416,16 @@ async function openHadith(key) {
       h("div", { class: "note" }, t("surah.hadithNote", { key })),
       ...list.map(x => h("div", { class: "hadith" },
         h("div", { class: "h-ref" },
-          h("span", {}, h("b", {}, t("surah.hadithRef", { collection: t(`collection.${x.c}`), num: x.num })),
-            h("span", { class: "tiny" }, t("surah.hadithBook", { book: x.book, bookName: x.bookName || "", inBook: x.inBook }))),
+          h("span", {}, h("b", {}, hadithLabel(x)),
+            x.c === "bukhari" ? h("span", { class: "tiny" }, t("surah.hadithBook", { book: x.book, bookName: x.bookName || "", inBook: x.inBook }))
+              : h("span", { class: "tiny" }, ` · ${x.bookName || ""}`)),
           h("a", { href: x.url, target: "_blank", rel: "noopener" }, t("common.verifySunnah"))),
+        h("div", { class: "h-how" }, (x.quoted || []).includes(key) ? t("surah.hadithQuotes") : t("surah.hadithCites")),
         h("div", { class: `h-txt ${lang === "ur" ? "urdu" : lang === "ar" ? "ar" : ""}`, dir: lang === "en" ? "ltr" : "rtl", lang },
           (lang === "ur" ? x.ur : lang === "ar" ? x.ar : x.en) || t("common.notInLanguage")),
         h("div", { class: "row-between", style: "margin-top:6px" },
           h("div", { class: "tiny" }, t("surah.alsoCites"), x.refs.filter(r => r !== key).slice(0, 12).join(", ") || "—"),
-          C.reportLink({ kind: "hadith", reference: t("report.hadithRef", { collection: t(`collection.${x.c}`), num: x.num, key }),
+          C.reportLink({ kind: "hadith", reference: `${hadithLabel(x)}, linked to ${key}`,
             source: t("report.hadithSource"), page: pageUrl(key) })))),
       h("div", { class: "source", style: "margin-top:14px" }, src["sahih-hadith-text"].publisher));
   }

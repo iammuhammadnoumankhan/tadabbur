@@ -227,13 +227,80 @@ def build_translations(chapters):
 REF = re.compile(r"\(\s*(?:V\.\s*)?(\d{1,3})\s*[.:]\s*(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?\s*\)")
 
 
+QUOTE_WORDS = 6        # a hadith "quotes" an ayah when its Arabic contains this many consecutive words of it
+QUOTE_MAX_AYAHS = 3    # phrases found in more ayahs than this are too common to point at one ayah
+AR_MARKS = re.compile(r"[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]")
+AR_NORM = str.maketrans({"أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا", "ى": "ي", "ة": "ه", "ؤ": "و", "ئ": "ي"})
+
+
+def ar_words(t):
+    """Arabic words without harakat, with common letter variants unified (for matching only)."""
+    return AR_MARKS.sub("", t or "").translate(AR_NORM).split()
+
+
+AYAH_WORDS = {}
+
+
+def quote_index(chapters):
+    plain = fetch(f"{QC}/quran/verses/imlaei_simple", "qc/imlaei_simple.json")["verses"]
+    keys = [f"{c['n']}:{a}" for c in chapters for a in range(1, c["ayahs"] + 1)]
+    assert [v["verse_key"] for v in plain] == keys
+    idx = {}
+    for k, v in zip(keys, plain):
+        w = ar_words(v["text_imlaei_simple"])
+        AYAH_WORDS[k] = w
+        for i in range(len(w) - QUOTE_WORDS + 1):
+            idx.setdefault(" ".join(w[i:i + QUOTE_WORDS]), set()).add(k)
+    return {win: ks for win, ks in idx.items() if len(ks) <= QUOTE_MAX_AYAHS}
+
+
+def longest_run(ayah_words, hadith_text):
+    """Most consecutive words of the ayah that appear, in order, in the hadith."""
+    best = 0
+    for i in range(len(ayah_words)):
+        for j in range(len(ayah_words), i + best, -1):
+            if f" {' '.join(ayah_words[i:j])} " in hadith_text:
+                best = j - i
+                break
+    return best
+
+
+def quoted_ayahs(hadith_words, windows):
+    """Ayahs the hadith quotes. When a quoted phrase occurs in several ayahs, keep only the ayah with the
+    longest quoted run; if they tie, the quote doesn't show which ayah is meant, so none is linked."""
+    text = f" {' '.join(hadith_words)} "
+    runs, found = {}, set()
+    for i in range(len(hadith_words) - QUOTE_WORDS + 1):
+        ks = windows.get(" ".join(hadith_words[i:i + QUOTE_WORDS]))
+        if not ks:
+            continue
+        for k in ks:
+            if k not in runs:
+                runs[k] = longest_run(AYAH_WORDS[k], text)
+        top = max(runs[k] for k in ks)
+        winners = [k for k in ks if runs[k] == top]
+        if len(winners) == 1:
+            found.add(winners[0])
+    return found
+
+
+def sunnah_url(slug, h):
+    if slug == "bukhari":
+        n = h["hadithnumber"]
+        return f"https://sunnah.com/bukhari:{int(n) if float(n).is_integer() else n}"
+    book, inbook = h["reference"]["book"], h["reference"]["hadith"]       # sunnah.com/muslim/<book>/<in-book>
+    return f"https://sunnah.com/muslim/{'introduction' if book == 0 else book}/{inbook}"
+
+
 def build_hadith(chapters):
-    """Link a hadith to an ayah ONLY where the hadith's own English translation
-    cites that ayah reference explicitly, e.g. "(8.24)" or "(V.2:255)"."""
+    """Link a hadith to an ayah ONLY when the hadith itself points to it:
+       - "cited":  its English translation cites the ayah reference, e.g. "(8.24)" or "(V.2:255)";
+       - "quoted": its Arabic text contains 6+ consecutive words of the ayah (common phrases ignored).
+       Nothing is linked by topic or by our judgement."""
     print("sahih hadith …")
     counts = {c["n"]: c["ayahs"] for c in chapters}
-    per_surah = {}
-    stats = {}
+    windows = quote_index(chapters)
+    per_surah, stats = {}, {}
     for slug in HADITH:
         eng = fetch(f"{HADITH_CDN}/eng-{slug}.json", f"hadith/eng-{slug}.json")
         urd = fetch(f"{HADITH_CDN}/urd-{slug}.json", f"hadith/urd-{slug}.json")
@@ -241,33 +308,37 @@ def build_hadith(chapters):
         u_by = {h["hadithnumber"]: h["text"] for h in urd["hadiths"]}
         a_by = {h["hadithnumber"]: h["text"] for h in ara["hadiths"]}
         books = eng["metadata"]["sections"]
-        linked = 0
+        n_cited = n_quoted = linked = 0
         for h in eng["hadiths"]:
-            refs = set()
+            num = h["hadithnumber"]
+            cited = set()
             for m in REF.finditer(h["text"] or ""):
                 s, a1, a2 = int(m.group(1)), int(m.group(2)), m.group(3)
                 a2 = int(a2) if a2 else a1
                 if 1 <= s <= 114 and 1 <= a1 <= a2 <= counts[s] and a2 - a1 < 40:
-                    for a in range(a1, a2 + 1):
-                        refs.add((s, a))
+                    cited |= {f"{s}:{a}" for a in range(a1, a2 + 1)}
+            quoted = quoted_ayahs(ar_words(a_by.get(num)), windows)
+            refs = cited | quoted
             if not refs:
                 continue
             linked += 1
-            num = h["hadithnumber"]
+            n_cited += bool(cited)
+            n_quoted += bool(quoted)
+            order = lambda k: tuple(map(int, k.split(":")))
             rec = {
                 "c": slug, "num": num,
                 "book": h["reference"]["book"], "bookName": books.get(str(h["reference"]["book"])),
                 "inBook": h["reference"]["hadith"],
                 "en": h["text"], "ur": u_by.get(num), "ar": a_by.get(num),
-                "refs": sorted(f"{s}:{a}" for s, a in refs),
-                "url": f"https://sunnah.com/{slug}:{str(num).rstrip('0').rstrip('.') if isinstance(num, float) else num}",
+                "refs": sorted(refs, key=order), "cited": sorted(cited, key=order), "quoted": sorted(quoted, key=order),
+                "url": sunnah_url(slug, h),
             }
-            for s in {s for s, _ in refs}:
+            for s in {int(k.split(":")[0]) for k in refs}:
                 per_surah.setdefault(s, []).append(rec)
-        stats[slug] = linked
-        print(f"  {slug}: {linked} hadith cite ayahs explicitly")
+        stats[slug] = {"linked": linked, "cited": n_cited, "quoted": n_quoted}
+        print(f"  {slug}: {linked} hadith linked ({n_cited} cite an ayah in English, {n_quoted} quote one in Arabic)")
     index = {}
-    for s, recs in per_surah.items():
+    for s, recs in sorted(per_surah.items()):
         recs.sort(key=lambda r: (r["c"] != "bukhari", r["num"]))
         write(f"hadith/{s:03d}.json", recs)
         by_ayah = {}
@@ -308,9 +379,12 @@ def build_sources(tr_meta, hadith_stats):
         "sahih-hadith-text": {
             "title": "Sahih al-Bukhari & Sahih Muslim (Arabic, English, Urdu)",
             "publisher": "fawazahmed0/hadith-api (public, Unlicense)", "url": "https://github.com/fawazahmed0/hadith-api",
-            "note": ("A hadith is linked to an ayah ONLY when that hadith's English translation itself cites the ayah "
-                     "reference (e.g. '(8.24)'). We add no links of our own. Each hadith links to sunnah.com for verification. "
-                     f"Linked: Bukhari {hadith_stats.get('bukhari', 0)}, Muslim {hadith_stats.get('muslim', 0)}.")},
+            "note": ("A hadith is linked to an ayah ONLY when the hadith itself points to it: its English translation cites the "
+                     "ayah reference (e.g. '(8.24)'), or its Arabic text quotes at least 6 consecutive words of the ayah "
+                     "(phrases found in more than 3 ayahs are ignored; when a phrase occurs in several ayahs, only the ayah with the longest quoted run is linked, and none on a tie). We add no links of our own. Each hadith links to "
+                     "sunnah.com for verification; Sahih Muslim is referenced by book and in-book number, as on sunnah.com. "
+                     + "; ".join(f"{HADITH[k][0]}: {v['linked']} hadith ({v['cited']} cited, {v['quoted']} quoted)"
+                                 for k, v in hadith_stats.items()) + ".")},
     }
     for t in tr_meta:
         s[t["src"]] = {"title": f"Translation — {t['name']}", "lang": t["lang"],
