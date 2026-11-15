@@ -211,13 +211,14 @@ addEventListener("error", offlineFailure);
 
 /** URLs needed to read every surah offline with the reader's current choices. */
 export async function offlineUrls() {
-  const [chs, trs, hIndex, se] = await Promise.all([core.chapters(), core.selectedTranslations(), core.hadithIndex(), core.seerah()]);
+  const [chs, trs, hIndex, se, simIx] = await Promise.all([core.chapters(), core.selectedTranslations(), core.hadithIndex(), core.seerah(), core.similarIndex()]);
   const urls = [];
   for (const c of chs) {
     const n = core.pad3(c.n);
     urls.push(`data/surah/${n}.json`, `data/indopak/${n}.json`, `data/info/${n}.json`, `data/morph/${n}.json`,
       ...trs.map(tr => `data/tr/${tr.id}/${n}.json`));
     if (hIndex[c.n]) urls.push(`data/hadith/${n}.json`);
+    if (simIx[c.n]) urls.push(`data/similar/${n}.json`);
     if (core.settings.get().script === "tajweed") urls.push(`data/tajweed/${n}.json`);
   }
   const mushaf = core.settings.get().script === "indopak" ? "indopak" : "madani";

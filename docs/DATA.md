@@ -169,6 +169,12 @@ Sources: `tadabbur-vocab` (counts) and `qac-morphology`.
   - `son-of`/`daughter-of` ones are drawn in the tree; `brother-of`, `uncle-of` and `descendant-of` are listed with the person.
 - `people` holds all 24 prophets, plus the relatives the links reach (e.g. Azar, Imran, Maryam), with the ontology's English and Arabic names.
 
+### `similar/index.json`, `similar/NNN.json` (similar wording)
+- `similar/index.json`: `{ "<surah>": number of its ayahs that share wording }` (surahs with none are left out).
+- `similar/NNN.json`: `{ "s:a": [["other s:a", [[start, length, otherStart], …]], …] }`, longest shared phrase first.
+  - Two ayahs are linked when they share **5 or more identical consecutive words**. Word positions (0-based) index the `w` list in `surah/NNN.json`, so the shared words can be highlighted.
+  - For matching only, harakat and Quranic marks are ignored and alif wasla is read as alif. Computed by `scripts/build_similar.py` from our own Quran text, with no outside source (`tadabbur-similar`).
+
 ### `places.json` (places named in the Quran, with a map)
 `{ src: [...], places: [{ id, en, ar, type, names, mentions, ayahs, url, at }], map: { w, h, land, rivers, bbox, lat0, scale } }`
 - `places`: every concept in the Corpus ontology's City, Historic Land, Mountain and Mosque categories. `type` is `city`, `land`, `mountain` or `mosque`.

@@ -8,9 +8,10 @@ C.footer();
 const params = new URLSearchParams(location.search);
 const N = Math.min(114, Math.max(1, parseInt(params.get("n") || "1", 10) || 1));
 
-const [chs, data, hIndex, src, trMeta, seerah, seerahBySurah, stories, storiesBySurah] = await Promise.all([
+const [chs, data, hIndex, src, trMeta, seerah, seerahBySurah, stories, storiesBySurah, SIM] = await Promise.all([
   C.chapters(), C.surah(N), C.hadithIndex(), C.sources(), C.translations(),
   C.seerah().catch(() => null), C.seerahBySurah(), C.stories().catch(() => null), C.storiesBySurah(),
+  C.similarIndex().then(ix => ix[N] ? C.similar(N) : {}),
 ]);
 const surahProphets = (storiesBySurah[N] || []).map(id => stories.prophets.find(p => p.id === id)).filter(Boolean);
 const seerahEvents = (seerahBySurah[N] || []).map(id => seerah.events.find(e => e.id === id)).filter(Boolean);
@@ -148,6 +149,7 @@ function ayahEl(a, idx) {
     h("span", { class: "tiny" }, t("surah.juzPage", { juz: a.juz, page: a.page })),
     h("span", { class: "sp" }),
     hc ? h("button", { class: "chip hadith-chip", onclick: () => openHadith(a.k), title: t("surah.hadithBadgeTitle") }, t("surah.hadithBadge", { n: hc })) : null,
+    SIM[a.k] ? h("button", { class: "chip sim-chip", onclick: () => openSimilar(a.k), title: t("surah.similarTitleAttr") }, t("surah.similarBadge", { n: SIM[a.k].length })) : null,
     h("button", { class: "chip tafsir-chip", onclick: () => openTafsir(a.k), title: t("surah.tafsirTitle") }, t("surah.tafsir")),
     h("button", { class: "icon-btn", title: t("surah.playAyah"), "aria-label": t("surah.playAyahAria", { key: a.k }), html: ICON.play, onclick: () => player.playFrom(idx, true) }),
     h("button", { class: "icon-btn", title: t("surah.copyAyah"), "aria-label": t("surah.copy"), html: ICON.copy, onclick: () => copyAyah(a, idx) }),
@@ -396,6 +398,45 @@ async function openTafsir(key) {
   fill();
 }
 C.onChange((_, patch) => { if ("tafsir" in patch && drawer.classList.contains("show") && tafsirListener) tafsirListener(); });
+
+// --- similar wording panel: ayahs sharing 5+ identical consecutive words (computed from the text itself)
+async function openSimilar(key) {
+  const list = SIM[key] || [];
+  const idx = data.ayahs.findIndex(a => a.k === key);
+  const tr0 = trList[0];
+  const mine = new Set(list.flatMap(([, runs]) => runs.flatMap(([i, n]) => Array.from({ length: n }, (_, d) => i + d))));
+  const arabic = (words, marks) => h("div", { class: `p-arabic ar-${isTJ() ? "uthmani" : C.get().script}`, lang: "ar", dir: "rtl", translate: "no" },
+    ...words.flatMap((w, i) => [i ? " " : "", h("span", { class: `pw${marks.has(i) ? " name" : ""}` }, w)]));
+  const plainWords = (sd, ipd, i) => sd.ayahs[i].w.map((w, j) => ipd ? ipd.ayahs[i][j] : w.u);
+  const body = h("div");
+  body.append(
+    h("div", { class: "note" }, t("surah.similarNote")),
+    h("div", { class: "p-ayah" }, h("div", { class: "p-ayah-h" }, h("span", { class: "ayah-key" }, key)),
+      arabic(data.ayahs[idx].w.map((w, j) => isIP() ? ip.ayahs[idx][j] : w.u), mine)),
+    h("h4", { class: "pc-h" }, t("surah.similarCount", { n: t("common.ayahs", { n: list.length }) })));
+  const box = body.appendChild(h("div", {}, h("div", { class: "skeleton" }, t("common.loading"))));
+  openDrawer(t("surah.similarTitle", { key }), body);
+
+  const surahs = [...new Set(list.map(([k]) => +k.split(":")[0]))];
+  const loaded = Object.fromEntries(await Promise.all(surahs.map(async s => [s, await Promise.all([
+    s === N ? data : C.surah(s), isIP() ? C.indopak(s).catch(() => null) : null, tr0 ? C.tr(tr0.id, s).catch(() => null) : null])])));
+  box.innerHTML = "";
+  for (const [k, runs] of list) {
+    const [s, a] = k.split(":").map(Number);
+    const [sd, ipd, trd] = loaded[s];
+    const marks = new Set(runs.flatMap(([, n, j]) => Array.from({ length: n }, (_, d) => j + d)));
+    const c = chs.find(x => x.n === s);
+    box.append(h("div", { class: "p-ayah" },
+      h("div", { class: "p-ayah-h" },
+        h("span", {}, h("span", { class: "ayah-key" }, k), " ", h("span", { class: "tiny" }, `${c.name} · `, t("surah.similarWords", { n: Math.max(...runs.map(r => r[1])) }))),
+        h("a", { href: `surah.html?n=${s}#${k}`, class: "tiny" }, t("common.readInContext"))),
+      arabic(plainWords(sd, ipd, a - 1), marks),
+      trd ? h("div", { class: `tr-item ${tr0.lang === "ur" ? "ur" : ""}` },
+        h("div", { class: `txt ${tr0.lang === "ur" ? "urdu" : ""}`, dir: tr0.lang === "ur" ? "rtl" : "ltr" }, trd[a - 1]),
+        h("div", { class: "who" }, `— ${tr0.name}`)) : null));
+  }
+  box.append(h("div", { class: "source", style: "margin-top:14px" }, src["tadabbur-similar"]?.publisher || ""));
+}
 
 // --- hadith panel
 // Sahih Muslim is referred to by book + in-book number (as on sunnah.com), Bukhari by its standard number

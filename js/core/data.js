@@ -79,6 +79,9 @@ export const stories = () => getJSON("data/stories.json");
 export const family = () => getJSON("data/family.json");
 /** { src, places: [{ id, en, ar, type, names, mentions, ayahs, url, at: {qid, label, lat, lon, x, y, region} | null }], map } */
 export const places = () => getJSON("data/places.json");
+/** Ayahs sharing 5+ identical consecutive words: { "s:a": [["other s:a", [[start, length, otherStart], …]], …] }. */
+export const similarIndex = () => getJSON("data/similar/index.json").catch(() => ({}));
+export const similar = n => getJSON(`data/similar/${pad3(n)}.json`).catch(() => ({}));
 export const storiesBySurah = () => getJSON("data/stories-by-surah.json").catch(() => ({}));
 
 // ---------------------------------------------------------------- word roots (Quranic Arabic Corpus)

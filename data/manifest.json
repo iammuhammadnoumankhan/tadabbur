@@ -11,6 +11,7 @@
   "seerah_events": 24,
   "prophets": 24,
   "places": 17,
+  "similar_ayahs": 1673,
   "roots": 1642,
   "vocab": 4824,
   "reciters": 6,
@@ -150,6 +151,17 @@
    ],
    "src": [
     "qac-ontology"
+   ]
+  },
+  {
+   "id": "similar",
+   "files": [
+    "similar/index.json",
+    "similar/NNN.json"
+   ],
+   "src": [
+    "tadabbur-similar",
+    "qc-text"
    ]
   },
   {

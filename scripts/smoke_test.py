@@ -29,6 +29,7 @@ PAGES = [
     ("surah.html?n=1", ".ayah", 7),
     ("surah.html?n=2", ".ayah", 286),
     ("surah.html?n=114", ".ayah", 6),
+    ("surah.html?n=2", ".sim-chip", 100),
     ("timeline.html", ".ev", 24),
     ("stories.html", ".p-card", 24),
     ("stories.html?p=musa", ".p-group", 34),

@@ -24,7 +24,7 @@ const SHELL_FILES = [
 ];
 const DATA_FILES = [
   "data/manifest.json", "data/chapters.json", "data/translations.json", "data/tafsirs.json", "data/sources.json",
-  "data/hadith-index.json", "data/seerah.json", "data/seerah-by-surah.json", "data/stories.json", "data/stories-by-surah.json", "data/family.json", "data/places.json",
+  "data/hadith-index.json", "data/seerah.json", "data/seerah-by-surah.json", "data/stories.json", "data/stories-by-surah.json", "data/family.json", "data/places.json", "data/similar/index.json",
 ];
 
 self.addEventListener("install", event => {

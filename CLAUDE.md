@@ -90,6 +90,7 @@ python3 scripts/build_vocab.py     # most frequent words (needs roots)
 python3 scripts/build_audio.py     # recitation word timings (6 reciters) from Quran.com
 python3 scripts/build_tajweed.py   # tajweed-coloured Uthmani text (Quran.com), word by word
 python3 scripts/build_layout.py    # mushaf page layouts: Madani 604 (Quran.com) + IndoPak 15-line (DigitalKhatt)
+python3 scripts/build_similar.py   # ayahs sharing 5+ identical consecutive words (from our own text)
 python3 scripts/build_search.py    # search index
 python3 scripts/build_manifest.py  # data/manifest.json (schema version + counts) — always last
 ```

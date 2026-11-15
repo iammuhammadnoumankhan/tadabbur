@@ -64,7 +64,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
 ## Phase 4: More context (sources researched 2026-11-15)
 
 - [ ] **12. Similar ayahs [#5]**
-  - **12a. Similar wording (ready).** Ayahs that share an identical phrase of 5 or more words, computed directly from the Quran text. No outside source, nothing to license, fully checkable. Useful for memorisers (mutashabihat lafziyya).
+  - **12a. Similar wording (done 2026-11-15).** Ayahs that share an identical phrase of 5 or more words, computed directly from the Quran text. No outside source, nothing to license, fully checkable. Useful for memorisers (mutashabihat lafziyya).
   - **12b. Related meaning (needs permission).**
     - Best source: QurSim (Sharaf & Atwell, University of Leeds, LREC 2012). It has 7,679 related-verse pairs taken from Ibn Kathir's tafsir, rated strong or weak.
     - Its download link is dead and its licence unstated, so it needs the authors' permission.

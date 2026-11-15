@@ -346,6 +346,33 @@ def main():
         if sorted(heads) != list(range(1, 115)):
             err(f"layout/{m}: surah headings should be 1–114 once each")
 
+    # 17. similar wording: links are symmetric and the shared words really are identical
+    sim_ix = load("similar/index.json")
+    need_src("tadabbur-similar", "similar")
+    MK = re.compile(r"[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]")
+    simw = {}
+    def sim_words(k):
+        s_, a_ = map(int, k.split(":"))
+        if s_ not in simw:
+            simw[s_] = [[MK.sub("", w["u"]).replace("ٱ", "ا") for w in a["w"]] for a in load(f"surah/{s_:03d}.json")["ayahs"]]
+        return simw[s_][a_ - 1]
+    all_sim = {}
+    for s_, n in sim_ix.items():
+        d = load(f"similar/{int(s_):03d}.json")
+        if len(d) != n:
+            err(f"similar/index.json: surah {s_} count {n}, file has {len(d)}")
+        all_sim.update(d)
+    for k, lst in all_sim.items():
+        for other, runs in lst:
+            if not valid_key(other) or other == k:
+                err(f"similar: {k} -> invalid {other}")
+                continue
+            for i, n, j in runs:
+                if n < 5 or sim_words(k)[i:i + n] != sim_words(other)[j:j + n]:
+                    err(f"similar: {k} and {other} don't share words at {i}/{j} ({n})")
+            if not any(o == k for o, _ in all_sim.get(other, [])):
+                err(f"similar: {k} -> {other} has no link back")
+
     # 16. places: ontology places, valid ayah/word tags, Wikidata positions inside the map
     pl = load("places.json")
     for sid in pl["src"]:
