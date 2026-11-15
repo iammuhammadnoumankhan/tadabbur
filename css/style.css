@@ -446,6 +446,10 @@ main > .pr-card { margin: 18px 0 60px; }
 .row-between { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
 .foot-report .report-link { font-size: 13px; }
 
+/* ---------- share card */
+.share-preview { width: 100%; height: auto; border-radius: 12px; box-shadow: var(--shadow); display: block; }
+.share-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+
 /* ---------- toast */
 .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); z-index: 100;

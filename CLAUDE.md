@@ -68,6 +68,10 @@ Web first, then mobile (Capacitor/TWA) and desktop (Tauri) wrapping the same cod
 - keep all UI text in `js/i18n/en.js`, ready for the Urdu interface;
 - put `localStorage` access behind try/catch (`common.js` already does), and store settings and progress in a shape that can sync later;
 - design mobile-first: test at 375px wide with no horizontal scroll.
+- **Share cards** (`js/sharecard.js`) are drawn on a `<canvas>` in the browser:
+  - The Arabic and translations are drawn exactly as given, with their sources printed on the card.
+  - Fonts shrink to fit and the card grows taller, so text is never cut.
+  - Tajweed mode shares plain Uthmani text.
 - **Reading progress** (`js/core/progress.js`) is per-device and private:
   - Never send it anywhere.
   - An account and sync are later roadmap work.

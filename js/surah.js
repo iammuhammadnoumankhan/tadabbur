@@ -1,4 +1,5 @@
 import * as C from "./common.js";
+import * as Card from "./sharecard.js";
 const { h, $, $$, ICON, t, sanitize, toArabicDigits } = C;
 
 C.header();
@@ -150,6 +151,7 @@ function ayahEl(a, idx) {
     h("button", { class: "chip tafsir-chip", onclick: () => openTafsir(a.k), title: t("surah.tafsirTitle") }, t("surah.tafsir")),
     h("button", { class: "icon-btn", title: t("surah.playAyah"), "aria-label": t("surah.playAyahAria", { key: a.k }), html: ICON.play, onclick: () => player.playFrom(idx, true) }),
     h("button", { class: "icon-btn", title: t("surah.copyAyah"), "aria-label": t("surah.copy"), html: ICON.copy, onclick: () => copyAyah(a, idx) }),
+    h("button", { class: "icon-btn", title: t("share.title"), "aria-label": t("share.title"), html: ICON.share, onclick: () => openShare(a, idx) }),
     bookmarkBtn(a.k),
     h("button", { class: `icon-btn note-btn${P.note(a.k) ? " on" : ""}`, title: t("progress.noteTitle"), "aria-label": t("progress.noteTitle"), html: ICON.note, onclick: () => openNote(a.k) }),
     C.reportLink({ kind: "translation", reference: a.k, page: pageUrl(a.k), source: ayahSources() }, { label: false, cls: "icon" }));
@@ -538,6 +540,71 @@ $("#open-mushaf").addEventListener("click", e => {
   const key = inView ? inView.id : `${N}:1`;
   e.currentTarget.href = `page.html?k=${key}&m=${C.get().script === "indopak" ? "indopak" : "madani"}`;
 });
+
+// ======================================================= share an ayah as an image (drawn in the browser)
+async function openShare(a, idx) {
+  const script = isIP() ? "indopak" : "uthmani";            // tajweed mode shares plain Uthmani text
+  const arabic = `${ayahText(idx)} ${isIP() ? "۝" : "﴿"}${toArabicDigits(a.n)}${isIP() ? "" : "﴾"}`;
+  const opts = {
+    format: "square",
+    theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+    picked: new Set(trList.slice(0, 2).map(tr => tr.id)),
+  };
+  const canvas = h("canvas", { class: "share-preview", role: "img", "aria-label": t("share.previewAria", { key: a.k }) });
+  const body = h("div");
+  openDrawer(t("share.drawerTitle", { key: a.k }), body);
+  await Card.loadFonts(script);
+
+  const card = () => {
+    const translations = trList.filter(tr => opts.picked.has(tr.id))
+      .map(tr => ({ text: trTexts[tr.id][idx], lang: tr.lang === "ur" ? "ur" : "en", name: tr.name }));
+    const credit = t("share.credit", {
+      arabic: script === "indopak" ? "DigitalKhatt IndoPak" : "Quran.com",
+      translations: translations.map(x => x.name).join(", ") || "—",
+    });
+    return Card.drawCard(canvas, { arabic, script, translations, ref: `${ch.name} · ${a.k}`,
+      surahAr: `${t("page.surahWord")} ${ch.ar}`, theme: opts.theme, format: opts.format, credit, brand: t("share.brand") });
+  };
+  const fileName = `tadabbur-${a.k.replace(":", "-")}.png`;
+  const seg = (key, choices) => h("div", { class: "seg" }, ...choices.map(([v, l]) =>
+    h("button", { class: opts[key] === v ? "on" : null, onclick: e => {
+      opts[key] = v; [...e.currentTarget.parentNode.children].forEach(b => b.classList.toggle("on", b === e.currentTarget)); card();
+    } }, l)));
+
+  body.append(
+    canvas,
+    h("div", { class: "opt-group", style: "margin-top:12px" }, h("h4", {}, t("share.size")),
+      seg("format", [["square", t("share.square")], ["story", t("share.story")]])),
+    h("div", { class: "opt-group" }, h("h4", {}, t("share.look")),
+      seg("theme", [["light", t("surah.themeLight")], ["dark", t("surah.themeDark")]])),
+    trList.length ? h("div", { class: "opt-group" }, h("h4", {}, t("surah.translations")),
+      ...trList.map(tr => h("label", { class: "check" },
+        h("input", { type: "checkbox", checked: opts.picked.has(tr.id), onchange: e => {
+          e.target.checked ? opts.picked.add(tr.id) : opts.picked.delete(tr.id); card();
+        } }), tr.name))) : null,
+    h("div", { class: "share-actions" },
+      h("button", { class: "btn primary", onclick: async () => {
+        const file = new File([await Card.toBlob(canvas)], fileName, { type: "image/png" });
+        if (navigator.canShare?.({ files: [file] })) {
+          try { await navigator.share({ files: [file], title: `${ch.name} ${a.k}` }); } catch { /* cancelled */ }
+        } else { download(file); C.toast(t("share.downloaded")); }
+      } }, h("span", { html: ICON.share }), t("share.share")),
+      h("button", { class: "btn", onclick: async () => download(new File([await Card.toBlob(canvas)], fileName, { type: "image/png" })) }, t("share.download")),
+      h("button", { class: "btn", onclick: async () => {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": Card.toBlob(canvas) })]);
+          C.toast(t("share.copied"));
+        } catch { C.toast(t("share.copyFailed")); }
+      } }, t("share.copy"))),
+    h("p", { class: "tiny", style: "margin-top:10px" }, t("share.note")));
+  card();
+}
+function download(file) {
+  const url = URL.createObjectURL(file);
+  const link = h("a", { href: url, download: file.name });
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
 
 // ======================================================= reading progress (stored on this device)
 const P = C.progress;

@@ -242,6 +242,24 @@ export default {
   "progress.noteDelete": "Delete note",
   "progress.yourNote": "Your note",
 
+  // ---------------------------------------------------------------- share an ayah as an image
+  "share.title": "Share this ayah as an image",
+  "share.drawerTitle": "Share {key}",
+  "share.previewAria": "Image of ayah {key} with translation",
+  "share.size": "Size",
+  "share.square": "Square (posts)",
+  "share.story": "Tall (stories, status)",
+  "share.look": "Look",
+  "share.share": "Share",
+  "share.download": "Download",
+  "share.copy": "Copy image",
+  "share.copied": "Image copied",
+  "share.copyFailed": "Couldn't copy the image. Use Download instead.",
+  "share.downloaded": "Saved the image (sharing files isn't supported here)",
+  "share.brand": "Tadabbur · تدبّر",
+  "share.credit": "Arabic: {arabic} · Translation: {translations}",
+  "share.note": "The image is made on your device. The Arabic and translations are shown exactly as published, with their sources on the card.",
+
   // ---------------------------------------------------------------- report a problem
   "report.label": "Report",
   "report.title": "Report a problem with this (opens a short form on GitHub)",

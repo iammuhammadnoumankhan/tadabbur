@@ -113,6 +113,30 @@ def main():
             failures.append(f"[report] ayah link: {href}")
         page.close()
 
+        # share card: the ayah is drawn into a 1080px-wide image, nothing blank, no errors
+        page = browser.new_page()
+        sc_errors = []
+        page.on("pageerror", lambda e: sc_errors.append(str(e)))
+        page.goto(base + "surah.html?n=112", wait_until="domcontentloaded")
+        try:
+            page.wait_for_selector('[id="112:1"] .icon-btn[aria-label="Share this ayah as an image"]')
+            page.click('[id="112:1"] .icon-btn[aria-label="Share this ayah as an image"]')
+            page.wait_for_selector(".share-preview")
+            page.wait_for_timeout(1500)
+            w, inked = page.evaluate("""() => {
+                const c = document.querySelector('.share-preview');
+                const d = c.getContext('2d').getImageData(0, c.height * 0.3, c.width, c.height * 0.4).data;
+                let dark = 0; for (let i = 0; i < d.length; i += 16) if (d[i] + d[i+1] + d[i+2] < 300) dark++;
+                return [c.width, dark];
+            }""")
+            ok, detail = w == 1080 and inked > 200 and not sc_errors, f"width {w}, inked pixels {inked}, errors {sc_errors[:2]}"
+        except Exception as e:  # noqa: BLE001
+            ok, detail = False, type(e).__name__
+        print(f"{'✓' if ok else '✗'} [share] ayah card is drawn with text" + ("" if ok else f"  ({detail})"))
+        if not ok:
+            failures.append(f"[share] {detail}")
+        page.close()
+
         # tajweed mode: coloured words + colour key, no missing text
         ctx = browser.new_context()
         ctx.add_init_script("localStorage.setItem('tadabbur.settings', JSON.stringify({script: 'tajweed'}))")

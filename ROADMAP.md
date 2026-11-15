@@ -58,7 +58,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
 - [x] **10. Reading progress [#11]** *(done 2026-11-15)*
   - Last read, bookmarks, personal notes, khatm tracker and daily goal.
   - Saved on the device first, with a format that can sync to an account later (sync needs a server, so it waits for budget).
-- [ ] **11. Share an ayah as an image [#12]**
+- [x] **11. Share an ayah as an image [#12]** *(done 2026-11-15)*
   - Arabic plus Urdu or English, with the source shown on the card. Made in the browser, no server.
 
 ## Phase 4: More context (each needs a confirmed source first)
