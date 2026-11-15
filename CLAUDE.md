@@ -83,6 +83,7 @@ python3 scripts/build_data.py      # chapters, Quran text, word-by-word, transla
 python3 scripts/build_indopak.py   # IndoPak text (DigitalKhatt) aligned to Quran.com words + OFL font
 python3 scripts/build_seerah.py    # Seerah timeline from Sahih al-Bukhari (asserts anchor hadith text)
 python3 scripts/build_stories.py   # prophets from the Quranic Arabic Corpus ontology
+python3 scripts/build_family.py    # prophets family links (stated ontology relations only)
 python3 scripts/build_roots.py     # word roots from the Quranic Arabic Corpus file (see below)
 python3 scripts/build_vocab.py     # most frequent words (needs roots)
 python3 scripts/build_audio.py     # recitation word timings (6 reciters) from Quran.com

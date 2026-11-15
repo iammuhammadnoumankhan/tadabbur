@@ -335,6 +335,18 @@ def main():
         if sorted(heads) != list(range(1, 115)):
             err(f"layout/{m}: surah headings should be 1–114 once each")
 
+    # 15. family links: only stated relation types, between known people; prophets match stories.json
+    fam = load("family.json") or {"people": {}, "links": []}
+    need_src(fam.get("src", ""), "family.json")
+    for rel, child, parent in fam["links"]:
+        if rel not in ("son-of", "daughter-of", "adopted-son-of"):
+            err(f"family.json: unknown relation {rel!r}")
+        if child not in fam["people"] or parent not in fam["people"]:
+            err(f"family.json: link {child} -> {parent} names someone not in people")
+    sp_ids = {p["id"] for p in st["prophets"]}
+    if {k for k, v in fam["people"].items() if v.get("prophet")} != sp_ids:
+        err("family.json: prophets don't match stories.json")
+
     # 9. manifest (docs/DATA.md): schema version and counts match the data
     man = load("manifest.json") or {}
     if man.get("schema") != SCHEMA:

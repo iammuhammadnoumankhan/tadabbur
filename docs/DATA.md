@@ -157,6 +157,11 @@ Sources: `tadabbur-vocab` (counts) and `qac-morphology`.
   - Words a reciter repeats appear again, as recited.
   - Incomplete or backwards entries from the source are dropped.
 
+### `family.json` (prophets family tree)
+`{ src, people: { id: { en, ar, prophet } }, links: [[rel, child, parent], …] }`
+- `rel` is one of `son-of`, `daughter-of` or `adopted-son-of`, **only as the Quranic Arabic Corpus ontology states it**. Nothing is inferred (no siblings or grandparents).
+- `people` holds all 24 prophets, plus the relatives the links reach (e.g. Azar, Imran, Maryam), with the ontology's English and Arabic names.
+
 ### `search/ar.json`, `search/tr-<id>.json`
 Each is an array of 6,236 strings, in global ayah index order.
 - `ar.json`: Quran.com plain Arabic (`imlaei_simple`), used **only for matching**.

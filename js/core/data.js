@@ -75,6 +75,8 @@ export const seerah = () => getJSON("data/seerah.json");
 export const seerahEvent = id => getJSON(`data/seerah/${id}.json`);
 export const seerahBySurah = () => getJSON("data/seerah-by-surah.json").catch(() => ({}));
 export const stories = () => getJSON("data/stories.json");
+/** { src, people: {id: {en, ar, prophet}}, links: [["son-of"|"daughter-of"|"adopted-son-of", child, parent], …] } */
+export const family = () => getJSON("data/family.json");
 export const storiesBySurah = () => getJSON("data/stories-by-surah.json").catch(() => ({}));
 
 // ---------------------------------------------------------------- word roots (Quranic Arabic Corpus)

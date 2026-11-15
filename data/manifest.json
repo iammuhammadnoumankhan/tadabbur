@@ -144,7 +144,8 @@
    "id": "prophets",
    "files": [
     "stories.json",
-    "stories-by-surah.json"
+    "stories-by-surah.json",
+    "family.json"
    ],
    "src": [
     "qac-ontology"

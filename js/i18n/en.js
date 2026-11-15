@@ -448,6 +448,21 @@ export default {
   "stories.ayahsTitle": "The ayahs",
   "stories.ayahsLead": "Grouped by surah. Revelation order shows how the mentions unfolded over the 23 years. The highlighted word is the one the Corpus tags as referring to him. Tap “Read in context” for the full passage.",
 
+  // ---------------------------------------------------------------- prophets family tree
+  "family.title": "Family links",
+  "family.lead": "Parent and child links between the prophets and their relatives, exactly as the Quranic Arabic Corpus ontology records them. Tap a prophet to read the ayahs about him.",
+  "family.son-of": "Son of ",
+  "family.daughter-of": "Daughter of ",
+  "family.adopted-son-of": "Adopted son of ",
+  "family.children": "Children: ",
+  "family.adoptedChild": "Adopted son: ",
+  "family.edge.adopted-son-of": "adopted",
+  "family.edge.daughter-of": "daughter",
+  "family.legendProphet": "Prophet or messenger",
+  "family.legendOther": "Other person",
+  "family.noLinks": "No parent–child link recorded in the ontology:",
+  "family.source": "Source: Quranic Arabic Corpus ontology (son-of, daughter-of, adopted-son-of). Only stated links are shown; nothing is inferred.",
+
   // ---------------------------------------------------------------- search
   "search.pageTitle": "Search the Quran — Tadabbur",
   "search.titleHtml": "Search the <em>Quran</em>",

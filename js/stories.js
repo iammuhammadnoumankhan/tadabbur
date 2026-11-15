@@ -4,7 +4,7 @@ const { h, $, $$, t } = C;
 C.header("stories");
 C.footer();
 
-const [D, chs] = await Promise.all([C.stories(), C.chapters()]);
+const [D, chs, FAM] = await Promise.all([C.stories(), C.chapters(), C.family().catch(() => null)]);
 const byN = Object.fromEntries(chs.map(c => [c.n, c]));
 const byId = Object.fromEntries(D.prophets.map(p => [p.id, p]));
 const nameOf = id => byId[id]?.en || D.names[id] || id;
@@ -21,12 +21,52 @@ function quranStrip(surahs) {
 
 const link = id => byId[id] ? h("a", { href: `stories.html?p=${id}` }, nameOf(id)) : h("span", {}, nameOf(id));
 function relations(p) {
-  return p.relations.map(([rel, a, b]) => {
-    if (rel !== "son-of") return null;
-    if (a === p.id) return h("span", {}, t("stories.sonOf"), link(b));
-    if (b === p.id) return h("span", {}, t("stories.fatherOf"), link(a));
-    return null;
-  }).filter(Boolean);
+  if (!FAM) return [];
+  const out = [];
+  for (const [rel, child, parent] of FAM.links) {
+    if (child === p.id) out.push(h("span", {}, t(`family.${rel}`), personLink(parent)));
+  }
+  const kids = FAM.links.filter(([rel, , parent]) => parent === p.id && rel !== "adopted-son-of").map(([, c]) => c);
+  if (kids.length) out.push(h("span", {}, t("family.children"), ...kids.flatMap((c, i) => [i ? ", " : "", personLink(c)])));
+  const adopted = FAM.links.filter(([rel, , parent]) => parent === p.id && rel === "adopted-son-of").map(([, c]) => c);
+  if (adopted.length) out.push(h("span", {}, t("family.adoptedChild"), ...adopted.flatMap((c, i) => [i ? ", " : "", personLink(c)])));
+  return out;
+}
+const personLink = id => byId[id] ? h("a", { href: `stories.html?p=${id}` }, nameOf(id)) : h("span", {}, FAM?.people[id]?.en || nameOf(id));
+
+// ------------------------------------------------------------------ family tree (only the ontology's stated links)
+function familyTree() {
+  if (!FAM) return null;
+  const parentOf = new Map(FAM.links.map(([rel, c, p]) => [c, { p, rel }]));
+  const childrenOf = new Map();
+  for (const [rel, c, p] of FAM.links) (childrenOf.get(p) || childrenOf.set(p, []).get(p)).push({ c, rel });
+  const inTree = new Set(FAM.links.flatMap(([, c, p]) => [c, p]));
+  const roots = [...inTree].filter(id => !parentOf.has(id))
+    .sort((a, b) => (childrenOf.get(b)?.length || 0) - (childrenOf.get(a)?.length || 0));
+  const node = id => {
+    const person = FAM.people[id];
+    const inner = [h("span", { class: "ft-ar", lang: "ar" }, person.ar), h("span", { class: "ft-en" }, person.en)];
+    return byId[id]
+      ? h("a", { class: "ft-node prophet", href: `stories.html?p=${id}` }, ...inner)
+      : h("span", { class: "ft-node" }, ...inner);
+  };
+  const branch = id => h("li", {}, node(id),
+    childrenOf.has(id) ? h("ul", {}, ...childrenOf.get(id).map(({ c, rel }) => {
+      const li = branch(c);
+      if (rel !== "son-of") li.classList.add(`rel-${rel}`), li.prepend(h("span", { class: "ft-rel" }, t(`family.edge.${rel}`)));
+      return li;
+    })) : null);
+  const alone = D.prophets.filter(p => !inTree.has(p.id));
+  return h("section", { class: "ft-section" },
+    h("div", { class: "section-h" }, h("div", {}, h("h2", {}, t("family.title")), h("p", {}, t("family.lead")))),
+    h("div", { class: "ft-forest" }, ...roots.map(r => h("div", { class: "card ft-card" }, h("ul", { class: "ftree" }, branch(r))))),
+    h("div", { class: "ft-legend" },
+      h("span", { class: "ft-node prophet ft-mini" }, t("family.legendProphet")),
+      h("span", { class: "ft-node ft-mini" }, t("family.legendOther"))),
+    alone.length ? h("div", { class: "jump-row" }, h("span", { class: "tiny" }, t("family.noLinks")),
+      ...alone.map(p => h("a", { class: "chip", href: `stories.html?p=${p.id}` }, p.en))) : null,
+    h("div", { class: "source", style: "margin-top:12px" }, t("family.source"), " ",
+      h("a", { href: "https://corpus.quran.com/concept.jsp?id=prophet", target: "_blank", rel: "noopener" }, "corpus.quran.com ↗")));
 }
 const counts = p => ({ ayahs: t("common.ayahs", { n: p.ayahs }), surahs: t("common.surahs", { n: p.surahs.length }) });
 
@@ -44,7 +84,8 @@ function renderIndex() {
         h("div", { class: "p-ar", translate: "no" }, p.ar),
         h("div", { class: "p-en" }, p.en),
         h("div", { class: "p-meta" }, t("stories.cardMeta", counts(p))),
-        quranStrip(p.surahs)))));
+        quranStrip(p.surahs)))),
+    familyTree());
 }
 
 // ------------------------------------------------------------------ one prophet

@@ -1,0 +1,217 @@
+{
+ "src": "qac-ontology",
+ "people": {
+  "abel": {
+   "en": "Abel",
+   "ar": "هابيل",
+   "prophet": false
+  },
+  "adam": {
+   "en": "Adam",
+   "ar": "آدم",
+   "prophet": true
+  },
+  "ayyub": {
+   "en": "Ayyub",
+   "ar": "أيوب",
+   "prophet": true
+  },
+  "azar": {
+   "en": "Azar",
+   "ar": "آزر",
+   "prophet": false
+  },
+  "cain": {
+   "en": "Cain",
+   "ar": "قابيل",
+   "prophet": false
+  },
+  "david": {
+   "en": "David",
+   "ar": "داود",
+   "prophet": true
+  },
+  "elijah": {
+   "en": "Elijah",
+   "ar": "إلياس",
+   "prophet": true
+  },
+  "elisha": {
+   "en": "Elisha",
+   "ar": "اليسع",
+   "prophet": true
+  },
+  "harun": {
+   "en": "Harun",
+   "ar": "هارون",
+   "prophet": true
+  },
+  "hud": {
+   "en": "Hud",
+   "ar": "هود",
+   "prophet": true
+  },
+  "ibrahim": {
+   "en": "Ibrahim",
+   "ar": "إبراهيم",
+   "prophet": true
+  },
+  "idris": {
+   "en": "Idris",
+   "ar": "إدريس",
+   "prophet": true
+  },
+  "imran": {
+   "en": "Imran",
+   "ar": "عمران",
+   "prophet": false
+  },
+  "isaac": {
+   "en": "Isaac",
+   "ar": "إسحاق",
+   "prophet": true
+  },
+  "ishmael": {
+   "en": "Ishmael",
+   "ar": "إسماعيل",
+   "prophet": true
+  },
+  "jesus": {
+   "en": "Jesus",
+   "ar": "عيسى",
+   "prophet": true
+  },
+  "lut": {
+   "en": "Lut",
+   "ar": "لوط",
+   "prophet": true
+  },
+  "maryam": {
+   "en": "Maryam",
+   "ar": "مريم",
+   "prophet": false
+  },
+  "muhammad": {
+   "en": "Muhammad",
+   "ar": "محمد",
+   "prophet": true
+  },
+  "musa": {
+   "en": "Musa",
+   "ar": "موسى",
+   "prophet": true
+  },
+  "nuh": {
+   "en": "Nuh",
+   "ar": "نوح",
+   "prophet": true
+  },
+  "salih": {
+   "en": "Salih",
+   "ar": "صالح",
+   "prophet": true
+  },
+  "shuayb": {
+   "en": "Shuayb",
+   "ar": "شعيب",
+   "prophet": true
+  },
+  "solomon": {
+   "en": "Solomon",
+   "ar": "سليمان",
+   "prophet": true
+  },
+  "yahya": {
+   "en": "Yahya",
+   "ar": "يحيى",
+   "prophet": true
+  },
+  "yaqub": {
+   "en": "Yaqub",
+   "ar": "يعقوب",
+   "prophet": true
+  },
+  "yunus": {
+   "en": "Yunus",
+   "ar": "يونس",
+   "prophet": true
+  },
+  "yusuf": {
+   "en": "Yusuf",
+   "ar": "يوسف",
+   "prophet": true
+  },
+  "zayd": {
+   "en": "Zayd",
+   "ar": "زيد",
+   "prophet": false
+  },
+  "zechariah": {
+   "en": "Zechariah",
+   "ar": "زكريا",
+   "prophet": true
+  }
+ },
+ "links": [
+  [
+   "adopted-son-of",
+   "zayd",
+   "muhammad"
+  ],
+  [
+   "daughter-of",
+   "maryam",
+   "imran"
+  ],
+  [
+   "son-of",
+   "abel",
+   "adam"
+  ],
+  [
+   "son-of",
+   "cain",
+   "adam"
+  ],
+  [
+   "son-of",
+   "ibrahim",
+   "azar"
+  ],
+  [
+   "son-of",
+   "isaac",
+   "ibrahim"
+  ],
+  [
+   "son-of",
+   "ishmael",
+   "ibrahim"
+  ],
+  [
+   "son-of",
+   "jesus",
+   "maryam"
+  ],
+  [
+   "son-of",
+   "solomon",
+   "david"
+  ],
+  [
+   "son-of",
+   "yahya",
+   "zechariah"
+  ],
+  [
+   "son-of",
+   "yaqub",
+   "isaac"
+  ],
+  [
+   "son-of",
+   "yusuf",
+   "yaqub"
+  ]
+ ]
+}

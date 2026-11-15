@@ -31,6 +31,7 @@ python3 scripts/build_seerah.py
 Then build the prophets data (Quranic Arabic Corpus ontology):
 ```bash
 python3 scripts/build_stories.py
+python3 scripts/build_family.py
 ```
 Then build the word roots. This needs `quranic-corpus-morphology-0.4.txt` in the project root: download it from https://corpus.quran.com/download/ (a form asks for a contact email). It's git-ignored and used unchanged.
 ```bash

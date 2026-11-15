@@ -72,7 +72,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
   - Alternative: limit it to Sahih hadith that state a reason for revelation.
 - [ ] **15. Map of places in the Quran [#14]**
   - Places from the Corpus ontology; map coordinates from a cited geographic source.
-- [ ] **16. Prophets family tree [#15]**
+- [x] **16. Prophets family tree [#15]** *(done 2026-11-15)*
   - Drawn only from the ontology's `son-of` relations, which we already have.
 
 ## Phase 5: Trust and reach

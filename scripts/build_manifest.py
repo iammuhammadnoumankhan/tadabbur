@@ -51,7 +51,7 @@ def main():
             {"id": "tafsir", "files": ["tafsirs.json"], "src": [t["src"] for t in load("tafsirs.json")["list"]]},
             {"id": "hadith", "files": ["hadith-index.json", "hadith/NNN.json"], "src": ["sahih-hadith-text"]},
             {"id": "seerah", "files": ["seerah.json", "seerah/<id>.json", "seerah-by-surah.json"], "src": ["seerah-timeline", "sahih-hadith-text"]},
-            {"id": "prophets", "files": ["stories.json", "stories-by-surah.json"], "src": ["qac-ontology"]},
+            {"id": "prophets", "files": ["stories.json", "stories-by-surah.json", "family.json"], "src": ["qac-ontology"]},
             {"id": "search", "files": ["search/ar.json", "search/tr-<id>.json"], "src": ["qc-imlaei-simple"]},
             {"id": "roots", "files": ["morph/NNN.json", "roots/index.json", "roots/<id>.json"], "src": ["qac-morphology"]},
             {"id": "vocab", "files": ["vocab.json"], "src": ["tadabbur-vocab", "qac-morphology"]},
