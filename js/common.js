@@ -212,6 +212,7 @@ export async function offlineUrls() {
     urls.push(`data/surah/${n}.json`, `data/indopak/${n}.json`, `data/info/${n}.json`, `data/morph/${n}.json`,
       ...trs.map(tr => `data/tr/${tr.id}/${n}.json`));
     if (hIndex[c.n]) urls.push(`data/hadith/${n}.json`);
+    if (core.settings.get().script === "tajweed") urls.push(`data/tajweed/${n}.json`);
   }
   urls.push("data/search/ar.json", "data/roots/index.json", "data/vocab.json", ...trs.map(tr => `data/search/tr-${tr.id}.json`),
     ...se.events.map(e => `data/seerah/${e.id}.json`));

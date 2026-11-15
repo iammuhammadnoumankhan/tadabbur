@@ -59,7 +59,13 @@ An array of 114 items:
 - The DigitalKhatt IndoPak text, with **exactly one entry per `surah/NNN.json` word**.
 - Fingerprinted in `checksums-indopak.json` (SHA-256 of the words joined with spaces, first 16 hex characters).
 
-### `checksums.json`, `checksums-indopak.json`
+### `tajweed/NNN.json`, `checksums-tajweed.json`
+`{ src, ayahs: [[word html, …], …] }`, with **one entry per `surah/NNN.json` word**.
+- **Text:** Quran.com's tajweed Uthmani text, as published. It's a slightly different Uthmani encoding from `surah/NNN.json` → `u`, so it is never mixed with it.
+- **Markup:** only `<span class="tj tj-RULE">…</span>` (may nest). The build fails on anything else.
+- **Fingerprints:** `checksums-tajweed.json`, a SHA-256 of each ayah's words with markup removed, joined with spaces.
+
+### `checksums.json`, `checksums-indopak.json`, `checksums-tajweed.json`
 `{ "<surah>": ["<16 hex>", …] }`, one entry per ayah.
 
 ### `translations.json`, `tr/<id>/NNN.json`

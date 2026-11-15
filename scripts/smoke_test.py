@@ -110,6 +110,26 @@ def main():
             failures.append(f"[report] ayah link: {href}")
         page.close()
 
+        # tajweed mode: coloured words + colour key, no missing text
+        ctx = browser.new_context()
+        ctx.add_init_script("localStorage.setItem('tadabbur.settings', JSON.stringify({script: 'tajweed'}))")
+        page = ctx.new_page()
+        tj_errors = []
+        page.on("pageerror", lambda e: tj_errors.append(str(e)))
+        page.goto(base + "surah.html?n=2", wait_until="domcontentloaded")
+        try:
+            page.wait_for_function("document.querySelectorAll('.ayah').length >= 286 && document.querySelectorAll('.w .tj').length > 1000", timeout=60000)
+            keys = page.evaluate("document.querySelectorAll('#tajweed-key .tj-key-item').length")
+            body = page.evaluate("document.body.innerText")
+            ok = keys >= 18 and "⟦" not in body and not tj_errors
+            detail = f"key items {keys}, errors {tj_errors[:2]}"
+        except Exception as e:  # noqa: BLE001
+            ok, detail = False, f"{type(e).__name__}"
+        print(f"{'✓' if ok else '✗'} [tajweed] Al-Baqarah in tajweed colours with the colour key" + ("" if ok else f"  ({detail})"))
+        if not ok:
+            failures.append(f"[tajweed] {detail}")
+        ctx.close()
+
         # installable app + offline reading (service worker)
         for name, ok, detail in offline_checks(browser, base):
             print(f"{'✓' if ok else '✗'} [offline] {name}" + ("" if ok else f"  ({detail})"))

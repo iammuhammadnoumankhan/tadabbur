@@ -84,15 +84,42 @@ let trList = [];        // selected translation meta
 const trTexts = {};     // id -> array
 let hadithData = null;
 let ip = null;          // IndoPak text for this surah (when that script is chosen)
+let tj = null;          // tajweed-coloured text (when "Tajweed" is chosen): word HTML from Quran.com
 
 const isIP = () => C.get().script === "indopak" && ip;
+const isTJ = () => C.get().script === "tajweed" && tj;
+const plain = html => { const d = document.createElement("div"); d.innerHTML = html; return d.textContent; };
 const pageUrl = key => `${location.origin}${location.pathname}?n=${N}#${key}`;
 const ayahSources = () => t("report.ayahSource", {
-  script: isIP() ? "DigitalKhatt IndoPak" : "Quran.com Uthmani",
+  script: isIP() ? "DigitalKhatt IndoPak" : isTJ() ? "Quran.com tajweed (Uthmani)" : "Quran.com Uthmani",
   translations: trList.map(tr => tr.name).join(", "),
 });
-const ayahText = idx => isIP() ? ip.ayahs[idx].join(" ") : data.ayahs[idx].u;
-const wordText = (idx, i) => isIP() ? ip.ayahs[idx][i] : data.ayahs[idx].w[i].u;
+const ayahText = idx => isIP() ? ip.ayahs[idx].join(" ") : isTJ() ? tj.ayahs[idx].map(plain).join(" ") : data.ayahs[idx].u;
+const wordText = (idx, i) => isIP() ? ip.ayahs[idx][i] : isTJ() ? plain(tj.ayahs[idx][i]) : data.ayahs[idx].w[i].u;
+/** The Arabic for one word as an element: tajweed words keep their colour markup (sanitised at build time). */
+const wordArabic = (idx, i, cls = "") => isTJ()
+  ? h("span", { class: `ar-uthmani tajweed ${cls}`.trim(), lang: "ar", html: tj.ayahs[idx][i] })
+  : h("span", { class: `ar-${C.get().script} ${cls}`.trim(), lang: "ar" }, wordText(idx, i));
+
+// Tajweed colour key: rule names (English + Arabic term) as used by Quran.com's tajweed text.
+const TAJWEED_KEY = [
+  ["ham_wasl", "silent"], ["laam_shamsiyah", "silent"], ["slnt", "silent"],
+  ["madda_normal"], ["madda_permissible"], ["madda_obligatory_mottasel"], ["madda_obligatory_monfasel"], ["madda_necessary"],
+  ["ghunnah"], ["qalaqah"], ["ikhafa"], ["ikhafa_shafawi"], ["iqlab"],
+  ["idgham_ghunnah"], ["idgham_wo_ghunnah"], ["idgham_shafawi"], ["idgham_mutajanisayn"], ["idgham_mutaqaribayn"],
+];
+function renderTajweedKey() {
+  const box = $("#tajweed-key");
+  box.innerHTML = "";
+  box.classList.toggle("hidden", !tj);
+  if (!tj) return;
+  box.append(h("details", { open: true },
+    h("summary", {}, t("tajweed.keyTitle")),
+    h("div", { class: "tj-key" }, ...TAJWEED_KEY.map(([r]) => h("span", { class: "tj-key-item" },
+      h("span", { class: `tj tj-${r} tj-swatch`, "aria-hidden": "true" }),
+      h("span", {}, t(`tajweed.${r}`), " ", h("span", { class: "tj-ar", lang: "ar" }, t(`tajweed.ar.${r}`)))))),
+    h("div", { class: "source", style: "margin-top:8px" }, t("tajweed.source"))));
+}
 
 async function loadTranslations() {
   trList = await C.selectedTranslations();
@@ -103,7 +130,7 @@ async function loadTranslations() {
 function wordEl(w, a, i, idx) {
   const st = C.get();
   const el = h("span", { class: "w", "data-k": a.k, "data-i": i, tabindex: "0", role: "button", "aria-label": t("surah.wordAria", { tl: w.tl, en: w.en }) },
-    h("span", { class: `ar-${st.script}`, lang: "ar" }, wordText(idx, i)));
+    wordArabic(idx, i));
   if (st.wbw) {
     if (st.showTranslit && w.tl) el.append(h("span", { class: "g", style: "font-style:italic;color:var(--ink-3)" }, w.tl));
     if (st.wbwLang === "ur" || st.wbwLang === "both") el.append(h("span", { class: "g ur", lang: "ur" }, w.ur || ""));
@@ -143,11 +170,18 @@ function ayahEl(a, idx) {
 async function renderReader() {
   const st = C.get();
   ip = st.script === "indopak" ? await C.indopak(N) : null;
+  tj = st.script === "tajweed" ? await C.tajweed(N).catch(() => null) : null;
+  renderTajweedKey();
   const r = $("#reader");
   r.innerHTML = "";
   if (ch.bismillah) {
-    const text = ip ? (await C.indopak(1)).ayahs[0].join(" ") : (await C.surah(1)).ayahs[0].u;
-    r.append(h("div", { class: `bismillah ar-${st.script}`, lang: "ar" }, text));
+    if (tj) {
+      const b = await C.tajweed(1);
+      r.append(h("div", { class: "bismillah ar-uthmani tajweed", lang: "ar", html: b.ayahs[0].join(" ") }));
+    } else {
+      const text = ip ? (await C.indopak(1)).ayahs[0].join(" ") : (await C.surah(1)).ayahs[0].u;
+      r.append(h("div", { class: `bismillah ar-${st.script}`, lang: "ar" }, text));
+    }
   }
   const frag = document.createDocumentFragment();
   data.ayahs.forEach((a, i) => frag.append(ayahEl(a, i)));
@@ -183,7 +217,7 @@ function showPop(el) {
   const st = C.get();
   pop.innerHTML = "";
   pop.append(
-    h("div", { class: `w-ar ar-${st.script}`, lang: "ar" }, wordText(idx, +el.dataset.i)),
+    h("div", { class: "w-ar" }, wordArabic(idx, +el.dataset.i)),
     h("div", { class: "w-tl" }, w.tl || ""),
     h("dl", {},
       h("dt", {}, t("lang.ur")), h("dd", { class: "urdu", lang: "ur" }, w.ur || "—"),
@@ -282,7 +316,7 @@ $("#open-settings").onclick = () => {
     h("button", { class: st[key] === v ? "on" : null, onclick: () => { C.set({ [key]: v }); $("#open-settings").click(); } }, l)));
   const body = h("div", {},
     h("div", { class: "opt-group" }, h("h4", {}, t("surah.setScript")),
-      seg("script", [["indopak", t("surah.setScriptIndopak")], ["uthmani", t("surah.setScriptUthmani")]]),
+      seg("script", [["indopak", t("surah.setScriptIndopak")], ["uthmani", t("surah.setScriptUthmani")], ["tajweed", t("surah.setScriptTajweed")]]),
       h("div", { class: "tiny", style: "margin-top:6px" }, t("surah.setScriptNote"))),
     h("div", { class: "opt-group" }, h("h4", {}, t("surah.setSize")),
       h("div", { class: "range-row" }, h("span", { class: "tiny" }, "A"),

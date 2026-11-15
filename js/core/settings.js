@@ -6,7 +6,7 @@ const KEY = "tadabbur.settings";
 
 export const DEFAULTS = Object.freeze({
   theme: "auto",          // auto | light | dark
-  script: "indopak",      // indopak (DigitalKhatt) | uthmani (Quran.com)
+  script: "indopak",      // indopak (DigitalKhatt) | uthmani (Quran.com) | tajweed (Quran.com, coloured)
   wbw: true,              // show word-by-word meanings
   wbwLang: "ur",          // ur | en | both
   translations: null,     // [translation id…]; null = defaults from translations.json

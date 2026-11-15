@@ -10,7 +10,7 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 ## Non-negotiable content rules
 1. **Never write religious content ourselves.** That covers translations, tafsir, summaries, stories, reasons for revelation, dates and event names beyond plain proper names. Everything comes from a named, recognised source and is fetched by a script, not typed in.
 2. **Every data record carries a `src` id** that exists in `data/sources.json` (publisher, URL, licence, date fetched). Show the source in the UI.
-3. **Never modify the Quran text.**
+3. **Never modify the Quran text.** Each script (Uthmani, IndoPak, tajweed) is shown exactly as its source publishes it and is fingerprinted separately; never merge or "fix" one script with another.
    - Arabic is shown exactly as fetched; `data/checksums*.json` holds SHA-256 fingerprints.
    - Only *re-shape* data: split, align or index it.
 4. **Hadith come only from Sahih al-Bukhari and Sahih Muslim** (the user's decision). Link a hadith to an ayah only when the hadith's own text cites that ayah. Each hadith links to sunnah.com.
@@ -78,6 +78,7 @@ python3 scripts/build_stories.py   # prophets from the Quranic Arabic Corpus ont
 python3 scripts/build_roots.py     # word roots from the Quranic Arabic Corpus file (see below)
 python3 scripts/build_vocab.py     # most frequent words (needs roots)
 python3 scripts/build_audio.py     # recitation word timings (6 reciters) from Quran.com
+python3 scripts/build_tajweed.py   # tajweed-coloured Uthmani text (Quran.com), word by word
 python3 scripts/build_search.py    # search index
 python3 scripts/build_manifest.py  # data/manifest.json (schema version + counts) — always last
 ```

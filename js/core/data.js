@@ -43,6 +43,8 @@ export const sources = () => getJSON("data/sources.json");
 export const surah = n => getJSON(`data/surah/${pad3(n)}.json`);
 export const indopak = n => getJSON(`data/indopak/${pad3(n)}.json`);
 export const info = n => getJSON(`data/info/${pad3(n)}.json`);
+/** Tajweed-coloured words (Quran.com): ayahs[i][w] = sanitised HTML with <span class="tj tj-RULE">. */
+export const tajweed = n => getJSON(`data/tajweed/${pad3(n)}.json`);
 
 /** IndoPak words for surah n when that script is chosen, else null (use Uthmani from surah()). */
 export const scriptText = n => settings.get().script === "indopak" ? indopak(n) : Promise.resolve(null);

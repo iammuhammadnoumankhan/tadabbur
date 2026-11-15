@@ -15,7 +15,7 @@ Fails (exit 1) if:
 
 Usage: python3 scripts/validate_data.py
 """
-import glob, hashlib, json, os, sys
+import glob, hashlib, html, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
@@ -274,6 +274,30 @@ def main():
                 if any(not 1 <= w <= words_per_ayah.get(k, 0) or e < s for w, s, e in segs):
                     err(f"{rel}: {k} has a word timing outside the ayah's words or ending before it starts")
                     break
+
+    # 13. tajweed text: one entry per word, only colour markup, fingerprints unchanged
+    sums_tj = load("checksums-tajweed.json") or {}
+    need_src("qc-tajweed", "tajweed")
+    span = re.compile(r'<span class="tj tj-[A-Za-z_-]+">|</span>')
+    for c in chs:
+        rel = f"tajweed/{c['n']:03d}.json"
+        d = load(rel)
+        if d is None:
+            continue
+        if len(d["ayahs"]) != count[c["n"]]:
+            err(f"{rel}: {len(d['ayahs'])} ayahs, expected {count[c['n']]}")
+            continue
+        for i, row in enumerate(d["ayahs"]):
+            k = f"{c['n']}:{i + 1}"
+            if len(row) != words_per_ayah.get(k, -1):
+                err(f"{rel}: {k} has {len(row)} words, word-by-word has {words_per_ayah.get(k)}")
+            for w in row:
+                if "<" in span.sub("", w):
+                    err(f"{rel}: {k} contains markup other than tajweed colour spans")
+                    break
+        got = [sha16(" ".join(html.unescape(re.sub(r"<[^>]*>", "", w)) for w in row)) for row in d["ayahs"]]
+        if got != sums_tj.get(str(c["n"])):
+            err(f"{rel}: tajweed text changed — fingerprint mismatch")
 
     # 9. manifest (docs/DATA.md): schema version and counts match the data
     man = load("manifest.json") or {}

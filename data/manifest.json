@@ -47,6 +47,16 @@
    ]
   },
   {
+   "id": "tajweed",
+   "files": [
+    "tajweed/NNN.json",
+    "checksums-tajweed.json"
+   ],
+   "src": [
+    "qc-tajweed"
+   ]
+  },
+  {
    "id": "translations",
    "files": [
     "translations.json",

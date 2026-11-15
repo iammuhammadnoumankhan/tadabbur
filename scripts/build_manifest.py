@@ -42,6 +42,7 @@ def main():
             {"id": "chapters", "files": ["chapters.json"], "src": ["qc-chapters"]},
             {"id": "quran-text", "files": ["surah/NNN.json", "checksums.json"], "src": ["qc-text", "qc-wbw"]},
             {"id": "indopak", "files": ["indopak/NNN.json", "checksums-indopak.json"], "src": ["dk-indopak-text", "dk-indopak-font"]},
+            {"id": "tajweed", "files": ["tajweed/NNN.json", "checksums-tajweed.json"], "src": ["qc-tajweed"]},
             {"id": "translations", "files": ["translations.json", "tr/<id>/NNN.json"], "src": [t["src"] for t in trs]},
             {"id": "surah-info", "files": ["info/NNN.json"], "src": ["qc-chapter-info"]},
             {"id": "tafsir", "files": ["tafsirs.json"], "src": [t["src"] for t in load("tafsirs.json")["list"]]},

@@ -107,7 +107,7 @@ input[type=search] {
 }
 .source::before { content: "Source"; font-weight: 600; color: var(--accent-2); text-transform: uppercase; letter-spacing: .6px; font-size: 10px; }
 
-.ar-uthmani { font-family: var(--font-uthmani); }
+.ar-uthmani, .ar-tajweed { font-family: var(--font-uthmani); }
 .ar-indopak { font-family: var(--font-indopak); }
 .urdu { font-family: var(--font-urdu); direction: rtl; line-height: 2.3; }
 
@@ -288,6 +288,40 @@ input[type=search] {
 .src-item { padding: 16px 18px; overflow-wrap: anywhere; min-width: 0; }
 .src-item h3 { margin: 0 0 4px; font-size: 16px; }
 .src-item code { font-size: 12px; color: var(--ink-3); }
+
+/* ---------- tajweed colours (palette follows Quran.com's tajweed colours; lighter in dark mode) */
+:root {
+  --tj-silent: #9a9a9a; --tj-madd-normal: #537fff; --tj-madd-perm: #4050ff; --tj-madd-oblig: #2144c1;
+  --tj-madd-nec: #000ebc; --tj-ghunnah: #ff7e1e; --tj-qalqalah: #dd0008; --tj-ikhfa: #9400a8;
+  --tj-ikhfa-shaf: #d500b7; --tj-iqlab: #26bffd; --tj-idgham-g: #169777; --tj-idgham-wo: #169200;
+  --tj-idgham-shaf: #58b800; --tj-idgham-other: #a1a1a1;
+}
+:root[data-theme="dark"] {
+  --tj-silent: #8d8d8d; --tj-madd-normal: #7e9fff; --tj-madd-perm: #7f8bff; --tj-madd-oblig: #6c8cff;
+  --tj-madd-nec: #9aa3ff; --tj-ghunnah: #ff9a4d; --tj-qalqalah: #ff5a5f; --tj-ikhfa: #d06cff;
+  --tj-ikhfa-shaf: #ff6be6; --tj-iqlab: #5fd3ff; --tj-idgham-g: #3fc9a0; --tj-idgham-wo: #4cc84a;
+  --tj-idgham-shaf: #8fe34a; --tj-idgham-other: #b5b5b5;
+}
+.tj-ham_wasl, .tj-laam_shamsiyah, .tj-slnt { color: var(--tj-silent); }
+.tj-madda_normal { color: var(--tj-madd-normal); }
+.tj-madda_permissible, .tj-madda_obligatory_monfasel { color: var(--tj-madd-perm); }
+.tj-madda_obligatory_mottasel, .tj-madda_obligatory { color: var(--tj-madd-oblig); }
+.tj-madda_necessary { color: var(--tj-madd-nec); }
+.tj-ghunnah { color: var(--tj-ghunnah); }
+.tj-qalaqah { color: var(--tj-qalqalah); }
+.tj-ikhafa { color: var(--tj-ikhfa); }
+.tj-ikhafa_shafawi { color: var(--tj-ikhfa-shaf); }
+.tj-iqlab { color: var(--tj-iqlab); }
+.tj-idgham_ghunnah { color: var(--tj-idgham-g); }
+.tj-idgham_wo_ghunnah { color: var(--tj-idgham-wo); }
+.tj-idgham_shafawi { color: var(--tj-idgham-shaf); }
+.tj-idgham_mutajanisayn, .tj-idgham_mutaqaribayn { color: var(--tj-idgham-other); }
+.tajweed-key { padding: 10px 16px; margin: 0 0 8px; }
+.tajweed-key summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.tj-key { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 10px; font-size: 13px; }
+.tj-key-item { display: inline-flex; align-items: center; gap: 6px; }
+.tj-swatch { display: inline-block; width: 14px; height: 14px; border-radius: 4px; background: currentColor; flex: none; }
+.tj-ar { font-family: var(--font-naskh); color: var(--ink-3); }
 
 /* ---------- word roots */
 .pop .grammar { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }

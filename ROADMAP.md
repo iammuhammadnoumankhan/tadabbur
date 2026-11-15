@@ -47,7 +47,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
   - A "how much of the Quran you now recognise" meter, computed from the text.
 - [x] **7. Audio that highlights each word as it's recited [#8]** *(done 2026-11-15)*
   - Source: Quran.com word-timing segments for a recitation.
-- [ ] **8. Tajweed colours [#10]**
+- [x] **8. Tajweed colours [#10]** *(done 2026-11-15)*
   - Source: Quran.com's tajweed text, plus a colour key.
 - [ ] **9. Mushaf page view [#9]**
   - 604 pages in Madani layout, plus IndoPak 13- and 15-line layouts.
