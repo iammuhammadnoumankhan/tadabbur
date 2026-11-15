@@ -35,6 +35,8 @@ PAGES = [
     ("search.html?q=%D8%B5%D8%A8%D8%B1", ".result", 10),
     ("search.html?q=2%3A255", ".jump", 1),
     ("sources.html", ".src-item", 20),
+    ("root.html", ".r-card", 1000),
+    ("root.html?r=0", ".result", 1),
 ]
 VIEWPORTS = {"desktop": {"width": 1280, "height": 900}, "phone": {"width": 375, "height": 812}}
 

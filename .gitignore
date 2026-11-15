@@ -1,2 +1,5 @@
 .cache/
 .DS_Store
+quranic-corpus-morphology-*.txt
+quranic-corpus-morphology-*.zip
+__pycache__/

@@ -39,7 +39,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
 
 ## Phase 2: Learning the Arabic
 
-- [ ] **5. Word roots [#2]**
+- [x] **5. Word roots [#2]** *(done 2026-11-15)*
   - Tap a word to see its root, lemma and form, and every other ayah where that root appears.
   - Source: Quranic Arabic Corpus morphology (GPL), aligned to our word list as we did for IndoPak.
 - [ ] **6. Most frequent words [#3]** *(needs item 5)*

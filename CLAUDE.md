@@ -24,7 +24,7 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 
 ## Architecture
 - Static site in plain **HTML, CSS and vanilla JS (ES modules)**. No framework and no build step. Must work from any static host and inside future app wrappers.
-- Pages: `index.html`, `surah.html`, `timeline.html`, `stories.html`, `search.html`, `sources.html`.
+- Pages: `index.html`, `surah.html`, `timeline.html`, `stories.html`, `search.html`, `root.html`, `sources.html`.
 - JS has three layers:
   - **`js/core/`**: no DOM. Data loading (`data.js`), settings with pluggable storage (`settings.js`), search engine (`search.js`) and Quran reference helpers (`quran.js`). Mobile and desktop apps reuse it; an app calls `configure({ base, fetch })` and `settings.configureStorage(adapter)`.
   - **`js/i18n/`**: every interface string, in `en.js`, through `t(key, vars)`. Static HTML uses `data-i18n`, `data-i18n-html`, `data-i18n-placeholder`, `data-i18n-title` or `data-i18n-aria-label`. A missing key shows as `⟦key⟧`, and the smoke test fails on it.
@@ -75,9 +75,15 @@ python3 scripts/build_data.py      # chapters, Quran text, word-by-word, transla
 python3 scripts/build_indopak.py   # IndoPak text (DigitalKhatt) aligned to Quran.com words + OFL font
 python3 scripts/build_seerah.py    # Seerah timeline from Sahih al-Bukhari (asserts anchor hadith text)
 python3 scripts/build_stories.py   # prophets from the Quranic Arabic Corpus ontology
+python3 scripts/build_roots.py     # word roots from the Quranic Arabic Corpus file (see below)
 python3 scripts/build_search.py    # search index
 python3 scripts/build_manifest.py  # data/manifest.json (schema version + counts) — always last
 ```
+- **Word roots** need `quranic-corpus-morphology-0.4.txt` in the project root.
+  - The owner downloads it from https://corpus.quran.com/download/ (the form asks for their email; never fill it in for them).
+  - It's git-ignored and must never be committed or edited.
+  - Its terms: data used unchanged, the Corpus credited with a link to corpus.quran.com, and the copyright notice reproduced in derived works. It's kept in `data/roots/index.json` → `notice` and shown on the Roots page.
+  - `build_roots.py` stops if word counts differ from our word list.
 - Scripts must **merge into** `data/sources.json`, never overwrite it.
 - Scripts **assert** their invariants (6,236 ayahs, alignment, anchor text) so the build fails loudly when something drifts.
 

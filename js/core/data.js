@@ -75,6 +75,20 @@ export const seerahBySurah = () => getJSON("data/seerah-by-surah.json").catch(()
 export const stories = () => getJSON("data/stories.json");
 export const storiesBySurah = () => getJSON("data/stories-by-surah.json").catch(() => ({}));
 
+// ---------------------------------------------------------------- word roots (Quranic Arabic Corpus)
+/** Per-ayah word morphology for surah n: ayahs[i][w] = [root, lemma, pos, features] or null. */
+export const morph = n => getJSON(`data/morph/${pad3(n)}.json`);
+export const rootsIndex = () => getJSON("data/roots/index.json");
+export const rootOccurrences = id => getJSON(`data/roots/${id}.json`);
+let rootIdCache = null;
+/** Root (Arabic letters) -> index entry { id, r, b, n, l }. */
+export async function rootByLetters(r) {
+  if (!rootIdCache) rootIdCache = rootsIndex().then(ix => new Map(ix.roots.map(x => [x.r, x])));
+  return (await rootIdCache).get(r) || null;
+}
+/** Corpus dictionary page for a root, e.g. https://corpus.quran.com/qurandictionary.jsp?q=Sbr */
+export const corpusRootUrl = bw => `https://corpus.quran.com/qurandictionary.jsp?q=${encodeURIComponent(bw)}`;
+
 // ---------------------------------------------------------------- search index
 export const searchText = field => getJSON(field === "ar" ? "data/search/ar.json" : `data/search/tr-${field}.json`);
 

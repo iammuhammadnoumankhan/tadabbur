@@ -287,6 +287,26 @@ input[type=search] {
 .src-item h3 { margin: 0 0 4px; font-size: 16px; }
 .src-item code { font-size: 12px; color: var(--ink-3); }
 
+/* ---------- word roots */
+.pop .grammar { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }
+.root-letters { font-family: var(--font-naskh); font-size: 20px; letter-spacing: 2px; color: var(--accent); }
+.lemma { font-family: var(--font-uthmani); font-size: 20px; direction: rtl; text-align: left; }
+.r-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 18px 0 60px; }
+.r-card { padding: 14px; text-align: center; color: var(--ink); display: grid; gap: 2px; }
+.r-card:hover { text-decoration: none; border-color: var(--accent); }
+.r-card .root-letters { font-size: 26px; }
+.r-card .lemma { text-align: center; font-size: 17px; color: var(--ink-2); }
+.r-head { padding: 24px; margin-top: 12px; }
+.r-head .root-letters { font-size: 54px; letter-spacing: 8px; line-height: 1.4; }
+.r-lemmas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.r-lemmas .chip { cursor: pointer; font-size: 13px; }
+.r-lemmas .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.r-lemmas .chip .lemma { font-size: 16px; }
+.r-occ { display: grid; gap: 10px; margin: 14px 0 60px; }
+.r-occ .p-arabic .pw.name { color: var(--accent-2); }
+.r-meaning { font-size: 14px; color: var(--ink-2); margin: 2px 0 6px; }
+.r-meaning .urdu { font-size: 16px; }
+
 /* ---------- report a problem */
 .report-link { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
 .report-link:hover { color: var(--accent-2); text-decoration: none; }

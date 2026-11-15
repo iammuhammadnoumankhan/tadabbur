@@ -192,13 +192,49 @@ def main():
         if p["ayahs"] != len({m["k"] for m in p["mentions"]}):
             err(f"stories.json: {p['id']} ayah count is wrong")
 
+    # 10. word roots (Quranic Arabic Corpus): aligned to our words; occurrences point at that root
+    need_src("qac-morphology", "morph")
+    morph = {}
+    for c in chs:
+        rel = f"morph/{c['n']:03d}.json"
+        d = load(rel)
+        if d is None:
+            continue
+        need_src(d["src"], rel)
+        if len(d["ayahs"]) != count[c["n"]]:
+            err(f"{rel}: {len(d['ayahs'])} ayahs, expected {count[c['n']]}")
+            continue
+        for i, row in enumerate(d["ayahs"]):
+            k = f"{c['n']}:{i + 1}"
+            if len(row) != words_per_ayah.get(k, -1):
+                err(f"{rel}: {k} has {len(row)} words, word-by-word has {words_per_ayah.get(k)}")
+            for e in row:
+                if e is not None and (not isinstance(e, list) or len(e) != 4):
+                    err(f"{rel}: {k} has a malformed entry {e!r}")
+        morph[c["n"]] = d["ayahs"]
+    rix = load("roots/index.json") or {"roots": []}
+    total_with_root = sum(1 for rows in morph.values() for row in rows for e in row if e and e[0])
+    if sum(r["n"] for r in rix["roots"]) != total_with_root:
+        err("roots/index.json: occurrence counts don't add up to the words that have a root")
+    for r in rix["roots"]:
+        occ = load(f"roots/{r['id']}.json") or []
+        if len(occ) != r["n"]:
+            err(f"roots/{r['id']}.json: {len(occ)} occurrences, index says {r['n']}")
+        for key in occ[:2000]:
+            s, a, w = map(int, key.split(":"))
+            rows = morph.get(s) or []
+            e = rows[a - 1][w - 1] if a <= len(rows) and w <= len(rows[a - 1]) else None
+            if not e or e[0] != r["r"]:
+                err(f"roots/{r['id']}.json: {key} isn't a word with root {r['r']}")
+                break
+
     # 9. manifest (docs/DATA.md): schema version and counts match the data
     man = load("manifest.json") or {}
     if man.get("schema") != SCHEMA:
         err(f"manifest.json: schema {man.get('schema')}, expected {SCHEMA} (see docs/DATA.md)")
     expect = {"surahs": 114, "ayahs": 6236, "words": sum(words_per_ayah.values()),
               "translations": len(trs["list"]), "tafsirs": len(taf["list"]),
-              "seerah_events": len(se["events"]), "prophets": len(st["prophets"])}
+              "seerah_events": len(se["events"]), "prophets": len(st["prophets"]), "roots": len(rix["roots"])}
     for k, v in expect.items():
         if (man.get("counts") or {}).get(k) != v:
             err(f"manifest.json: counts.{k} is {(man.get('counts') or {}).get(k)}, data has {v} — rerun scripts/build_manifest.py")

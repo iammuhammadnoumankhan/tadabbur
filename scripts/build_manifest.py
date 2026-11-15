@@ -34,6 +34,7 @@ def main():
             "hadith_linked": len(hadith_nums),
             "seerah_events": len(load("seerah.json")["events"]),
             "prophets": len(load("stories.json")["prophets"]),
+            "roots": len(load("roots/index.json")["roots"]),
         },
         "datasets": [
             {"id": "chapters", "files": ["chapters.json"], "src": ["qc-chapters"]},
@@ -46,6 +47,7 @@ def main():
             {"id": "seerah", "files": ["seerah.json", "seerah/<id>.json", "seerah-by-surah.json"], "src": ["seerah-timeline", "sahih-hadith-text"]},
             {"id": "prophets", "files": ["stories.json", "stories-by-surah.json"], "src": ["qac-ontology"]},
             {"id": "search", "files": ["search/ar.json", "search/tr-<id>.json"], "src": ["qc-imlaei-simple"]},
+            {"id": "roots", "files": ["morph/NNN.json", "roots/index.json", "roots/<id>.json"], "src": ["qac-morphology"]},
         ],
     }
     with open(os.path.join(DATA, "manifest.json"), "w", encoding="utf-8") as f:

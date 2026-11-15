@@ -93,6 +93,26 @@ export const ICON = {
   speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>',
 };
 
+// ---------- word grammar (Quranic Arabic Corpus)
+const ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
+/** "Verb · form X · command" from a morph entry's pos + features. */
+export function morphLabel(pos, features = "") {
+  const parts = [t(`pos.${pos}`)].filter(x => !x.startsWith("⟦"));
+  const f = features ? features.split("|") : [];
+  const form = f.find(x => /^VF:\d+$/.test(x) || /^\([IVX]+\)$/.test(x));
+  if (form) {
+    const n = form.startsWith("VF:") ? ROMAN[+form.slice(3)] : form.slice(1, -1);
+    if (n && n !== "I") parts.push(t("feat.form", { n }));
+  }
+  for (const k of ["PERF", "IMPF", "IMPV"]) if (f.includes(k)) parts.push(t(`feat.${k}`));
+  if (f.includes("PCPL")) parts.push(t(f.includes("PASS") ? "feat.PASS|PCPL" : "feat.ACT|PCPL"));
+  else if (f.includes("PASS")) parts.push(t("feat.PASS"));
+  if (f.includes("VN")) parts.push(t("feat.VN"));
+  return parts.join(" · ");
+}
+/** Root letters with spaces, e.g. "ص ب ر". */
+export const spacedRoot = r => [...r].join(" ");
+
 // ---------- "Report a problem" (opens a pre-filled GitHub issue form; see js/core/report.js)
 export function reportLink(opts, { label = true, cls = "" } = {}) {
   const href = core.reportUrl({ page: location.href, ...opts });
@@ -121,6 +141,7 @@ export function header(active = "") {
         h("a", { href: "index.html#surahs", class: active === "surahs" ? "on" : null }, t("nav.surahs")),
         h("a", { href: "search.html", class: "nav-search", title: t("nav.search"), "aria-label": t("nav.search"), html: ICON.search }),
         h("a", { href: "stories.html" }, t("nav.prophets")),
+        h("a", { href: "root.html" }, t("nav.roots")),
         h("a", { href: "timeline.html" }, h("span", { class: "label" }, t("nav.seerahPrefix")), t("nav.timeline")),
         h("a", { href: "sources.html" }, t("nav.sources")),
         installBtn(),
@@ -187,11 +208,11 @@ export async function offlineUrls() {
   const urls = [];
   for (const c of chs) {
     const n = core.pad3(c.n);
-    urls.push(`data/surah/${n}.json`, `data/indopak/${n}.json`, `data/info/${n}.json`,
+    urls.push(`data/surah/${n}.json`, `data/indopak/${n}.json`, `data/info/${n}.json`, `data/morph/${n}.json`,
       ...trs.map(tr => `data/tr/${tr.id}/${n}.json`));
     if (hIndex[c.n]) urls.push(`data/hadith/${n}.json`);
   }
-  urls.push("data/search/ar.json", ...trs.map(tr => `data/search/tr-${tr.id}.json`),
+  urls.push("data/search/ar.json", "data/roots/index.json", ...trs.map(tr => `data/search/tr-${tr.id}.json`),
     ...se.events.map(e => `data/seerah/${e.id}.json`));
   return urls;
 }

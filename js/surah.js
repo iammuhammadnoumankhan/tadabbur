@@ -14,6 +14,7 @@ const [chs, data, hIndex, src, trMeta, seerah, seerahBySurah, stories, storiesBy
 const surahProphets = (storiesBySurah[N] || []).map(id => stories.prophets.find(p => p.id === id)).filter(Boolean);
 const seerahEvents = (seerahBySurah[N] || []).map(id => seerah.events.find(e => e.id === id)).filter(Boolean);
 const ch = chs.find(c => c.n === N);
+const morphP = C.morph(N).catch(() => null);          // word grammar, loaded in the background
 const hCounts = hIndex[N] || {};
 document.title = t("surah.pageTitle", { name: ch.name, n: ch.n });
 
@@ -186,6 +187,7 @@ function showPop(el) {
     h("dl", {},
       h("dt", {}, t("lang.ur")), h("dd", { class: "urdu", lang: "ur" }, w.ur || "—"),
       h("dt", {}, t("lang.en")), h("dd", {}, w.en || "—")),
+    grammarBox(idx, +el.dataset.i),
     h("div", { class: "row" },
       h("button", { class: "btn", onclick: () => { wordAudio.src = C.audioUrl.word(w.a); wordAudio.play(); } },
         h("span", { html: ICON.speaker }), t("surah.wordListen")),
@@ -195,7 +197,13 @@ function showPop(el) {
       C.reportLink({ kind: "word", reference: t("report.wordRef", { key: a.k, n: +el.dataset.i + 1, word: wordText(idx, +el.dataset.i) }),
         source: t("report.wordSource"), page: pageUrl(a.k) })));
   pop.classList.add("show");
-  const r = el.getBoundingClientRect();
+  popEl = el;
+  placePop();
+}
+let popEl = null;
+function placePop() {
+  if (!popEl || !pop.classList.contains("show")) return;
+  const r = popEl.getBoundingClientRect();
   const pw = pop.offsetWidth, ph = pop.offsetHeight;
   let x = r.left + r.width / 2 - pw / 2;
   x = Math.max(8, Math.min(x, innerWidth - pw - 8));
@@ -203,6 +211,30 @@ function showPop(el) {
   if (y + ph > innerHeight - 8) y = Math.max(8, r.top - ph - 8);
   pop.style.left = x + "px"; pop.style.top = y + "px";
 }
+// root / dictionary form / type for one word (fills in when the grammar data arrives)
+function grammarBox(idx, wi) {
+  const box = h("dl", { class: "grammar" }, h("dt", {}, t("morph.root")), h("dd", { class: "tiny" }, t("morph.loading")));
+  morphP.then(async m => {
+    const e = m?.ayahs?.[idx]?.[wi];
+    box.innerHTML = "";
+    if (!e) { box.remove(); return; }
+    const [root, lemma, pos, feats] = e;
+    const info = root ? await C.rootByLetters(root) : null;
+    box.append(
+      h("dt", {}, t("morph.root")),
+      root
+        ? h("dd", {}, h("span", { class: "root-letters", lang: "ar" }, C.spacedRoot(root)), " ",
+            info ? h("a", { href: `root.html?r=${info.id}`, class: "tiny" }, t("morph.rootCount", { n: info.n })) : null)
+        : h("dd", { class: "tiny" }, t("morph.noRoot")),
+      lemma ? h("dt", {}, t("morph.lemma")) : null,
+      lemma ? h("dd", { class: "lemma", lang: "ar" }, lemma) : null,
+      h("dt", {}, t("morph.pos")), h("dd", {}, C.morphLabel(pos, feats)),
+      h("dt", {}), h("dd", {}, h("a", { class: "tiny", href: "https://corpus.quran.com", target: "_blank", rel: "noopener" }, t("morph.source"))));
+    placePop();
+  });
+  return box;
+}
+
 function hidePop() { pop.classList.remove("show"); $$(".w.on").forEach(x => x.classList.remove("on")); }
 addEventListener("scroll", hidePop, { passive: true });
 

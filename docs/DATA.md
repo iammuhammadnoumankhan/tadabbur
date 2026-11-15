@@ -101,6 +101,20 @@ An array of 114 items:
   - `as` is the name variant used (e.g. `"messiah"`).
 - `stories-by-surah.json`: `{ "<surah>": [prophet id…] }`
 
+### `morph/NNN.json`, `roots/index.json`, `roots/<id>.json`
+- `morph/NNN.json`: `{ src, ayahs: [[Word|null, …], …] }`, with **one entry per `surah/NNN.json` word**.
+  - `Word` is `[root, lemma, pos, features]`.
+  - `root`: Arabic root letters (e.g. `"صبر"`), or `null` for particles and names without a root.
+  - `lemma`: dictionary form with harakat.
+  - `pos`: Corpus part-of-speech tag (`N`, `V`, `P`, `PN`, …).
+  - `features`: verb form, aspect and participle tags joined with `|`, e.g. `"IMPV|(X)"` or `"ACT|PCPL"`.
+- `roots/index.json`: `{ src, roots: [{ id, r, b, n, l: [[lemma, count], …] }] }`
+  - `id`: position in Arabic alphabetical order, also the occurrence file name.
+  - `b`: the Buckwalter spelling, for `corpus.quran.com/qurandictionary.jsp?q=<b>`.
+  - `n`: number of occurrences.
+- `roots/<id>.json`: every occurrence of that root, as `["s:a:w", …]`.
+- Source: `qac-morphology` (Quranic Arabic Corpus v0.4, used unchanged).
+
 ### `search/ar.json`, `search/tr-<id>.json`
 Each is an array of 6,236 strings, in global ayah index order.
 - `ar.json`: Quran.com plain Arabic (`imlaei_simple`), used **only for matching**.
