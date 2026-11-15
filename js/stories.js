@@ -58,9 +58,8 @@ function familyTree() {
   const node = id => {
     const person = FAM.people[id];
     const inner = [h("span", { class: "ft-ar", lang: "ar" }, person.ar), h("span", { class: "ft-en" }, person.en)];
-    return byId[id]
-      ? h("a", { class: "ft-node prophet", href: `stories.html?p=${id}` }, ...inner)
-      : h("span", { class: "ft-node" }, ...inner);
+    return h("button", { class: `ft-node${byId[id] ? " prophet" : ""}`, type: "button", "data-person": id,
+      "aria-label": t("family.openCard", { name: person.en }), onclick: () => openPerson(id) }, ...inner);
   };
   const branch = id => h("li", {}, node(id),
     childrenOf.has(id) ? h("ul", {}, ...childrenOf.get(id).map(({ c, rel }) => {
@@ -78,17 +77,80 @@ function familyTree() {
       h("span", { class: "ft-node ft-mini" }, t("family.legendOther")),
       EV.length ? h("span", { class: "ft-legend-ev" }, t("family.legendEvidence")) : null),
     alone.length ? h("div", { class: "jump-row" }, h("span", { class: "tiny" }, t("family.noLinks")),
-      ...alone.map(p => h("a", { class: "chip", href: `stories.html?p=${p.id}` }, p.en))) : null,
+      ...alone.map(p => h("button", { class: "chip", type: "button", "data-person": p.id, onclick: () => openPerson(p.id) }, p.en))) : null,
     EV.length ? evidenceList() : null,
     h("div", { class: "source", style: "margin-top:12px" }, t("family.source"), " ",
       h("a", { href: "https://corpus.quran.com/concept.jsp?id=prophet", target: "_blank", rel: "noopener" }, "corpus.quran.com ↗")));
 }
 
+const evLink = x => x.type === "ayah"
+  ? h("a", { class: "chip", href: `surah.html?n=${x.key.split(":")[0]}#${x.key}`, title: x.quote }, x.key)
+  : h("a", { class: "chip", href: x.url, target: "_blank", rel: "noopener", title: x.quote }, `${t(`collection.${x.c}`)} ${x.num} ↗`);
+const ayahChip = k => h("a", { class: "chip", href: `surah.html?n=${k.split(":")[0]}#${k}` }, k);
+
+// ------------------------------------------------------------------ person card (tap anyone in the tree)
+// Shows only what the data holds: names, the ontology's prophet/messenger categories, the ayahs the ontology
+// tags, and each family link with its source. No biography is written by us.
+let card = null;
+function openPerson(id) {
+  const person = FAM.people[id];
+  if (!person) return;
+  if (!card) {
+    const scrim = document.body.appendChild(h("div", { class: "scrim", onclick: () => closePerson() }));
+    const body = h("div", { class: "drawer-b" });
+    const title = h("h3", {});
+    const el = document.body.appendChild(h("aside", { class: "drawer pc-drawer", role: "dialog", "aria-modal": "true", "aria-hidden": "true" },
+      h("div", { class: "drawer-h" }, title,
+        h("button", { class: "icon-btn", type: "button", "aria-label": t("common.close"), html: C.ICON.close, onclick: () => closePerson() })),
+      body));
+    addEventListener("keydown", e => { if (e.key === "Escape" && el.classList.contains("show")) closePerson(); });
+    card = { el, scrim, body, title, opener: null };
+  }
+  const p = byId[id];
+  const rows = [];
+  for (const [rel, a, b] of FAM.links) if (a === id || b === id) rows.push({ rel, a, b, ev: null });
+  for (const e of EV) if (e.a === id || e.b === id) rows.push({ rel: e.rel, a: e.a, b: e.b, ev: e.evidence });
+  const who = x => x === id ? h("b", {}, FAM.people[x].en)
+    : h("button", { class: "pc-link", type: "button", onclick: () => openPerson(x) }, FAM.people[x].en);
+  const ayahs = person.ayahs || [];
+
+  card.title.textContent = t("family.cardTitle");
+  card.body.innerHTML = "";
+  card.body.append(
+    h("div", { class: "pc-head" },
+      h("div", { class: "p-ar", translate: "no", lang: "ar" }, person.ar),
+      h("div", { class: "p-en" }, person.en),
+      h("div", { class: "pl-row" },
+        ...(p ? p.cats.map(c => h("span", { class: "chip" }, t(`stories.cat.${c}`))) : [h("span", { class: "chip" }, t("family.notProphet"))]))),
+    h("h4", { class: "pc-h" }, t("family.cardQuran")),
+    p ? h("div", {},
+        h("p", { class: "muted", style: "margin:0 0 8px" }, t("family.referredIn", counts(p))),
+        h("a", { class: "btn", href: `stories.html?p=${id}` }, t("family.readAyahs", { n: t("common.ayahs", { n: p.ayahs }) })))
+      : ayahs.length ? h("div", {},
+        h("p", { class: "muted", style: "margin:0 0 8px" }, t("family.taggedIn", { n: t("common.ayahs", { n: ayahs.length }) })),
+        h("div", { class: "pc-chips" }, ...ayahs.map(ayahChip)))
+      : h("p", { class: "muted", style: "margin:0" }, person.concept ? t("family.noAyahs") : t("family.hadithOnly")),
+    h("h4", { class: "pc-h" }, t("family.cardFamily")),
+    ...rows.map(r => h("div", { class: "pc-rel" },
+      h("div", {}, who(r.a), ` ${t(`family.rel.${r.rel}`)} `, who(r.b)),
+      r.ev ? h("div", { class: "pc-chips" }, ...r.ev.map(evLink))
+        : h("div", { class: "tiny" }, t("family.fromOntology")))),
+    h("div", { class: "row-between", style: "margin-top:16px" },
+      person.concept ? h("div", { class: "source" }, t("stories.source"),
+        h("a", { href: `https://corpus.quran.com/concept.jsp?id=${id}`, target: "_blank", rel: "noopener" }, t("stories.viewConcept"))) : h("span"),
+      C.reportLink({ kind: "prophets", reference: t("family.cardRef", { name: person.en }), source: t("report.prophetsSource") })));
+  card.opener = document.activeElement;
+  card.el.classList.add("show"); card.scrim.classList.add("show"); card.el.setAttribute("aria-hidden", "false");
+  card.body.scrollTop = 0;
+  card.el.querySelector(".icon-btn").focus();
+}
+function closePerson() {
+  card.el.classList.remove("show"); card.scrim.classList.remove("show"); card.el.setAttribute("aria-hidden", "true");
+  card.opener?.focus?.();
+}
+
 // Every link added beyond the ontology, with the ayahs / hadith that state it
 function evidenceList() {
-  const evLink = x => x.type === "ayah"
-    ? h("a", { class: "chip", href: `surah.html?n=${x.key.split(":")[0]}#${x.key}`, title: x.quote }, x.key)
-    : h("a", { class: "chip", href: x.url, target: "_blank", rel: "noopener", title: x.quote }, `${t(`collection.${x.c}`)} ${x.num} ↗`);
   return h("div", { class: "card ft-evidence" },
     h("h3", {}, t("family.evidenceTitle")),
     h("p", { class: "tiny" }, t("family.evidenceLead")),

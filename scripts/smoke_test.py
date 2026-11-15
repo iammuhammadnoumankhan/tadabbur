@@ -32,6 +32,7 @@ PAGES = [
     ("timeline.html", ".ev", 24),
     ("stories.html", ".p-card", 24),
     ("stories.html?p=musa", ".p-group", 34),
+    ("stories.html", "button.ft-node", 23),
     ("search.html?q=%D8%B5%D8%A8%D8%B1", ".result", 10),
     ("search.html?q=2%3A255", ".jump", 1),
     ("sources.html", ".src-item", 20),

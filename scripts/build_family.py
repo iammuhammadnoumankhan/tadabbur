@@ -18,7 +18,7 @@ Run after build_stories.py.
 import datetime, html, json, os, re, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from build_stories import get, text  # noqa: E402  (same cached, polite fetching)
+from build_stories import get, text, mentions  # noqa: E402  (same cached, polite fetching)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
@@ -110,7 +110,9 @@ def main():
         seen.add(cid)
         en, ar, rels = concept(cid)
         p = prophets.get(cid)
-        people[cid] = {"en": p["en"] if p else en, "ar": p["ar"] if p else ar, "prophet": bool(p)}
+        people[cid] = {"en": p["en"] if p else en, "ar": p["ar"] if p else ar, "prophet": bool(p), "concept": True}
+        if not p:                                         # prophets' ayahs are in stories.json; relatives' come from here
+            people[cid]["ayahs"] = sorted({f"{s}:{a}" for s, a, w in mentions(cid)}, key=lambda k: tuple(map(int, k.split(":"))))
         for rel, a, b in rels:
             if cid not in (a, b):
                 continue                                  # only relations about this person

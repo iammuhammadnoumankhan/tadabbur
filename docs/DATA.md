@@ -162,6 +162,7 @@ Sources: `tadabbur-vocab` (counts) and `qac-morphology`.
 
 ### `family.json` (prophets family tree)
 `{ src: [...], people: { id: { en, ar, prophet } }, links: [[rel, child, parent], …], evidenced: [{ rel, a, b, evidence }] }`
+- `people[id]`: `concept: true` if the person is a Corpus ontology concept; for those who aren't prophets, `ayahs` lists the ayah keys the ontology tags (prophets' ayahs are in `stories.json`).
 - `links`: `rel` is one of `son-of`, `daughter-of` or `adopted-son-of`, **only as the Quranic Arabic Corpus ontology states it**. Nothing is inferred (no siblings or grandparents).
 - `evidenced`: extra links where an ayah or a Sahih hadith states the relation itself, approved by the project owner (see `docs/FAMILY_CANDIDATES.md`). "`a` `rel` `b`", with `rel` one of `son-of`, `daughter-of`, `brother-of`, `uncle-of`, `descendant-of`.
   - `evidence`: `[{ type: "ayah", key, quote } | { type: "hadith", c, num, url, quote }]`. `quote` is the wording the build checked: Saheeh International for an ayah, the hadith's Arabic (harakat removed) for a hadith. `num` is the sunnah.com number.

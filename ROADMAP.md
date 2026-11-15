@@ -90,7 +90,7 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
 - [x] **16b. Fuller family tree with evidence** *(done 2026-11-15: A1 and C1–C8 of docs/FAMILY_CANDIDATES.md approved and added)*
   - Add parent, child and sibling links **only where an ayah or a Sahih hadith states them**, each link showing its evidence. Example: the Prophet's ﷺ son Ibrahim, named in Bukhari 1060, 1063, 1303, 3255 and 6194.
   - Candidate links are listed for the owner's (and ideally a scholar's) approval before they're added.
-- [ ] **16c. Person cards** *(proposed)*
+- [x] **16c. Person cards** *(done 2026-11-15)*
   - Tap anyone in the tree to see:
     - name (Arabic and English);
     - prophet or messenger, per the ontology;

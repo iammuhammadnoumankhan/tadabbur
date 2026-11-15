@@ -587,6 +587,17 @@ a.ft-node:hover { text-decoration: none; border-color: var(--accent); }
 .ftree li.rel-ev > .ft-node { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-2) 45%, transparent); }
 .ft-legend-ev { font-size: 12px; padding: 4px 10px; border-radius: 10px; border: 1px solid var(--line); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-2) 45%, transparent); }
 .ft-evidence { padding: 16px 18px; margin-top: 14px; }
+button.ft-node { font: inherit; cursor: pointer; }
+button.ft-node:hover, button.ft-node:focus-visible { border-color: var(--accent); outline: none; }
+button.chip { font: inherit; font-size: 13px; cursor: pointer; }
+.pc-head { display: grid; gap: 2px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.pc-head .p-ar { text-align: left; font-size: 40px; }
+.pc-h { margin: 18px 0 8px; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3); }
+.pc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pc-rel { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid var(--line); }
+.pc-rel:first-of-type { border-top: 0; }
+.pc-link { font: inherit; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
+.pc-link:hover { text-decoration: underline; }
 .ft-evidence h3 { margin: 0 0 4px; font-size: 16px; }
 .ft-ev-row { display: grid; gap: 6px; padding: 10px 0; border-top: 1px solid var(--line); }
 .ft-ev-src { display: flex; flex-wrap: wrap; gap: 6px; }

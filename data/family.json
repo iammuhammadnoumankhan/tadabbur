@@ -23,7 +23,11 @@
   "abel": {
    "en": "Abel",
    "ar": "هابيل",
-   "prophet": false
+   "prophet": false,
+   "concept": true,
+   "ayahs": [
+    "5:27"
+   ]
   },
   "abu-talib": {
    "en": "Abu Talib",
@@ -33,37 +37,50 @@
   "adam": {
    "en": "Adam",
    "ar": "آدم",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "ayyub": {
    "en": "Ayyub",
    "ar": "أيوب",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "azar": {
    "en": "Azar",
    "ar": "آزر",
-   "prophet": false
+   "prophet": false,
+   "concept": true,
+   "ayahs": [
+    "6:74"
+   ]
   },
   "cain": {
    "en": "Cain",
    "ar": "قابيل",
-   "prophet": false
+   "prophet": false,
+   "concept": true,
+   "ayahs": [
+    "5:27"
+   ]
   },
   "david": {
    "en": "David",
    "ar": "داود",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "elijah": {
    "en": "Elijah",
    "ar": "إلياس",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "elisha": {
    "en": "Elisha",
    "ar": "اليسع",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "fatimah": {
    "en": "Fatimah",
@@ -73,17 +90,20 @@
   "harun": {
    "en": "Harun",
    "ar": "هارون",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "hud": {
    "en": "Hud",
    "ar": "هود",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "ibrahim": {
    "en": "Ibrahim",
    "ar": "إبراهيم",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "ibrahim-son-of-muhammad": {
    "en": "Ibrahim",
@@ -93,67 +113,118 @@
   "idris": {
    "en": "Idris",
    "ar": "إدريس",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "imran": {
    "en": "Imran",
    "ar": "عمران",
-   "prophet": false
+   "prophet": false,
+   "concept": true,
+   "ayahs": [
+    "3:33",
+    "3:35",
+    "66:12"
+   ]
   },
   "isaac": {
    "en": "Isaac",
    "ar": "إسحاق",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "ishmael": {
    "en": "Ishmael",
    "ar": "إسماعيل",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "jesus": {
    "en": "Jesus",
    "ar": "عيسى",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "lut": {
    "en": "Lut",
    "ar": "لوط",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "maryam": {
    "en": "Maryam",
    "ar": "مريم",
-   "prophet": false
+   "prophet": false,
+   "concept": true,
+   "ayahs": [
+    "2:87",
+    "2:253",
+    "3:36",
+    "3:37",
+    "3:42",
+    "3:43",
+    "3:44",
+    "3:45",
+    "4:156",
+    "4:157",
+    "4:171",
+    "5:17",
+    "5:46",
+    "5:72",
+    "5:75",
+    "5:78",
+    "5:110",
+    "5:112",
+    "5:114",
+    "5:116",
+    "9:31",
+    "19:16",
+    "19:27",
+    "19:34",
+    "23:50",
+    "33:7",
+    "43:57",
+    "57:27",
+    "61:6",
+    "61:14",
+    "66:12"
+   ]
   },
   "muhammad": {
    "en": "Muhammad",
    "ar": "محمد",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "musa": {
    "en": "Musa",
    "ar": "موسى",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "nuh": {
    "en": "Nuh",
    "ar": "نوح",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "salih": {
    "en": "Salih",
    "ar": "صالح",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "shuayb": {
    "en": "Shuayb",
    "ar": "شعيب",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "solomon": {
    "en": "Solomon",
    "ar": "سليمان",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "umamah": {
    "en": "Umamah",
@@ -163,22 +234,26 @@
   "yahya": {
    "en": "Yahya",
    "ar": "يحيى",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "yaqub": {
    "en": "Yaqub",
    "ar": "يعقوب",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "yunus": {
    "en": "Yunus",
    "ar": "يونس",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "yusuf": {
    "en": "Yusuf",
    "ar": "يوسف",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   },
   "zainab": {
    "en": "Zainab",
@@ -188,12 +263,17 @@
   "zayd": {
    "en": "Zayd",
    "ar": "زيد",
-   "prophet": false
+   "prophet": false,
+   "concept": true,
+   "ayahs": [
+    "33:37"
+   ]
   },
   "zechariah": {
    "en": "Zechariah",
    "ar": "زكريا",
-   "prophet": true
+   "prophet": true,
+   "concept": true
   }
  },
  "links": [
