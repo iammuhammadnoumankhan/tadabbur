@@ -11,7 +11,8 @@
   "seerah_events": 24,
   "prophets": 24,
   "roots": 1642,
-  "vocab": 4824
+  "vocab": 4824,
+  "reciters": 6
  },
  "datasets": [
   {
@@ -155,6 +156,21 @@
    "src": [
     "tadabbur-vocab",
     "qac-morphology"
+   ]
+  },
+  {
+   "id": "recitations",
+   "files": [
+    "audio/reciters.json",
+    "audio/<reciter id>/NNN.json"
+   ],
+   "src": [
+    "qc-audio-7",
+    "qc-audio-6",
+    "qc-audio-12",
+    "qc-audio-2",
+    "qc-audio-9",
+    "qc-audio-3"
    ]
   }
  ]

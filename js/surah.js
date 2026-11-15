@@ -15,6 +15,7 @@ const surahProphets = (storiesBySurah[N] || []).map(id => stories.prophets.find(
 const seerahEvents = (seerahBySurah[N] || []).map(id => seerah.events.find(e => e.id === id)).filter(Boolean);
 const ch = chs.find(c => c.n === N);
 const morphP = C.morph(N).catch(() => null);          // word grammar, loaded in the background
+const RECITERS = await C.reciters().catch(() => null);
 const hCounts = hIndex[N] || {};
 document.title = t("surah.pageTitle", { name: ch.name, n: ch.n });
 
@@ -294,6 +295,12 @@ $("#open-settings").onclick = () => {
       h("label", { class: "check" },
         h("input", { type: "checkbox", checked: st.showTranslit, onchange: e => C.set({ showTranslit: e.target.checked }) }), t("surah.setTranslit"))),
     h("div", { class: "opt-group" }, h("h4", {}, t("surah.setMeaningLang")), seg("uiMeaning", [["ur", t("lang.ur")], ["en", t("lang.en")]])),
+    RECITERS ? h("div", { class: "opt-group" }, h("h4", {}, t("surah.setReciter")),
+      h("select", { class: "tafsir-select", "aria-label": t("surah.setReciter"), onchange: e => C.set({ reciter: +e.target.value }) },
+        ...RECITERS.list.map(r => h("option", { value: r.id, selected: r.id === (st.reciter || RECITERS.default) }, `${r.name} — ${r.style}`))),
+      h("label", { class: "check", style: "margin-top:8px" },
+        h("input", { type: "checkbox", checked: st.followWords, onchange: e => C.set({ followWords: e.target.checked }) }), t("surah.setFollow")),
+      h("div", { class: "tiny", style: "margin-top:4px" }, t("surah.setReciterNote"))) : null,
     h("div", { class: "opt-group" }, h("h4", {}, t("surah.setTheme")),
       seg("theme", [["auto", t("surah.themeAuto")], ["light", t("surah.themeLight")], ["dark", t("surah.themeDark")]])),
     h("div", { class: "opt-group" }, h("h4", {}, t("pwa.offlineTitle")), C.offlinePanel()));
@@ -379,36 +386,90 @@ async function openHadith(key) {
 }
 
 // ======================================================= audio player
+// Full-surah recitation with ayah + word timings (data/audio/<reciter>/NNN.json), so each word
+// lights up as it's recited. Falls back to per-ayah audio if timings can't be loaded.
 const audio = $("#audio");
 const player = {
-  idx: -1, playing: false, continuous: true,
-  playFrom(i, single = false) {
-    this.continuous = !single || this.playing;
-    this.idx = i; this.load(); audio.play(); this.playing = true; syncPlay();
+  playing: false, single: false, idx: -1, word: null, T: null, reciterId: null, raf: 0,
+  async timings() {
+    const rec = await C.selectedReciter();
+    if (this.T && this.reciterId === rec.id) return this.T;
+    this.reciterId = rec.id;
+    this.T = await C.audioTimings(rec.id, N).catch(() => null);
+    return this.T;
   },
-  load() {
-    const a = data.ayahs[this.idx];
-    audio.src = C.audioUrl.ayah(a.id);
-    $$(".ayah.playing").forEach(x => x.classList.remove("playing"));
-    const el = document.getElementById(a.k);
-    el?.classList.add("playing");
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  async playFrom(i, single = false) {
+    this.single = single;
+    const T = await this.timings();
+    if (T) {
+      if (audio.src !== T.url) audio.src = T.url;
+      audio.currentTime = T.ayahs[i][0] / 1000;
+    } else {
+      audio.src = C.audioUrl.ayah(data.ayahs[i].id);           // fallback: one file per ayah
+    }
+    this.idx = -1;
+    this.setAyah(i);
+    await audio.play().catch(() => {});
+    this.playing = true; syncPlay(); this.loop();
   },
   toggle() {
-    if (this.playing) { audio.pause(); this.playing = false; }
-    else { if (this.idx < 0) { this.idx = 0; this.load(); } this.continuous = true; audio.play(); this.playing = true; }
-    syncPlay();
+    if (this.playing) { audio.pause(); this.playing = false; syncPlay(); return; }
+    if (this.idx < 0 || audio.ended) return this.playFrom(0, false);
+    this.single = false;
+    audio.play().catch(() => {}); this.playing = true; syncPlay(); this.loop();
+  },
+  setAyah(i) {
+    if (i === this.idx) return;
+    this.idx = i;
+    $$(".ayah.playing").forEach(x => x.classList.remove("playing"));
+    const el = document.getElementById(data.ayahs[i].k);
+    el?.classList.add("playing");
+    if (el && !inView(el)) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  },
+  setWord(i, w) {
+    const key = i == null || w == null ? null : `${i}:${w}`;
+    if (key === this.word) return;
+    $$(".w.speak").forEach(x => x.classList.remove("speak"));
+    this.word = key;
+    if (key && C.get().followWords) document.querySelector(`.w[data-k="${data.ayahs[i].k}"][data-i="${w - 1}"]`)?.classList.add("speak");
+  },
+  loop() {
+    cancelAnimationFrame(this.raf);
+    const startIdx = this.idx;
+    const tick = () => {
+      if (!this.playing) return;
+      const T = this.T;
+      if (T) {
+        const ms = audio.currentTime * 1000;
+        let i = this.idx < 0 ? 0 : this.idx;                       // ayahs are in time order
+        while (i < T.ayahs.length - 1 && ms >= T.ayahs[i + 1][0]) i++;
+        while (i > 0 && ms < T.ayahs[i][0]) i--;
+        if (this.single && i !== startIdx) { audio.pause(); this.playing = false; this.setWord(); syncPlay(); return; }
+        this.setAyah(i);
+        const seg = T.ayahs[i][2].find(([, a, b]) => ms >= a && ms < b);
+        this.setWord(i, seg ? seg[0] : null);
+      }
+      this.raf = requestAnimationFrame(tick);
+    };
+    this.raf = requestAnimationFrame(tick);
   },
 };
+const inView = el => { const r = el.getBoundingClientRect(); return r.top > 120 && r.bottom < innerHeight - 40; };
 audio.addEventListener("ended", () => {
-  if (player.continuous && player.idx < data.ayahs.length - 1) { player.idx++; player.load(); audio.play(); }
-  else { player.playing = false; syncPlay(); }
+  if (!player.T && !player.single && player.idx < data.ayahs.length - 1) return player.playFrom(player.idx + 1, false);
+  player.playing = false; player.setWord(); syncPlay();
 });
 function syncPlay() {
   $("#play-all").innerHTML = player.playing ? `${ICON.pause}<span>${t("surah.pause")}</span>` : `${ICON.play}<span>${t("surah.listen")}</span>`;
 }
 $("#play-all").onclick = () => player.toggle();
 syncPlay();
+C.onChange((_, patch) => {
+  if (!("reciter" in patch)) return;
+  const was = player.playing;
+  audio.pause(); player.playing = false; player.T = null; syncPlay();
+  if (was) player.playFrom(Math.max(0, player.idx), false);
+});
 
 // ======================================================= toolbar sync
 function syncToolbar() {
@@ -422,12 +483,13 @@ $$("#wbw-seg button").forEach(b => b.onclick = () =>
   b.dataset.v === "off" ? C.set({ wbw: false }) : C.set({ wbw: true, wbwLang: b.dataset.v }));
 
 C.onChange(async (_, patch) => {
-  if ("arSize" in patch || "theme" in patch || "tafsir" in patch || "known" in patch) return;
+  if ("arSize" in patch || "theme" in patch || "tafsir" in patch || "known" in patch || "reciter" in patch || "followWords" in patch) return;
   if ("translations" in patch) await loadTranslations();
   if ("uiMeaning" in patch) await renderGate();
   const keep = player.idx;
   await renderReader();
   if (keep >= 0) document.getElementById(data.ayahs[keep].k)?.classList.add("playing");
+  player.word = null;
 });
 
 // ======================================================= pager

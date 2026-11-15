@@ -15,7 +15,8 @@ UA = {"User-Agent": "tadabbur-link-check/1.0 (+https://github.com/iammuhammadnou
 
 RUNTIME = {
     "tafsir API (Ibn Kathir, 1:1)": "https://api.quran.com/api/v4/tafsirs/169/by_ayah/1:1",
-    "ayah audio (Alafasy, 1:1)": "https://cdn.islamic.network/quran/audio/128/ar.alafasy/1.mp3",
+    "surah recitation (Alafasy, Al-Fatihah)": "https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal/1.mp3",
+    "ayah audio fallback (Alafasy, 1:1)": "https://cdn.islamic.network/quran/audio/128/ar.alafasy/1.mp3",
     "word audio (1:1 word 1)": "https://audio.qurancdn.com/wbw/001_001_001.mp3",
     "sunnah.com (Bukhari 3902)": "https://sunnah.com/bukhari:3902",
 }

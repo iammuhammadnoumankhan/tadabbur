@@ -89,6 +89,16 @@ export async function rootByLetters(r) {
 /** Corpus dictionary page for a root, e.g. https://corpus.quran.com/qurandictionary.jsp?q=Sbr */
 export const corpusRootUrl = bw => `https://corpus.quran.com/qurandictionary.jsp?q=${encodeURIComponent(bw)}`;
 
+// ---------------------------------------------------------------- recitations with word timings
+export const reciters = () => getJSON("data/audio/reciters.json");
+/** { url, ms, ayahs: [[fromMs, toMs, [[word, startMs, endMs], …]], …] } for one reciter + surah. */
+export const audioTimings = (rid, n) => getJSON(`data/audio/${rid}/${pad3(n)}.json`);
+/** The reader's chosen reciter (metadata). */
+export async function selectedReciter() {
+  const r = await reciters();
+  return r.list.find(x => x.id === settings.get().reciter) || r.list.find(x => x.id === r.default);
+}
+
 // ---------------------------------------------------------------- search index
 export const searchText = field => getJSON(field === "ar" ? "data/search/ar.json" : `data/search/tr-${field}.json`);
 

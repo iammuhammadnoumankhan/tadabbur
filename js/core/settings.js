@@ -16,6 +16,8 @@ export const DEFAULTS = Object.freeze({
   uiLang: "en",           // interface language (Urdu interface comes later, see ROADMAP)
   tafsir: null,           // chosen tafsir id; null = default for uiMeaning
   known: [],              // vocabulary keys ("lemma|root") the reader has marked as known
+  reciter: null,          // recitation id (data/audio/reciters.json); null = default
+  followWords: true,      // highlight each word while it's recited
 });
 
 function browserStorage() {

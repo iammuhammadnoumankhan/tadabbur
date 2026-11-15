@@ -225,7 +225,9 @@ input[type=search] {
 }
 .w { display: inline-flex; flex-direction: column; align-items: center; padding: 2px 4px; border-radius: 8px; cursor: pointer; transition: background .12s; }
 .w:hover, .w.on { background: color-mix(in srgb, var(--accent) 12%, transparent); }
-.w.speak { background: var(--hl); }
+.w.speak { background: color-mix(in srgb, var(--accent-2) 30%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-2) 55%, transparent); }
+.w.speak > span:first-child { color: var(--accent-2); }
+.w { transition: background .12s, box-shadow .12s; }
 .w .g { font-family: var(--font-ui); font-size: 12px; line-height: 1.35; color: var(--ink-2); direction: ltr; text-align: center; max-width: 120px; margin-top: 2px; }
 .w .g.ur { font-family: var(--font-urdu); direction: rtl; font-size: 13px; line-height: 1.9; }
 .w .g + .g { margin-top: 0; }

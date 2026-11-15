@@ -38,7 +38,7 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 - Fonts:
   - bundled: `fonts/DigitalKhatt-IndoPak.woff2` (SIL OFL; licence file next to it)
   - from Google Fonts: Amiri Quran, Noto Naskh Arabic, Noto Nastaliq Urdu, Inter, Fraunces
-- **Live (not bundled):** tafsir text and audio (Quran.com API and CDNs) are fetched at runtime. Everything else is in `data/`.
+- **Live (not bundled):** tafsir text and audio (Quran.com API and CDNs) are fetched at runtime. Recitation **timings** are bundled (`data/audio/`), so word highlighting doesn't depend on Quran.com's undocumented audio API at runtime. Everything else is in `data/`.
 
 ## "Report a problem"
 - **Where the buttons are:** every ayah (flag icon), word popover, tafsir panel, each hadith, surah introduction, Seerah event, prophet, tagged ayah, and the footer.
@@ -77,6 +77,7 @@ python3 scripts/build_seerah.py    # Seerah timeline from Sahih al-Bukhari (asse
 python3 scripts/build_stories.py   # prophets from the Quranic Arabic Corpus ontology
 python3 scripts/build_roots.py     # word roots from the Quranic Arabic Corpus file (see below)
 python3 scripts/build_vocab.py     # most frequent words (needs roots)
+python3 scripts/build_audio.py     # recitation word timings (6 reciters) from Quran.com
 python3 scripts/build_search.py    # search index
 python3 scripts/build_manifest.py  # data/manifest.json (schema version + counts) — always last
 ```

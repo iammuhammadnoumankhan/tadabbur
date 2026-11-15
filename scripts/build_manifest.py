@@ -36,6 +36,7 @@ def main():
             "prophets": len(load("stories.json")["prophets"]),
             "roots": len(load("roots/index.json")["roots"]),
             "vocab": len(load("vocab.json")["items"]),
+            "reciters": len(load("audio/reciters.json")["list"]),
         },
         "datasets": [
             {"id": "chapters", "files": ["chapters.json"], "src": ["qc-chapters"]},
@@ -50,6 +51,7 @@ def main():
             {"id": "search", "files": ["search/ar.json", "search/tr-<id>.json"], "src": ["qc-imlaei-simple"]},
             {"id": "roots", "files": ["morph/NNN.json", "roots/index.json", "roots/<id>.json"], "src": ["qac-morphology"]},
             {"id": "vocab", "files": ["vocab.json"], "src": ["tadabbur-vocab", "qac-morphology"]},
+            {"id": "recitations", "files": ["audio/reciters.json", "audio/<reciter id>/NNN.json"], "src": [r["src"] for r in load("audio/reciters.json")["list"]]},
         ],
     }
     with open(os.path.join(DATA, "manifest.json"), "w", encoding="utf-8") as f:

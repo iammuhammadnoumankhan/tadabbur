@@ -131,6 +131,15 @@ An array of 114 items:
 
 Sources: `tadabbur-vocab` (counts) and `qac-morphology`.
 
+### `audio/reciters.json`, `audio/<reciter id>/NNN.json` (recitations with word timings)
+- `audio/reciters.json`: `{ default, list: [{ id, name, style, src }] }`. `id` is the Quran.com recitation id.
+- `audio/<id>/NNN.json`: `{ src, url, ms, ayahs: [[fromMs, toMs, [[word, startMs, endMs], …]], …] }`
+  - `url` is the full-surah audio file, streamed live (not bundled).
+  - Times are milliseconds into that file.
+  - `word` is the 1-based word index (as in `surah/NNN.json`).
+  - Words a reciter repeats appear again, as recited.
+  - Incomplete or backwards entries from the source are dropped.
+
 ### `search/ar.json`, `search/tr-<id>.json`
 Each is an array of 6,236 strings, in global ayah index order.
 - `ar.json`: Quran.com plain Arabic (`imlaei_simple`), used **only for matching**.
@@ -140,7 +149,8 @@ Each is an array of 6,236 strings, in global ayah index order.
 
 | What | URL |
 |---|---|
-| Ayah audio | `https://cdn.islamic.network/quran/audio/128/ar.alafasy/<ayah id>.mp3` |
+| Surah recitation (with timings) | `audio/<id>/NNN.json` → `url` (download.quranicaudio.com) |
+| Ayah audio (fallback only) | `https://cdn.islamic.network/quran/audio/128/ar.alafasy/<ayah id>.mp3` |
 | Word audio | `https://audio.qurancdn.com/<Word.a>` |
 | Tafsir | `tafsirs.json` → `api` |
 

@@ -248,13 +248,40 @@ def main():
             err(f"vocab.json: example {it['ex']} isn't the word {it['l']}")
             break
 
+    # 12. recitation timings: every surah, every ayah, word numbers within the ayah, times in order
+    recs = load("audio/reciters.json") or {"list": [], "default": None}
+    if recs["default"] not in {r["id"] for r in recs["list"]}:
+        err("audio/reciters.json: default reciter isn't in the list")
+    for r in recs["list"]:
+        need_src(r["src"], f"audio/reciters.json {r['id']}")
+        for c in chs:
+            rel = f"audio/{r['id']}/{c['n']:03d}.json"
+            d = load(rel)
+            if d is None:
+                continue
+            if not d.get("url", "").startswith("https://"):
+                err(f"{rel}: no audio URL")
+            if len(d["ayahs"]) != count[c["n"]]:
+                err(f"{rel}: {len(d['ayahs'])} ayahs, expected {count[c['n']]}")
+                continue
+            prev = -1
+            for i, (frm, to, segs) in enumerate(d["ayahs"]):
+                k = f"{c['n']}:{i + 1}"
+                if frm < prev or to < frm:
+                    err(f"{rel}: {k} times out of order ({frm}–{to})")
+                    break
+                prev = frm
+                if any(not 1 <= w <= words_per_ayah.get(k, 0) or e < s for w, s, e in segs):
+                    err(f"{rel}: {k} has a word timing outside the ayah's words or ending before it starts")
+                    break
+
     # 9. manifest (docs/DATA.md): schema version and counts match the data
     man = load("manifest.json") or {}
     if man.get("schema") != SCHEMA:
         err(f"manifest.json: schema {man.get('schema')}, expected {SCHEMA} (see docs/DATA.md)")
     expect = {"surahs": 114, "ayahs": 6236, "words": sum(words_per_ayah.values()),
               "translations": len(trs["list"]), "tafsirs": len(taf["list"]),
-              "seerah_events": len(se["events"]), "prophets": len(st["prophets"]), "roots": len(rix["roots"]), "vocab": len(voc["items"])}
+              "seerah_events": len(se["events"]), "prophets": len(st["prophets"]), "roots": len(rix["roots"]), "vocab": len(voc["items"]), "reciters": len(recs["list"])}
     for k, v in expect.items():
         if (man.get("counts") or {}).get(k) != v:
             err(f"manifest.json: counts.{k} is {(man.get('counts') or {}).get(k)}, data has {v} — rerun scripts/build_manifest.py")
