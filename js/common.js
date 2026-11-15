@@ -145,6 +145,7 @@ export function header(active = "") {
         h("a", { href: "index.html#surahs", class: active === "surahs" ? "on" : null }, t("nav.surahs")),
         h("a", { href: "search.html", class: "nav-search", title: t("nav.search"), "aria-label": t("nav.search"), html: ICON.search }),
         h("a", { href: "stories.html" }, t("nav.prophets")),
+        h("a", { href: "places.html" }, t("nav.places")),
         h("a", { href: "root.html" }, t("nav.roots")),
         h("a", { href: "learn.html" }, t("nav.learn")),
         h("a", { href: "progress.html" }, t("nav.progress")),

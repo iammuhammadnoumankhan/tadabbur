@@ -165,6 +165,15 @@ Sources: `tadabbur-vocab` (counts) and `qac-morphology`.
 - `rel` is one of `son-of`, `daughter-of` or `adopted-son-of`, **only as the Quranic Arabic Corpus ontology states it**. Nothing is inferred (no siblings or grandparents).
 - `people` holds all 24 prophets, plus the relatives the links reach (e.g. Azar, Imran, Maryam), with the ontology's English and Arabic names.
 
+### `places.json` (places named in the Quran, with a map)
+`{ src: [...], places: [{ id, en, ar, type, names, mentions, ayahs, url, at }], map: { w, h, land, rivers, bbox, lat0, scale } }`
+- `places`: every concept in the Corpus ontology's City, Historic Land, Mountain and Mosque categories. `type` is `city`, `land`, `mountain` or `mosque`.
+  - `names`: the ontology's name variants merged into this place (only where it states `name-of`, e.g. Bakkah → Makkah).
+  - `mentions`: `[{ k: "s:a", w, as }]`, the ontology's word-level tags (`as` = which name).
+  - `at`: map position from Wikidata, `{ qid, label, lat, lon, x, y, region }`, or `null` when our sources don't settle where the place is (not drawn). `region: true` marks a land (Egypt, Sheba) drawn as an area, not a point. The place → Wikidata item choice is listed in `scripts/build_places.py` and `sources.json`.
+- `map`: Natural Earth land and rivers, already projected to SVG paths (`viewBox 0 0 w h`; equirectangular, scaled at `lat0`). No modern borders.
+- Sources: `qac-ontology-places`, `wikidata-places`, `natural-earth`.
+
 ### `search/ar.json`, `search/tr-<id>.json`
 Each is an array of 6,236 strings, in global ayah index order.
 - `ar.json`: Quran.com plain Arabic (`imlaei_simple`), used **only for matching**.

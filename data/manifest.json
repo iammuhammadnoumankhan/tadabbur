@@ -10,6 +10,7 @@
   "hadith_linked": 805,
   "seerah_events": 24,
   "prophets": 24,
+  "places": 17,
   "roots": 1642,
   "vocab": 4824,
   "reciters": 6,
@@ -149,6 +150,17 @@
    ],
    "src": [
     "qac-ontology"
+   ]
+  },
+  {
+   "id": "places",
+   "files": [
+    "places.json"
+   ],
+   "src": [
+    "qac-ontology-places",
+    "wikidata-places",
+    "natural-earth"
    ]
   },
   {

@@ -14,9 +14,9 @@ const DATA = "tadabbur-data-schema-1";
 const RUNTIME = "tadabbur-runtime";
 
 const SHELL_FILES = [
-  "./", "index.html", "surah.html", "timeline.html", "stories.html", "search.html", "sources.html", "root.html", "learn.html", "page.html", "progress.html",
+  "./", "index.html", "surah.html", "timeline.html", "stories.html", "search.html", "sources.html", "root.html", "learn.html", "page.html", "progress.html", "places.html",
   "css/style.css",
-  "js/common.js", "js/home.js", "js/surah.js", "js/timeline.js", "js/stories.js", "js/search.js", "js/sources.js", "js/root.js", "js/learn.js", "js/page.js", "js/progress.js", "js/sharecard.js",
+  "js/common.js", "js/home.js", "js/surah.js", "js/timeline.js", "js/stories.js", "js/search.js", "js/sources.js", "js/root.js", "js/learn.js", "js/page.js", "js/progress.js", "js/places.js", "js/sharecard.js",
   "js/core/index.js", "js/core/data.js", "js/core/quran.js", "js/core/search.js", "js/core/settings.js", "js/core/report.js", "js/core/learn.js", "js/core/progress.js",
   "js/i18n/index.js", "js/i18n/en.js",
   "fonts/DigitalKhatt-IndoPak.woff2",
@@ -24,7 +24,7 @@ const SHELL_FILES = [
 ];
 const DATA_FILES = [
   "data/manifest.json", "data/chapters.json", "data/translations.json", "data/tafsirs.json", "data/sources.json",
-  "data/hadith-index.json", "data/seerah.json", "data/seerah-by-surah.json", "data/stories.json", "data/stories-by-surah.json", "data/family.json",
+  "data/hadith-index.json", "data/seerah.json", "data/seerah-by-surah.json", "data/stories.json", "data/stories-by-surah.json", "data/family.json", "data/places.json",
 ];
 
 self.addEventListener("install", event => {

@@ -24,12 +24,12 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 
 ## Architecture
 - Static site in plain **HTML, CSS and vanilla JS (ES modules)**. No framework and no build step. Must work from any static host and inside future app wrappers.
-- Pages: `index.html`, `surah.html`, `page.html` (mushaf page view), `progress.html` (my reading), `timeline.html`, `stories.html`, `search.html`, `root.html`, `learn.html`, `sources.html`.
+- Pages: `index.html`, `surah.html`, `page.html` (mushaf page view), `progress.html` (my reading), `timeline.html`, `stories.html`, `search.html`, `root.html`, `learn.html`, `places.html` (map of places), `sources.html`.
 - JS has three layers:
   - **`js/core/`**: no DOM. Data loading (`data.js`), settings with pluggable storage (`settings.js`), search engine (`search.js`) and Quran reference helpers (`quran.js`). Mobile and desktop apps reuse it; an app calls `configure({ base, fetch })` and `settings.configureStorage(adapter)`.
   - **`js/i18n/`**: every interface string, in `en.js`, through `t(key, vars)`. Static HTML uses `data-i18n`, `data-i18n-html`, `data-i18n-placeholder`, `data-i18n-title` or `data-i18n-aria-label`. A missing key shows as `⟦key⟧`, and the smoke test fails on it.
   - **`js/common.js`**: browser UI layer. Re-exports core and `t`, and holds the theme, `h()`, `sanitize()`, header and footer, tooltip and journey bars.
-  - Then one module per page: `home.js`, `surah.js`, `timeline.js`, `stories.js`, `search.js`, `sources.js`.
+  - Then one module per page: `home.js`, `surah.js`, `timeline.js`, `stories.js`, `places.js`, `search.js`, `sources.js`.
 - **Rules:**
   - Never hard-code UI text; add a key to `js/i18n/en.js`.
   - Never touch `document` or `window` in `js/core/`.
@@ -84,6 +84,7 @@ python3 scripts/build_indopak.py   # IndoPak text (DigitalKhatt) aligned to Qura
 python3 scripts/build_seerah.py    # Seerah timeline from Sahih al-Bukhari (asserts anchor hadith text)
 python3 scripts/build_stories.py   # prophets from the Quranic Arabic Corpus ontology
 python3 scripts/build_family.py    # prophets family links (stated ontology relations only)
+python3 scripts/build_places.py    # places named in the Quran (ontology) + Wikidata positions + Natural Earth basemap
 python3 scripts/build_roots.py     # word roots from the Quranic Arabic Corpus file (see below)
 python3 scripts/build_vocab.py     # most frequent words (needs roots)
 python3 scripts/build_audio.py     # recitation word timings (6 reciters) from Quran.com

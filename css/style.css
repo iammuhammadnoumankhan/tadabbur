@@ -452,6 +452,27 @@ main > .pr-card { margin: 18px 0 60px; }
 
 .h-how { display: inline-block; margin-top: 6px; font-size: 11px; letter-spacing: .3px; color: var(--accent-2); border: 1px solid color-mix(in srgb, var(--accent-2) 40%, var(--line)); border-radius: 999px; padding: 1px 8px; }
 
+/* ---------- places map */
+.pl-card { padding: 12px; margin-top: 18px; }
+.pl-map { display: block; width: 100%; height: auto; max-height: 78vh; border-radius: 10px; }
+.pl-sea { fill: color-mix(in srgb, var(--madinah) 16%, var(--bg)); }
+.pl-land { fill: color-mix(in srgb, var(--ink) 6%, var(--surface)); stroke: color-mix(in srgb, var(--ink-3) 50%, transparent); stroke-width: .8; }
+.pl-river { fill: none; stroke: color-mix(in srgb, var(--madinah) 45%, transparent); stroke-width: 1.2; }
+.pl-pin { cursor: default; }
+.pl-pin[role="button"] { cursor: pointer; }
+.pl-pin[role="button"]:focus { outline: none; }
+.pl-pin[role="button"]:focus .pl-dot, .pl-pin[role="button"]:hover .pl-dot { stroke-width: 4; }
+.pl-dot { fill: var(--accent-2); stroke: var(--surface); stroke-width: 2.5; }
+.pl-area { fill: color-mix(in srgb, var(--accent-2) 16%, transparent); stroke: color-mix(in srgb, var(--accent-2) 45%, transparent); stroke-dasharray: 4 4; }
+.pl-label { font: 600 15px var(--font-ui); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.pl-pin.on .pl-dot { fill: var(--accent); r: 9; }
+.pl-pin.dim { opacity: .45; }
+.pl-pick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; min-height: 30px; align-items: center; }
+.pl-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+.chip.pl-off { color: var(--ink-3); border-style: dashed; }
+.pl-head { align-items: start; }
+@media (max-width: 820px) { .pl-head { grid-template-columns: 1fr; } }
+
 /* ---------- toast */
 .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); z-index: 100;

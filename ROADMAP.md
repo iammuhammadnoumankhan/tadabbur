@@ -80,14 +80,11 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
     - The English translation (Guezzou) is copyrighted.
     - The only public-domain copy is an image scan (1316 AH Cairo print on Wikisource) that would need error-prone OCR.
   - Sahih reasons for revelation are already covered where Bukhari and Muslim hadith quote or cite the ayah (items 13 and the existing links).
-- [ ] **15. Map of places in the Quran [#14]**
-  - **Places (ready):** the Corpus ontology names them, e.g.:
-    - cities: Makkah, Bakkah, Yathrib, Badr, Hunayn, Babylon, Iram;
-    - lands: Egypt, al-Ahqaf;
-    - mountains: Mount Sinai;
-    - mosques: the Kaaba, al-Masjid al-Haram.
-  - Each comes with the ayahs that mention it.
-  - **Coordinates:** Wikidata (CC0, no restrictions). Ancient places whose location is debated are marked as approximate or left off the map.
+- [x] **15. Map of places in the Quran [#14]** *(done 2026-11-15)*
+  - `places.html`: 17 places from the Corpus ontology (cities, lands, mountains, mosques), each with the ayahs that name it. Bakkah and Yathrib are merged into Makkah and Medinah, as the ontology states.
+  - **Positions:** Wikidata (CC0). The Wikidata item chosen for each place is shown with a link. Egypt and Sheba are drawn as areas.
+  - **Left off the map:** Iram, al-Ahqaf, Mount Sinai and al-Judi, because our sources don't settle where they are.
+  - **Background:** Natural Earth coastlines and rivers (public domain), drawn offline, with no modern borders.
 - [x] **16. Prophets family tree [#15]** *(done 2026-11-15)*
   - Drawn only from the ontology's stated son-of / daughter-of / adopted-son-of relations.
 - [ ] **16b. Fuller family tree with evidence** *(proposed)*

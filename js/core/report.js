@@ -14,6 +14,7 @@ export const KINDS = Object.freeze({
   intro: "Surah introduction",
   seerah: "Seerah timeline",
   prophets: "Prophets",
+  places: "Places map",
   other: "Something else",
 });
 

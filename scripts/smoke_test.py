@@ -41,6 +41,9 @@ PAGES = [
     ("page.html?m=madani&p=3", ".m-line", 15),
     ("page.html?m=indopak&p=3", ".m-line", 15),
     ("progress.html", ".pr-card", 5),
+    ("places.html", ".p-card", 17),
+    ("places.html", ".pl-pin", 7),
+    ("places.html?p=masjid-al-haram", ".p-ayah", 15),
 ]
 VIEWPORTS = {"desktop": {"width": 1280, "height": 900}, "phone": {"width": 375, "height": 812}}
 

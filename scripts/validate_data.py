@@ -346,6 +346,33 @@ def main():
         if sorted(heads) != list(range(1, 115)):
             err(f"layout/{m}: surah headings should be 1–114 once each")
 
+    # 16. places: ontology places, valid ayah/word tags, Wikidata positions inside the map
+    pl = load("places.json")
+    for sid in pl["src"]:
+        need_src(sid, "places.json")
+    mw, mh = pl["map"]["w"], pl["map"]["h"]
+    seen = set()
+    for p in pl["places"]:
+        if p["id"] in seen:
+            err(f"places.json: {p['id']} listed twice")
+        seen.add(p["id"])
+        if p["type"] not in ("city", "land", "mountain", "mosque"):
+            err(f"places.json: {p['id']} has unknown type {p['type']}")
+        for m in p["mentions"]:
+            if not valid_key(m["k"]):
+                err(f"places.json: {p['id']} cites invalid ayah {m['k']}")
+            else:
+                s_, a_ = map(int, m["k"].split(":"))
+                if not 0 < m["w"] <= len(load(f"surah/{s_:03d}.json")["ayahs"][a_ - 1]["w"]):
+                    err(f"places.json: {p['id']} {m['k']} word {m['w']} doesn't exist")
+        if p["ayahs"] != len({m["k"] for m in p["mentions"]}) or not p["ayahs"]:
+            err(f"places.json: {p['id']} ayah count is wrong")
+        at = p["at"]
+        if at is not None and not (re.fullmatch(r"Q\d+", at["qid"]) and 0 <= at["x"] <= mw and 0 <= at["y"] <= mh):
+            err(f"places.json: {p['id']} has a bad map position {at}")
+    if len(seen) < 17:
+        err(f"places.json: only {len(seen)} places")
+
     # 15. family links: only stated relation types, between known people; prophets match stories.json
     fam = load("family.json") or {"people": {}, "links": []}
     need_src(fam.get("src", ""), "family.json")

@@ -21,6 +21,7 @@ body:
         - Surah introduction
         - Seerah timeline
         - Prophets
+        - Places map
         - Something else
     validations:
       required: true

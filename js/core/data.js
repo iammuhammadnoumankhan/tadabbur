@@ -77,6 +77,8 @@ export const seerahBySurah = () => getJSON("data/seerah-by-surah.json").catch(()
 export const stories = () => getJSON("data/stories.json");
 /** { src, people: {id: {en, ar, prophet}}, links: [["son-of"|"daughter-of"|"adopted-son-of", child, parent], …] } */
 export const family = () => getJSON("data/family.json");
+/** { src, places: [{ id, en, ar, type, names, mentions, ayahs, url, at: {qid, label, lat, lon, x, y, region} | null }], map } */
+export const places = () => getJSON("data/places.json");
 export const storiesBySurah = () => getJSON("data/stories-by-surah.json").catch(() => ({}));
 
 // ---------------------------------------------------------------- word roots (Quranic Arabic Corpus)
