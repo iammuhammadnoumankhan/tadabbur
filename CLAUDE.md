@@ -28,7 +28,7 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 - JS has three layers:
   - **`js/core/`**: no DOM. Data loading (`data.js`), settings with pluggable storage (`settings.js`), search engine (`search.js`) and Quran reference helpers (`quran.js`). Mobile and desktop apps reuse it; an app calls `configure({ base, fetch })` and `settings.configureStorage(adapter)`.
   - **`js/i18n/`**: every interface string, in `en.js`, through `t(key, vars)`. Static HTML uses `data-i18n`, `data-i18n-html`, `data-i18n-placeholder`, `data-i18n-title` or `data-i18n-aria-label`. A missing key shows as `⟦key⟧`, and the smoke test fails on it.
-  - **`js/common.js`**: browser UI layer. Re-exports core and `t`, and holds the theme, `h()`, `sanitize()`, header and footer, tooltip and journey bars.
+  - **`js/common.js`**: browser UI layer. Re-exports core and `t`, and holds the theme, `h()`, `sanitize()`, header (top menu on desktop; 5-tab bottom bar plus a "More" sheet on phones ≤720px, each page passes its name to `header()`) and footer, tooltip and journey bars.
   - Then one module per page: `home.js`, `surah.js`, `timeline.js`, `stories.js`, `places.js`, `search.js`, `sources.js`.
 - **Rules:**
   - Never hard-code UI text; add a key to `js/i18n/en.js`.

@@ -1,7 +1,7 @@
 import * as C from "./common.js";
 const { h, t } = C;
 
-C.header();
+C.header("sources");
 C.footer();
 document.title = t("sources.pageTitle");
 

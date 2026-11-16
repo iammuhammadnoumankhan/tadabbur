@@ -94,6 +94,9 @@ export const ICON = {
   note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg>',
   share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>',
   flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4"/><path d="M4 4h12l-2 4 2 4H4"/></svg>',
+  cards: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="13" height="14" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v12"/></svg>',
+  more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
   speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>',
 };
 
@@ -132,36 +135,93 @@ function installBtn() {
   onInstallAvailable(on => b.classList.toggle("hidden", !on));
   return b;
 }
+// Which phone tab each page belongs to (U1). Pages pass their own name to header().
+const TAB_OF = { surahs: "read", surah: "read", mushaf: "read", search: "search", learn: "learn", progress: "progress" };
+// Pages reached from "More" on phones (all are also in the desktop top menu)
+const MORE = [
+  { href: "stories.html", key: "prophets", page: "stories" },
+  { href: "places.html", key: "places", page: "places" },
+  { href: "root.html", key: "roots", page: "roots" },
+  { href: "timeline.html", key: "timeline", page: "timeline" },
+  { href: "page.html", key: "mushaf", page: "mushaf" },
+  { href: "sources.html", key: "sources", page: "sources" },
+];
+
+function themeButton() {
+  const theme = document.documentElement.dataset.theme;
+  return h("button", {
+    class: "icon-btn", title: t("nav.theme"), "aria-label": t("nav.theme"),
+    html: theme === "dark" ? ICON.sun : ICON.moon,
+    onclick: e => {
+      const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      set({ theme: next });
+      e.currentTarget.innerHTML = next === "dark" ? ICON.sun : ICON.moon;
+    },
+  });
+}
+
 export function header(active = "") {
   applyI18n();
-  const theme = document.documentElement.dataset.theme;
+  const on = page => (page === active ? "on" : null);
   const el = h("header", { class: "top" },
     h("div", { class: "wrap" },
       h("a", { class: "brand", href: "index.html" },
         h("span", { class: "mark" }, "ت"),
         h("span", { class: "t" }, t("app.name")),
         h("span", { class: "ar" }, t("app.nameAr"))),
-      h("nav", { class: "nav" },
-        h("a", { href: "index.html#surahs", class: active === "surahs" ? "on" : null }, t("nav.surahs")),
-        h("a", { href: "search.html", class: "nav-search", title: t("nav.search"), "aria-label": t("nav.search"), html: ICON.search }),
-        h("a", { href: "stories.html" }, t("nav.prophets")),
-        h("a", { href: "places.html" }, t("nav.places")),
-        h("a", { href: "root.html" }, t("nav.roots")),
-        h("a", { href: "learn.html" }, t("nav.learn")),
-        h("a", { href: "progress.html" }, t("nav.progress")),
-        h("a", { href: "timeline.html" }, h("span", { class: "label" }, t("nav.seerahPrefix")), t("nav.timeline")),
-        h("a", { href: "sources.html" }, t("nav.sources")),
+      h("nav", { class: "nav", "aria-label": t("nav.main") },
+        h("a", { href: "index.html#surahs", class: `nav-link ${on("surahs") || on("surah") || ""}` }, t("nav.surahs")),
+        h("a", { href: "search.html", class: `nav-link nav-search ${on("search") || ""}`, title: t("nav.search"), "aria-label": t("nav.search"), html: ICON.search }),
+        h("a", { href: "stories.html", class: `nav-link ${on("stories") || ""}` }, t("nav.prophets")),
+        h("a", { href: "places.html", class: `nav-link ${on("places") || ""}` }, t("nav.places")),
+        h("a", { href: "root.html", class: `nav-link ${on("roots") || ""}` }, t("nav.roots")),
+        h("a", { href: "learn.html", class: `nav-link ${on("learn") || ""}` }, t("nav.learn")),
+        h("a", { href: "progress.html", class: `nav-link ${on("progress") || ""}` }, t("nav.progress")),
+        h("a", { href: "timeline.html", class: `nav-link ${on("timeline") || ""}` }, h("span", { class: "label" }, t("nav.seerahPrefix")), t("nav.timeline")),
+        h("a", { href: "sources.html", class: `nav-link ${on("sources") || ""}` }, t("nav.sources")),
         installBtn(),
-        h("button", {
-          class: "icon-btn", title: t("nav.theme"), "aria-label": t("nav.theme"),
-          html: theme === "dark" ? ICON.sun : ICON.moon,
-          onclick: e => {
-            const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-            set({ theme: next });
-            e.currentTarget.innerHTML = next === "dark" ? ICON.sun : ICON.moon;
-          },
-        }))));
+        themeButton())));
   document.body.prepend(el);
+  tabBar(TAB_OF[active] || (active ? "more" : ""), active);
+}
+
+// ---------- phone tab bar (U1): 5 labelled tabs in thumb reach; the rest under a labelled "More"
+function tabBar(current, active) {
+  const tab = (id, href, icon, label) => h("a", {
+    class: `tab${current === id ? " on" : ""}`, href, "aria-current": current === id ? "page" : null,
+  }, h("span", { class: "tab-ic", html: icon }), h("span", { class: "tab-l" }, label));
+  const moreBtn = h("button", {
+    class: `tab${current === "more" ? " on" : ""}`, type: "button", "aria-haspopup": "dialog", "aria-expanded": "false",
+    onclick: () => openMore(),
+  }, h("span", { class: "tab-ic", html: ICON.more }), h("span", { class: "tab-l" }, t("nav.more")));
+  const bar = h("nav", { class: "tabbar", "aria-label": t("nav.main") },
+    tab("read", "index.html#surahs", ICON.book, t("nav.read")),
+    tab("search", "search.html", ICON.search, t("nav.searchShort")),
+    tab("learn", "learn.html", ICON.cards, t("nav.learn")),
+    tab("progress", "progress.html", ICON.bookmark, t("nav.progress")),
+    moreBtn);
+  document.body.append(bar);
+  document.body.classList.add("has-tabbar");
+
+  let sheet = null, scrim = null;
+  function openMore() {
+    if (!sheet) {
+      scrim = document.body.appendChild(h("div", { class: "scrim", onclick: closeMore }));
+      sheet = document.body.appendChild(h("div", { class: "sheet", role: "dialog", "aria-modal": "true", "aria-label": t("nav.more") },
+        h("div", { class: "sheet-grip", "aria-hidden": "true" }),
+        h("div", { class: "sheet-list" }, ...MORE.map(m => h("a", { class: `sheet-item${m.page === active ? " on" : ""}`, href: m.href },
+          h("span", {}, h("b", {}, m.key === "timeline" ? t("nav.seerahPrefix") + t("nav.timeline") : t(`nav.${m.key}`)), h("span", { class: "sheet-hint" }, t(`nav.hint.${m.key}`))),
+          h("span", { class: "sheet-chev", html: ICON.chevron })))),
+        h("div", { class: "sheet-foot" }, installBtn(), h("span", { class: "sp" }), h("span", { class: "tiny" }, t("nav.theme")), themeButton())));
+      addEventListener("keydown", e => { if (e.key === "Escape" && sheet.classList.contains("show")) closeMore(); });
+    }
+    sheet.classList.add("show"); scrim.classList.add("show"); moreBtn.setAttribute("aria-expanded", "true");
+    sheet.querySelector("a").focus();
+  }
+  function closeMore() {
+    sheet.classList.remove("show"); scrim.classList.remove("show"); moreBtn.setAttribute("aria-expanded", "false");
+    moreBtn.focus();
+  }
 }
 
 export function footer() {

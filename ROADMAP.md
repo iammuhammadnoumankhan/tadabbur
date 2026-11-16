@@ -105,7 +105,7 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
 - [ ] **U0. First test with 5 real readers** *(free; §3.6)*
   - 5 Urdu-speaking readers, each on their own phone, doing a few set tasks, e.g. "find what 2:255 means in Urdu", "find a hadith on this ayah", "continue where you left off".
   - Watch without helping and note where they get stuck. This tells us which of U1–U8 matters most, and gives a "before" to compare with.
-- [ ] **U1. Bottom tab bar on phones** *(§2, §3.2)*
+- [x] **U1. Bottom tab bar on phones** *(done 2026-11-16; §2, §3.2)*
   - Today 6 of 9 header links are off-screen on a phone.
   - Phones get a bottom bar with 4–5 labelled tabs (Read, Search, Learn, My reading, More), within thumb reach. Desktop keeps the top menu.
 - [ ] **U2. Reading comes first on the surah page** *(§2, §3.3)*

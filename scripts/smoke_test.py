@@ -7,6 +7,7 @@ For each page, at desktop and phone (375px) width, fails if:
   - any of our own files fail to load (404 etc.);
   - the expected content doesn't appear (e.g. all 7 ayahs of Al-Fatihah);
   - the page scrolls sideways on a phone;
+  - phones don't get the 5-tab bottom bar (or desktop doesn't get the top menu);
   - any interface text key is missing (shown as ⟦key⟧).
 Also runs scripts/core_worker_test.js in a Web Worker to prove js/core works without a DOM.
 
@@ -95,6 +96,19 @@ def main():
                     sw, iw = page.evaluate("[document.documentElement.scrollWidth, innerWidth]")
                     if sw > iw + 1:
                         problems.append(f"scrolls sideways on a phone ({sw}px wide in a {iw}px screen)")
+                # U1: phones get a 5-tab bar at the bottom (44px+ targets) instead of the top menu; desktop doesn't
+                nav = page.evaluate("""() => {
+                  const bar = document.querySelector('.tabbar');
+                  const shown = el => el && getComputedStyle(el).display !== 'none';
+                  const tabs = bar ? [...bar.querySelectorAll('.tab')].map(e => e.getBoundingClientRect()) : [];
+                  return { bar: shown(bar), tabs: tabs.length, small: tabs.filter(r => r.width < 44 || r.height < 44).length,
+                           atBottom: bar ? Math.abs(bar.getBoundingClientRect().bottom - innerHeight) < 2 : false,
+                           topLinks: [...document.querySelectorAll('header .nav-link')].filter(shown).length };
+                }""")
+                if vname == "phone" and not (nav["bar"] and nav["tabs"] == 5 and not nav["small"] and nav["atBottom"] and nav["topLinks"] == 0):
+                    problems.append(f"phone tab bar wrong: {nav}")
+                if vname == "desktop" and (nav["bar"] or nav["topLinks"] < 9):
+                    problems.append(f"desktop menu wrong: {nav}")
                 status = "✓" if not problems else "✗"
                 print(f"{status} [{vname}] {path}")
                 for pr in problems:

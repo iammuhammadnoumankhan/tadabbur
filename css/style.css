@@ -77,6 +77,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .nav a, .icon-btn {
   padding: 8px 12px; border-radius: 10px; color: var(--ink-2); background: none; border: 0; font-size: 14px;
 }
+.nav a.on { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); font-weight: 600; }
 .nav a:hover, .icon-btn:hover { background: var(--bg-2); color: var(--ink); text-decoration: none; }
 .icon-btn svg { width: 18px; height: 18px; vertical-align: -3px; }
 
@@ -475,6 +476,50 @@ main > .pr-card { margin: 18px 0 60px; }
 .pl-head { align-items: start; }
 @media (max-width: 820px) { .pl-head { grid-template-columns: 1fr; } }
 
+/* ---------- phone tab bar + More sheet (U1; docs/UX_RESEARCH.md §3.2) */
+.tabbar { display: none; }
+.sheet { display: none; }
+@media (max-width: 720px) {
+  .nav .nav-link { display: none; }
+  .brand .t { display: inline; }
+  .tabbar {
+    display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    background: color-mix(in srgb, var(--surface) 96%, transparent); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .tab {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px;
+    color: var(--ink-2); background: none; border: 0; font: inherit; font-size: 12px; cursor: pointer; padding: 6px 2px;
+  }
+  .tab:hover { text-decoration: none; color: var(--ink); }
+  .tab-ic { display: grid; place-items: center; width: 52px; height: 28px; border-radius: 14px; transition: background .15s; }
+  .tab-ic svg { width: 22px; height: 22px; }
+  .tab.on { color: var(--accent); font-weight: 600; }
+  .tab.on .tab-ic { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; border-radius: 12px; }
+  body.has-tabbar { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+  body.has-tabbar .toast { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .sheet {
+    display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; max-height: 85vh; overflow-y: auto;
+    background: var(--surface); border-radius: 18px 18px 0 0; border-top: 1px solid var(--line); box-shadow: var(--shadow);
+    padding: 8px 12px calc(12px + env(safe-area-inset-bottom, 0px)); transform: translateY(105%); transition: transform .22s ease;
+  }
+  .sheet.show { transform: none; }
+  .sheet-grip { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 4px auto 10px; }
+  .sheet-list { display: grid; }
+  .sheet-item { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 6px; border-bottom: 1px solid var(--line); color: var(--ink); }
+  .sheet-item:hover { text-decoration: none; background: var(--bg-2); }
+  .sheet-item > span:first-child { flex: 1; display: grid; }
+  .sheet-item b { font-weight: 600; font-size: 16px; }
+  .sheet-item.on b { color: var(--accent); }
+  .sheet-hint { font-size: 13px; color: var(--ink-3); }
+  .sheet-chev svg { width: 18px; height: 18px; color: var(--ink-3); }
+  .sheet-foot { display: flex; align-items: center; gap: 8px; padding: 12px 6px 4px; }
+  .sheet-foot .sp { flex: 1; }
+  .sheet-foot .icon-btn { min-width: 44px; min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) { .sheet, .tab-ic { transition: none; } }
+
 /* ---------- toast */
 .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); z-index: 100;
@@ -683,7 +728,6 @@ footer.foot { border-top: 1px solid var(--line); padding: 24px 0 40px; font-size
   .ayah-head { gap: 4px; }
   .ayah-head .icon-btn, .ayah-head .report-link.icon { padding: 6px 5px; }
   .ayah-head .tiny { display: none; }
-  .brand .t { display: none; }
   .nav { overflow-x: auto; scrollbar-width: none; }
   .nav::-webkit-scrollbar { display: none; }
   .nav a, .icon-btn { padding: 8px 7px; font-size: 13px; }

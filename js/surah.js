@@ -2,7 +2,7 @@ import * as C from "./common.js";
 import * as Card from "./sharecard.js";
 const { h, $, $$, ICON, t, sanitize, toArabicDigits } = C;
 
-C.header();
+C.header("surah");
 C.footer();
 
 const params = new URLSearchParams(location.search);
