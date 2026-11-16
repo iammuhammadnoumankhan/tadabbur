@@ -458,6 +458,11 @@ $("#open-settings").onclick = () => {
       h("div", { class: "range-row" }, h("span", { class: "tiny" }, "A"),
         h("input", { type: "range", min: 22, max: 56, value: st.arSize, "aria-label": t("surah.setSize"), oninput: e => C.set({ arSize: +e.target.value }) }),
         h("span", {}, "A"))),
+    h("div", { class: "opt-group" }, h("h4", {}, t("surah.setTrSize")),
+      h("div", { class: "range-row" }, h("span", { class: "tiny" }, "A"),
+        h("input", { type: "range", min: 15, max: 26, value: st.trSize || 17, "aria-label": t("surah.setTrSize"), oninput: e => C.set({ trSize: +e.target.value }) }),
+        h("span", {}, "A")),
+      h("div", { class: "tiny", style: "margin-top:6px" }, t("surah.setTrSizeNote"))),
     h("div", { class: "opt-group" }, h("h4", {}, t("surah.setWbw")),
       seg("wbwLang", [["ur", t("lang.ur")], ["en", t("lang.en")], ["both", t("surah.both")]]),
       h("label", { class: "check", style: "margin-top:8px" },
@@ -701,7 +706,7 @@ $$("#wbw-seg button").forEach(b => b.onclick = () =>
   b.dataset.v === "off" ? C.set({ wbw: false }) : C.set({ wbw: true, wbwLang: b.dataset.v }));
 
 C.onChange(async (_, patch) => {
-  if ("arSize" in patch || "theme" in patch || "tafsir" in patch || "known" in patch || "reciter" in patch || "followWords" in patch) return;
+  if ("arSize" in patch || "trSize" in patch || "theme" in patch || "tafsir" in patch || "known" in patch || "reciter" in patch || "followWords" in patch) return;
   if ("translations" in patch) await loadTranslations();
   if ("uiMeaning" in patch) await renderGate();
   const keep = player.idx;

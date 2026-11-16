@@ -384,6 +384,8 @@ export default {
   "surah.setScriptUthmani": "Uthmani",
   "surah.setScriptNote": "IndoPak: DigitalKhatt text and font, after the IndoPak 'Quraan Al Majeed' mushaf. Uthmani: Quran.com text. Tajweed: Quran.com's tajweed-coloured Uthmani text.",
   "surah.setSize": "Arabic size",
+  "surah.setTrSize": "Translation size",
+  "surah.setTrSizeNote": "Makes the Urdu and English translations larger or smaller everywhere on the site.",
   "surah.setWbw": "Word-by-word under each word",
   "surah.setShowWbw": "Show word meanings",
   "surah.setTranslit": "Show transliteration",

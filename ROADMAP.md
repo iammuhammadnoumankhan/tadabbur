@@ -144,10 +144,12 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
     - If a font truly can't load (after 10 s), the text is shown in the device's Arabic font with a notice. This was tested by blocking Google Fonts.
   - **Cost:** a first visit over slow 4G waits for the font. Surah pages appear in 2.7–3.8s; the speed test warns above 4.0s and fails above 4.5s. Repeat visits with the font cached appear in 0.1–0.3s, against the normal 2.5s limit. There's no layout shift.
   - **Later (optional):** a smaller first download of the font itself is only possible without modifying it (e.g. better HTTP caching); the font file is never changed.
-- [ ] **U5. Easier reading** *(§3.5)*
-  - No text under 13px (translator names are 11px today); body text at 16px or more.
-  - More line height for Nastaliq; comfortable line length on desktop.
-  - A simple text-size control in the reader for older eyes.
+- [x] **U5. Easier reading** *(done 2026-11-17; §3.5)*
+  - **No text under 13px anywhere:** 33 sizes raised from 10–12px to 13px, including translator names (the source credit), tab labels and Source labels. The smoke test fails on any visible text under 13px, on every page at phone and desktop width.
+  - **Urdu Nastaliq:** the word-by-word Urdu meanings went from 13px to 15px, and the surah list's Urdu names from 12px to 15px, with more line space (2.1–2.3).
+  - **Line length:** translations and surah introductions stop at about 72 characters a line on wide screens.
+  - **Text size:** a new "Translation size" slider in Settings (15–26px, Urdu 2px larger), next to the existing Arabic size. It applies on every page.
+  - **Also fixed:** wide family-tree branches now scroll to their left edge on phones, instead of being cut off.
 - [ ] **U6. Accessibility pass to WCAG 2.2 AA** *(§3.1, §3.7)*
   - Contrast in both themes, visible keyboard focus, screen-reader labels, correct `lang` on Arabic and Urdu, respect for "reduce motion".
   - The revelation-order bars stop being 2px links on touch screens.

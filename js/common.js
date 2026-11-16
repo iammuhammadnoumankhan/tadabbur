@@ -24,6 +24,7 @@ export function applyTheme() {
     : s.theme;
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.setProperty("--ar-size", s.arSize + "px");
+  document.documentElement.style.setProperty("--tr-size", (s.trSize || 17) + "px");
 }
 applyLanguage();
 applyTheme();

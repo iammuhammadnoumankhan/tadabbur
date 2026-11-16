@@ -11,6 +11,7 @@ export const DEFAULTS = Object.freeze({
   wbwLang: "ur",          // ur | en | both
   translations: null,     // [translation id…]; null = defaults from translations.json
   arSize: 34,             // Arabic font size (px)
+  trSize: 17,             // translation font size (px); Urdu is drawn 2px larger
   showTranslit: false,
   uiMeaning: "ur",        // language for surah meanings, intros, hadith and tafsir defaults
   uiLang: "en",           // interface language (Urdu interface comes later, see ROADMAP)

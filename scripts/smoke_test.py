@@ -96,6 +96,20 @@ def main():
                     sw, iw = page.evaluate("[document.documentElement.scrollWidth, innerWidth]")
                     if sw > iw + 1:
                         problems.append(f"scrolls sideways on a phone ({sw}px wide in a {iw}px screen)")
+                # U5: no visible text smaller than 13px (docs/UX_RESEARCH.md §3.5)
+                tiny = page.evaluate("""() => {
+                  const out = [];
+                  for (const el of document.querySelectorAll('body *')) {
+                    if (el.closest('svg, [hidden], .sheet:not(.show), .drawer:not(.show), .pop:not(.show), .toast')) continue;
+                    if (![...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim())) continue;
+                    const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+                    if (!r.width || !r.height || cs.visibility === 'hidden' || cs.display === 'none') continue;
+                    if (parseFloat(cs.fontSize) < 12.95) out.push(`${el.textContent.trim().slice(0, 20)} (${cs.fontSize})`);
+                  }
+                  return out.slice(0, 5);
+                }""")
+                if tiny:
+                    problems.append(f"text under 13px: {tiny}")
                 # Rule 8: IndoPak Quran text is hidden only until its own font has loaded, never stuck hidden
                 for cls, font in (("indopak", "DigitalKhatt IndoPak"), ("uthmani", "Amiri Quran")):
                     if not page.evaluate(f"document.querySelector('.ar-{cls}') !== null"):
