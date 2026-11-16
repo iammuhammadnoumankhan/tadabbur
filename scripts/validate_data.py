@@ -19,7 +19,7 @@ import glob, hashlib, html, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
-SCHEMA = 1          # must match scripts/build_manifest.py, js/core/data.js and docs/DATA.md
+SCHEMA = 2          # must match scripts/build_manifest.py, js/core/data.js and docs/DATA.md
 errors, notes = [], []
 
 
@@ -80,6 +80,9 @@ def main():
     sums = load("checksums.json")
     sums_ip = load("checksums-indopak.json")
     words_per_ayah = {}
+    word_sums = load("checksums-words.json") or {}
+    if sum(len(v) for v in word_sums.values()) != 6236:
+        err("checksums-words.json: needs one fingerprint for each of the 6,236 ayahs")
     for c in chs:
         n, rel = c["n"], f"surah/{c['n']:03d}.json"
         d = load(rel)
@@ -97,6 +100,22 @@ def main():
             if not a["w"]:
                 err(f"{rel}: {a['k']} has no words")
             words_per_ayah[a["k"]] = len(a["w"])
+            if set(a) - {"k", "n", "id", "u", "juz", "page", "sajdah", "w"} or any(set(w) != {"u", "en", "ur"} for w in a["w"]):
+                err(f"{rel}: {a['k']} has fields outside schema 2 (extra word data belongs in words/)")
+        ex = load(f"words/{n:03d}.json")
+        if not ex or len(ex["ayahs"]) != len(ayahs):
+            err(f"words/{n:03d}.json: missing or not one entry per ayah")
+        else:
+            want = word_sums.get(str(n), [])
+            for j, (a, e) in enumerate(zip(ayahs, ex["ayahs"])):
+                if len(e["w"]) != len(a["w"]):
+                    err(f"words/{n:03d}.json: {a['k']} has {len(e['w'])} words, surah/ has {len(a['w'])}")
+                    continue
+                # surah/ + words/ joined must equal the original fetched word data, letter for letter
+                full = {"u": a["u"], "i": e["i"], "w": [{**cw, **ew} for cw, ew in zip(a["w"], e["w"])]}
+                got = hashlib.sha256(json.dumps(full, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest()[:16]
+                if j >= len(want) or got != want[j]:
+                    err(f"{a['k']}: word data (Arabic, meanings, transliteration or audio) doesn't match checksums-words.json")
         got = [sha16(a["u"]) for a in ayahs]
         if got != sums.get(str(n)):
             bad = [ayahs[i]["k"] for i, (x, y) in enumerate(zip(got, sums.get(str(n), []))) if x != y]

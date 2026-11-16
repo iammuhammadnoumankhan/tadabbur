@@ -2,10 +2,11 @@
 
 Every client reads the same static JSON in `data/`: the website now, and the mobile and desktop apps later. This file is the contract.
 
-- **Schema version: 1.** It's recorded in `data/manifest.json` as `schema`.
+- **Schema version: 2.** It's recorded in `data/manifest.json` as `schema`.
   - Adding a field doesn't change the version; clients must ignore fields they don't know.
   - Renaming or removing a field, or changing a field's meaning or type, **bumps the version**. Clients refuse data with a version they don't support (`js/core/data.js` → `SCHEMA`).
 - `scripts/validate_data.py` enforces the rules below in CI.
+- **History:** schema 2 (2026-11-16) moved `i`, `tl` and `a` out of `surah/NNN.json` into the new `words/NNN.json`. The service worker's data cache is named after the schema (`tadabbur-data-schema-2`), so old cached data is dropped.
 
 ## Conventions
 - **Ayah key:** `"surah:ayah"`, e.g. `"2:255"`. Surahs are 1–114; ayah counts come from `chapters.json`.
@@ -42,17 +43,21 @@ An array of 114 items:
 | `pages` | `[first, last]` mushaf page |
 | `src` | Source id |
 
-### `surah/NNN.json`
+### `surah/NNN.json` (what the reader needs first)
 `{ n, src: { text, wbw }, ayahs: [Ayah] }`
-- `Ayah`: `{ k, n, id, u, i, juz, page, sajdah, w: [Word] }`
+- `Ayah`: `{ k, n, id, u, juz, page, sajdah, w: [Word] }`
   - `id` is the global ayah id (1–6236), used for audio.
   - `u` is the Uthmani text, unmodified (fingerprinted in `checksums.json`).
-  - `i` is Quran.com's IndoPak text, kept for reference. The reader uses `indopak/` instead.
-- `Word`: `{ u, i, tl, en, ur, a }`
-  - `u`, `i`: Uthmani and IndoPak spelling
-  - `tl`: transliteration
+- `Word`: `{ u, en, ur }`
+  - `u`: Uthmani spelling
   - `en`, `ur`: English and Urdu meaning
-  - `a`: relative audio path on `audio.qurancdn.com`
+
+### `words/NNN.json` (extra word data, loaded only when needed)
+`{ n, src: { text, wbw }, ayahs: [{ i, w: [{ i, tl, a }] }] }`, with **one entry per ayah and per word of `surah/NNN.json`**, in the same order.
+- `ayahs[].i`, `w[].i`: Quran.com's IndoPak spelling, kept for reference. The reader uses `indopak/` instead.
+- `tl`: transliteration
+- `a`: relative audio path on `audio.qurancdn.com`
+- Split out of `surah/NNN.json` in schema 2 (U4b) so the first download is smaller (Al-Baqarah: 222 → 118 KB compressed). Nothing was changed, only moved.
 
 ### `indopak/NNN.json`
 `{ src, bismillah, ayahs: [[word, …], …] }`
@@ -65,8 +70,9 @@ An array of 114 items:
 - **Markup:** only `<span class="tj tj-RULE">…</span>` (may nest). The build fails on anything else.
 - **Fingerprints:** `checksums-tajweed.json`, a SHA-256 of each ayah's words with markup removed, joined with spaces.
 
-### `checksums.json`, `checksums-indopak.json`, `checksums-tajweed.json`
+### `checksums.json`, `checksums-indopak.json`, `checksums-tajweed.json`, `checksums-words.json`
 `{ "<surah>": ["<16 hex>", …] }`, one entry per ayah.
+- `checksums-words.json`: each ayah's complete word data (Uthmani text, IndoPak text, and every field of every word: spelling, Urdu and English meaning, transliteration, audio path), taken from the original records before they're split into `surah/` and `words/`. The validator rejoins the two files and checks every ayah against it, so a change of even one letter fails CI.
 
 ### `translations.json`, `tr/<id>/NNN.json`
 - `translations.json`: `{ default: [id…], list: [{ id, lang, name, src }] }`

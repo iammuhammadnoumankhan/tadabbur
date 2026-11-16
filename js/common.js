@@ -307,7 +307,7 @@ export async function offlineUrls() {
   const urls = [];
   for (const c of chs) {
     const n = core.pad3(c.n);
-    urls.push(`data/surah/${n}.json`, `data/indopak/${n}.json`, `data/info/${n}.json`, `data/morph/${n}.json`,
+    urls.push(`data/surah/${n}.json`, `data/words/${n}.json`, `data/indopak/${n}.json`, `data/info/${n}.json`, `data/morph/${n}.json`,
       ...trs.map(tr => `data/tr/${tr.id}/${n}.json`));
     if (hIndex[c.n]) urls.push(`data/hadith/${n}.json`);
     if (simIx[c.n]) urls.push(`data/similar/${n}.json`);

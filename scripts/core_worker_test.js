@@ -28,6 +28,8 @@ try {
 
   const s1 = await core.surah(1);
   check("Al-Fatihah has 7 ayahs", s1.ayahs.length === 7, s1.ayahs.length);
+  const w1 = await core.words(1);
+  check("extra word data lines up with the surah", w1.ayahs.length === 7 && w1.ayahs.every((a, i) => a.w.length === s1.ayahs[i].w.length) && !!w1.ayahs[0].w[0].a);
   check("scriptText is null for Uthmani", (await core.scriptText(1)) === null);
 
   const sel = await core.selectedTranslations();

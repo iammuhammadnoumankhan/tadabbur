@@ -133,9 +133,14 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
     - the word grammar and share-card code load only when needed;
     - the header's space is reserved, and the English page text is in the HTML (`scripts/stamp_i18n.py`), so nothing jumps.
   - **Fonts:** Google Fonts already sends each font only when its letters appear on screen, so Nastaliq downloads only when Urdu is shown. The bundled IndoPak font (338 KB) is left untouched: trimming it risks how the Quran text is drawn, and the OFL would require renaming it.
-- [ ] **U4b. Smaller first download for long surahs**
-  - Al-Baqarah's first visit on slow 4G is 2.8s, because its word-by-word file is 222 KB compressed. The speed test allows 3.0s for it until this is done.
-  - **Idea:** split `surah/NNN.json` so the first screen needs less (e.g. move word audio paths and transliteration to their own file). This changes the data format, so it needs a schema bump (docs/DATA.md).
+- [x] **U4b. Smaller first download for long surahs** *(done 2026-11-16)*
+  - Data schema 2: transliteration, word audio paths and Quran.com's IndoPak spelling (not shown) moved from `surah/NNN.json` to the new `words/NNN.json`, loaded only when needed. Al-Baqarah's first file: 222 → 118 KB compressed, first visit on slow 4G 2.8 → 2.3s.
+  - **Proven lossless:** all 114 files rejoined equal the last commit exactly (0 of 6,236 ayahs and 0 of 77,429 words differ).
+  - `checksums-words.json` now fingerprints every ayah's full word data, so CI fails on any one-letter change. Tested with a deliberate change to a transliteration and an Urdu meaning.
+- [ ] **U4c. No rewrap when the Quran font arrives**
+  - On a first visit straight to a linked ayah over slow 4G, the IndoPak font (338 KB) arrives after the text, and the words rewrap once (layout shift about 0.28; the speed test allows 0.3 for that page). Later visits have the font cached.
+  - Waiting for the font instead delays the text by about 1.5s (tested), so text-first is kept for now.
+  - **Idea:** a fallback font sized to match DigitalKhatt (CSS `size-adjust`), tested on a real Android phone. The Quran text itself is never touched.
 - [ ] **U5. Easier reading** *(§3.5)*
   - No text under 13px (translator names are 11px today); body text at 16px or more.
   - More line height for Nastaliq; comfortable line length on desktop.

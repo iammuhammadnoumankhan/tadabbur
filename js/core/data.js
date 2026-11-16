@@ -5,7 +5,7 @@ import { pad3 } from "./quran.js";
 import * as settings from "./settings.js";
 
 /** Data schema this code understands; must match data/manifest.json. */
-export const SCHEMA = 1;
+export const SCHEMA = 2;
 
 let BASE = "";                       // "" = relative to the page; apps may set an absolute URL
 let fetchImpl = (...a) => globalThis.fetch(...a);
@@ -44,6 +44,9 @@ export const surah = n => getJSON(`data/surah/${pad3(n)}.json`);
 export const indopak = n => getJSON(`data/indopak/${pad3(n)}.json`);
 export const info = n => getJSON(`data/info/${pad3(n)}.json`);
 /** Tajweed-coloured words (Quran.com): ayahs[i][w] = sanitised HTML with <span class="tj tj-RULE">. */
+/** Extra word data for surah n (schema 2): { ayahs: [{ i, w: [{ i, tl, a }] }] }, parallel to surah(n).
+ *  Transliteration, word audio path and Quran.com's IndoPak spelling; load it only when needed. */
+export const words = n => getJSON(`data/words/${pad3(n)}.json`);
 export const tajweed = n => getJSON(`data/tajweed/${pad3(n)}.json`);
 
 /** IndoPak words for surah n when that script is chosen, else null (use Uthmani from surah()). */

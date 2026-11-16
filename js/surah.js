@@ -155,12 +155,18 @@ async function loadTranslations() {
   $("#tr-count").textContent = trList.length;
 }
 
+// Extra word data (transliteration, audio path) lives in words/NNN.json and is loaded only when needed (U4b)
+let extra = null;
+const extraNow = () => C.words(N).then(x => (extra = x)).catch(() => null);
+const wordMeaning = w => (C.get().wbwLang === "en" ? w.en : w.ur) || w.en || "";
+
 function wordEl(w, a, i, idx) {
   const st = C.get();
-  const el = h("span", { class: "w", "data-k": a.k, "data-i": i, tabindex: "0", role: "button", "aria-label": t("surah.wordAria", { tl: w.tl, en: w.en }) },
+  const el = h("span", { class: "w", "data-k": a.k, "data-i": i, tabindex: "0", role: "button", "aria-label": t("surah.wordAria", { word: w.u, meaning: wordMeaning(w) }) },
     wordArabic(idx, i));
+  const tl = extra?.ayahs[idx]?.w[i]?.tl;
   if (st.wbw) {
-    if (st.showTranslit && w.tl) el.append(h("span", { class: "g", style: "font-style:italic;color:var(--ink-3)" }, w.tl));
+    if (st.showTranslit && tl) el.append(h("span", { class: "g", style: "font-style:italic;color:var(--ink-3)" }, tl));
     if (st.wbwLang === "ur" || st.wbwLang === "both") el.append(h("span", { class: "g ur", lang: "ur" }, w.ur || ""));
     if (st.wbwLang === "en" || st.wbwLang === "both") el.append(h("span", { class: "g" }, w.en || ""));
   }
@@ -203,6 +209,7 @@ function ayahEl(a, idx) {
 async function renderReader() {
   const st = C.get();
   ip = st.script === "indopak" ? await C.indopak(N) : null;
+  if (st.showTranslit && !extra) await extraNow();
   tj = st.script === "tajweed" ? await C.tajweed(N).catch(() => null) : null;
   renderTajweedKey();
   const r = $("#reader");
@@ -296,9 +303,14 @@ function pinTo(el) {
   const quit = () => { stop = true; };
   const evs = ["wheel", "touchstart", "keydown", "pointerdown"];
   evs.forEach(e => addEventListener(e, quit, { once: true, passive: true }));
-  const until = performance.now() + 2500;
+  // hold for at least 2.5 s, and until the Quran fonts have arrived (a first visit on a slow connection
+  // gets them after the text is drawn, and the words rewrap), but never more than 8 s
+  const start = performance.now();
+  let fontsIn = document.fonts?.status === "loaded";
+  document.fonts?.ready.then(() => { fontsIn = true; });
   const tick = () => {
-    if (stop || performance.now() > until) { evs.forEach(e => removeEventListener(e, quit)); return; }
+    const t = performance.now() - start;
+    if (stop || t > 8000 || (t > 2500 && fontsIn)) { evs.forEach(e => removeEventListener(e, quit)); return; }
     if (Math.abs(el.getBoundingClientRect().top - want) > 4) el.scrollIntoView({ block: "start" });
     requestAnimationFrame(tick);
   };
@@ -331,15 +343,23 @@ function showPop(el) {
   const w = a.w[+el.dataset.i];
   const st = C.get();
   pop.innerHTML = "";
+  const wi = +el.dataset.i;
+  const tlBox = h("div", { class: "w-tl" }, extra?.ayahs[idx]?.w[wi]?.tl || "");
+  if (!extra) extraNow().then(x => { if (x && popEl === el) tlBox.textContent = x.ayahs[idx]?.w[wi]?.tl || ""; });
   pop.append(
     h("div", { class: "w-ar" }, wordArabic(idx, +el.dataset.i)),
-    h("div", { class: "w-tl" }, w.tl || ""),
+    tlBox,
     h("dl", {},
       h("dt", {}, t("lang.ur")), h("dd", { class: "urdu", lang: "ur" }, w.ur || "—"),
       h("dt", {}, t("lang.en")), h("dd", {}, w.en || "—")),
     grammarBox(idx, +el.dataset.i),
     h("div", { class: "row" },
-      h("button", { class: "btn", onclick: () => { wordAudio.src = C.audioUrl.word(w.a); wordAudio.play(); } },
+      h("button", { class: "btn", onclick: async () => {
+        const x = extra || await extraNow();
+        const path = x?.ayahs[idx]?.w[wi]?.a;
+        if (!path) return C.toast(t("surah.wordAudioMissing"));
+        wordAudio.src = C.audioUrl.word(path); wordAudio.play();
+      } },
         h("span", { html: ICON.speaker }), t("surah.wordListen")),
       h("span", { class: "tiny" }, t("surah.wordRef", { key: a.k, n: +el.dataset.i + 1 }))),
     h("div", { class: "row", style: "margin-top:10px" },
@@ -858,6 +878,8 @@ function pager() {
 await Promise.all([renderGate(), loadTranslations()]);
 await renderReader();
 // word grammar: fetched when the phone is idle (or when a word is tapped), so it never delays a tap (U4)
-if ("requestIdleCallback" in window) requestIdleCallback(() => morphNow(), { timeout: 8000 }); else setTimeout(morphNow, 4000);
+// …and the same for the extra word data (transliteration, word audio)
+if ("requestIdleCallback" in window) requestIdleCallback(() => { morphNow(); extraNow(); }, { timeout: 8000 });
+else setTimeout(() => { morphNow(); extraNow(); }, 4000);
 pager();
 P.setLast(location.hash ? decodeURIComponent(location.hash.slice(1)) : `${N}:1`, "reader");

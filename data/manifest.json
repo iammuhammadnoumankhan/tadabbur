@@ -1,6 +1,6 @@
 {
- "schema": 1,
- "built": "2026-11-15",
+ "schema": 2,
+ "built": "2026-11-16",
  "counts": {
   "surahs": 114,
   "ayahs": 6236,
@@ -32,7 +32,9 @@
    "id": "quran-text",
    "files": [
     "surah/NNN.json",
-    "checksums.json"
+    "words/NNN.json",
+    "checksums.json",
+    "checksums-words.json"
    ],
    "src": [
     "qc-text",

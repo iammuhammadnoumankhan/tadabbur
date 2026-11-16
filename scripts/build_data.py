@@ -195,7 +195,10 @@ def build_verses(chapters):
                 "sajdah": bool(ve.get("sajdah_number")),
                 "w": words,
             })
-        write(f"surah/{n:03d}.json", {"n": n, "src": {"text": "qc-text", "wbw": "qc-wbw"}, "ayahs": ayahs})
+        WORD_SUMS[str(n)] = [words_fingerprint(a) for a in ayahs]
+        core, extra = split_surah(n, ayahs)
+        write(f"surah/{n:03d}.json", core)
+        write(f"words/{n:03d}.json", extra)
         return n, [hashlib.sha256(a["u"].encode()).hexdigest()[:16] for a in ayahs]
     sums = {}
     with ThreadPoolExecutor(4) as ex:
@@ -290,6 +293,30 @@ def sunnah_url(slug, h):
         return f"https://sunnah.com/bukhari:{int(n) if float(n).is_integer() else n}"
     book, inbook = h["reference"]["book"], h["reference"]["hadith"]       # sunnah.com/muslim/<book>/<in-book>
     return f"https://sunnah.com/muslim/{'introduction' if book == 0 else book}/{inbook}"
+
+
+# Schema 2 (U4b): the reader's first screen needs only the Uthmani words and their meanings, so those stay in
+# surah/NNN.json. Transliteration, word audio paths and Quran.com's IndoPak spelling (not shown; the reader uses
+# DigitalKhatt) move to words/NNN.json, loaded only when needed. Nothing is changed, only moved.
+WORD_SUMS = {}
+CORE_WORD = ("u", "en", "ur")
+EXTRA_WORD = ("i", "tl", "a")
+
+
+def words_fingerprint(a):
+    """SHA-256 (first 16 hex) of one ayah's complete word data: its Uthmani and IndoPak text and every field of
+    every word. Stored in checksums-words.json; validate_data.py recomputes it from surah/ + words/ joined."""
+    s = json.dumps({"u": a["u"], "i": a.get("i"), "w": a["w"]}, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(s.encode()).hexdigest()[:16]
+
+
+def split_surah(n, ayahs):
+    core = {"n": n, "src": {"text": "qc-text", "wbw": "qc-wbw"}, "ayahs": [
+        {**{k: v for k, v in a.items() if k not in ("i", "w")}, "w": [{k: w.get(k) for k in CORE_WORD} for w in a["w"]]}
+        for a in ayahs]}
+    extra = {"n": n, "src": {"text": "qc-text", "wbw": "qc-wbw"}, "ayahs": [
+        {"i": a.get("i"), "w": [{k: w.get(k) for k in EXTRA_WORD} for w in a["w"]]} for a in ayahs]}
+    return core, extra
 
 
 def build_hadith(chapters):
@@ -432,6 +459,7 @@ def main():
     build_chapter_info(chapters)
     sums = build_verses(chapters)
     write("checksums.json", {str(k): v for k, v in sorted(sums.items())})
+    write("checksums-words.json", {k: WORD_SUMS[k] for k in sorted(WORD_SUMS, key=int)})
     tr = build_translations(chapters)
     hs = build_hadith(chapters)
     build_sources(tr, hs)

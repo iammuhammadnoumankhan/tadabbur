@@ -17,6 +17,10 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 5. **Be honest about limits and disagreement.** Revelation order is approximate. Seerah events follow Bukhari's chapter order, and only moments a hadith dates have a year. Say so in the UI.
 6. **Check licences before bundling.** Some sources say "no modification", "credit with version" or "no ads". Respect them; when in doubt, link instead of copying.
 7. When a source is missing, **mark the gap** ("needs source"). Don't fill it from general knowledge.
+8. **Zero tolerance for mistakes (the owner's rule).** Speed, design or code work must never change religious content: not one letter of the Quran text, a translation, a word meaning, a hadith or a tafsir.
+   - Restructuring data (splitting, moving or indexing files) must be **proven lossless**: rejoined, it equals the original exactly, and fingerprints in `data/checksums*.json` guard it in CI.
+   - Prove a new guard works by making a one-letter test change and confirming the validator fails, then restore the file.
+   - Display changes (what is drawn when, e.g. drawing long surahs in sections) must show every ayah, once and in order. The smoke test checks this.
 
 ## Git
 - **No Claude attribution:** no `Co-Authored-By: Claude` trailers in commits, no "Generated with Claude Code" in PRs. Commit as the user only.
@@ -33,7 +37,7 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
 - **Rules:**
   - Never hard-code UI text; add a key to `js/i18n/en.js`.
   - Never touch `document` or `window` in `js/core/`.
-  - Data formats are defined in `docs/DATA.md` (schema 1). A breaking change bumps `SCHEMA` in `build_manifest.py`, `validate_data.py` and `js/core/data.js`.
+  - Data formats are defined in `docs/DATA.md` (schema 2). A breaking change bumps `SCHEMA` in `build_manifest.py`, `validate_data.py` and `js/core/data.js`.
 - CSS: `css/style.css`, with colour tokens on `:root` and dark mode via `[data-theme="dark"]`.
 - Fonts:
   - bundled: `fonts/DigitalKhatt-IndoPak.woff2` (SIL OFL; licence file next to it)
@@ -54,7 +58,7 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
   - `sw.js`, the service worker.
 - **How `sw.js` caches:**
   - The **app shell** (`SHELL_FILES`) is cached per deploy. CI replaces `__BUILD__` with the commit, so an update installs a complete new shell.
-  - **Data** goes in `tadabbur-data-schema-1`, kept across deploys and refreshed in the background. Rename it when the data schema changes.
+  - **Data** goes in `tadabbur-data-schema-2`, kept across deploys and refreshed in the background. Rename it when the data schema changes.
   - Fonts and tafsir you've read go in `tadabbur-runtime`.
 - **When adding a page, JS module or core data file,** add it to `SHELL_FILES` / `DATA_FILES` in `sw.js`, or it won't work offline. The offline test catches most misses.
 - **"Save for offline"** (`offlinePanel()` in `common.js`) asks the service worker to cache every surah file for the reader's chosen translations (about 658 files, about 30 MB).
@@ -79,7 +83,7 @@ Web first, then mobile (Capacitor/TWA) and desktop (Tauri) wrapping the same cod
 
 ## Data pipeline (run in this order; raw downloads are cached in `.cache/`, which git ignores)
 ```bash
-python3 scripts/build_data.py      # chapters, Quran text, word-by-word, translations, surah intros, Bukhari links, tafsir list
+python3 scripts/build_data.py      # chapters, Quran text, word-by-word (surah/ + extra words/), translations, surah intros, hadith links, tafsir list
 python3 scripts/build_indopak.py   # IndoPak text (DigitalKhatt) aligned to Quran.com words + OFL font
 python3 scripts/build_seerah.py    # Seerah timeline from Sahih al-Bukhari (asserts anchor hadith text)
 python3 scripts/build_stories.py   # prophets from the Quranic Arabic Corpus ontology

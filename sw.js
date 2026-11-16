@@ -10,7 +10,7 @@
 
 const VERSION = "__BUILD__";
 const SHELL = `tadabbur-shell-${VERSION}`;
-const DATA = "tadabbur-data-schema-1";
+const DATA = "tadabbur-data-schema-2";
 const RUNTIME = "tadabbur-runtime";
 
 const SHELL_FILES = [

@@ -6,7 +6,7 @@ See docs/DATA.md. Run last, after all other build scripts.
 """
 import datetime, glob, json, os
 
-SCHEMA = 1
+SCHEMA = 2
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "data")
 
@@ -44,7 +44,7 @@ def main():
         },
         "datasets": [
             {"id": "chapters", "files": ["chapters.json"], "src": ["qc-chapters"]},
-            {"id": "quran-text", "files": ["surah/NNN.json", "checksums.json"], "src": ["qc-text", "qc-wbw"]},
+            {"id": "quran-text", "files": ["surah/NNN.json", "words/NNN.json", "checksums.json", "checksums-words.json"], "src": ["qc-text", "qc-wbw"]},
             {"id": "indopak", "files": ["indopak/NNN.json", "checksums-indopak.json"], "src": ["dk-indopak-text", "dk-indopak-font"]},
             {"id": "layout", "files": ["layout/<madani|indopak>/index.json", "layout/<madani|indopak>/PPP.json"], "src": ["qc-layout-madani", "dk-indopak-text"]},
             {"id": "tajweed", "files": ["tajweed/NNN.json", "checksums-tajweed.json"], "src": ["qc-tajweed"]},
