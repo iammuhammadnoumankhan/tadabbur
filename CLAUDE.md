@@ -129,6 +129,7 @@ After a change, check in the browser at desktop and at 375px (mobile):
 - Urdu (Nastaliq) and Arabic render without missing-glyph boxes.
 
 ## Conventions
+- UI rules (from [docs/UX_RESEARCH.md](docs/UX_RESEARCH.md)): design for budget Android phones and one-handed use first; tap targets ≥ 44px (never < 24px); no text under 13px; show the main thing first and put the rest behind a clearly labelled control; aim for WCAG 2.2 AA.
 - Urdu text: `class="urdu"`, `dir="rtl"`, Nastaliq font.
 - Quran text: `translate="no"`, `lang="ar"`.
 - Sanitize any third-party HTML (tafsir, surah intros) to a small set of allowed tags.

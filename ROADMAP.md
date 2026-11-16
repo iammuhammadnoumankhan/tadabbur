@@ -98,18 +98,73 @@ Status: `[ ]` to do · `[~]` in progress · `[x]` done.
     - family links with their evidence.
   - No biography written by us.
 
-## Phase 5: Trust and reach
+## Phase 5: Design and usability (UI/UX) *(added 2026-11-16)*
+
+Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs/UX_RESEARCH.md) (§ numbers below point there). Phones come first: most readers use budget Android phones on paid data, often with one hand.
+
+- [ ] **U0. First test with 5 real readers** *(free; §3.6)*
+  - 5 Urdu-speaking readers, each on their own phone, doing a few set tasks, e.g. "find what 2:255 means in Urdu", "find a hadith on this ayah", "continue where you left off".
+  - Watch without helping and note where they get stuck. This tells us which of U1–U8 matters most, and gives a "before" to compare with.
+- [ ] **U1. Bottom tab bar on phones** *(§2, §3.2)*
+  - Today 6 of 9 header links are off-screen on a phone.
+  - Phones get a bottom bar with 4–5 labelled tabs (Read, Search, Learn, My reading, More), within thumb reach. Desktop keeps the top menu.
+- [ ] **U2. Reading comes first on the surah page** *(§2, §3.3)*
+  - Today the first ayah starts two screens down.
+  - Use a compact header (name, Makki/Madani, ayah count), with "About this surah" to expand the introduction, timeline, prophets and sources. Nothing is removed; it's one tap away.
+- [ ] **U3. Simpler ayah actions** *(§2, §3.1, §3.3)*
+  - Today there are 8 controls per ayah, at 28×33px.
+  - Keep play, tafsir and the hadith/similar badges visible; put copy, share, bookmark, note and report in one labelled "More" menu.
+  - Every tap target becomes at least 44px.
+- [ ] **U4. Fast on budget phones** *(§2, §3.4)*
+  - Al-Baqarah today has 30k elements and downloads 2.7 MB.
+  - Draw long surahs in pieces as you scroll; load the Nastaliq font only when Urdu is shown; trim the fonts.
+  - Target: LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1 on a slowed "budget phone" profile, checked in CI.
+- [ ] **U5. Easier reading** *(§3.5)*
+  - No text under 13px (translator names are 11px today); body text at 16px or more.
+  - More line height for Nastaliq; comfortable line length on desktop.
+  - A simple text-size control in the reader for older eyes.
+- [ ] **U6. Accessibility pass to WCAG 2.2 AA** *(§3.1, §3.7)*
+  - Contrast in both themes, visible keyboard focus, screen-reader labels, correct `lang` on Arabic and Urdu, respect for "reduce motion".
+  - The revelation-order bars stop being 2px links on touch screens.
+  - An automated accessibility check is added to CI.
+- [ ] **U7. First-time setup** *(§3.3)*
+  - On first visit, three quick choices: meaning language (Urdu/English), script (IndoPak/Uthmani) and translations. Then a one-time tip explaining the gold hadith and green "similar" badges.
+  - Everything stays changeable in settings.
+- [ ] **U8. Better on desktop and tablet** *(§3.2)*
+  - A side navigation rail, Arabic and translation side by side on wide screens, and keyboard shortcuts (next/previous ayah, play, tafsir).
+- [ ] **U9. Design system notes**
+  - `docs/DESIGN.md`: colours, type sizes, spacing, and the shared components (chips, cards, drawers, tabs). New features then look and behave the same, and the mobile and desktop apps reuse them.
+- [ ] **U10. Second test with 5 readers**
+  - Repeat U0's tasks after U1–U7 and compare. Repeat after any large change.
+
+## Phase 6: Trust and reach
 
 - [ ] **17. Scholar review page [#17]**
   - Which sources a qualified 'alim has reviewed, when, and their notes. Needs a reviewer.
-- [ ] **18. More languages [#19]**
-  - Translations in Bengali, Hindi, Pashto, Sindhi, Indonesian and Turkish, from the same Quran.com source.
+  - Good first items to review: `docs/FAMILY_CANDIDATES.md` and the hadith-to-ayah linking rules.
+- [ ] **12b. Related-meaning ayahs (QurSim)**: waits on permission.
+  - We can draft the request; the owner sends it to the authors (Leeds).
 - [ ] **19. Own web address and link previews [#20]**
   - Domain about $10–15 a year; do it when budget allows.
   - Social preview images for every surah and prophet page.
-- [ ] **20. Urdu interface [#1]** *(last, as decided)*
+
+## Phase 7: More languages
+
+- [ ] **18. Translations in more languages [#19]** *(checked 2026-11-16, docs/UX_RESEARCH.md §4)*
+  - Quran.com offers 126 translations in 69 languages.
+  - First, languages close to our readers: Pashto (1), Sindhi (1), Persian (2), Hindi (1), Bengali (4). Then Indonesian (3), Turkish (5), Malay (1) and others.
+  - Punjabi, Balochi and Kashmiri have none there: mark them "needs source".
+  - **Check each translation's licence before bundling** (CLAUDE.md rule 6); link out where bundling isn't allowed.
+- [ ] **18b. Choosing a translation by language**
+  - The translation picker grouped by language, with a search box, so dozens of translations stay easy to choose from.
+- [ ] **18c. Word-by-word meaning in more languages**
+  - Only where Quran.com publishes word-by-word for that language; check each one first.
+- [ ] **20. Urdu interface [#1]** *(last of the original list, as decided)*
   - The whole interface in Urdu: right to left, Nastaliq font, with an English switch.
   - Item 2 already gathers all the text in one place, so this is mostly translating that file.
+- [ ] **18d. More interface languages** *(after the Urdu interface)*
+  - Translate `js/i18n/en.js` into other languages. Right-to-left ones (Arabic, Persian, Pashto, Sindhi) reuse the Urdu right-to-left work.
+  - Each needs a native-speaker check, because we don't machine-translate the interface without review.
 
 ---
 
