@@ -96,6 +96,18 @@ def main():
                     sw, iw = page.evaluate("[document.documentElement.scrollWidth, innerWidth]")
                     if sw > iw + 1:
                         problems.append(f"scrolls sideways on a phone ({sw}px wide in a {iw}px screen)")
+                # U3: each ayah shows at most 5 controls, icon buttons at least 44px; settings bar on one row on phones
+                if path.startswith("surah.html"):
+                    u3 = page.evaluate("""() => {
+                      const head = document.querySelector('.ayah .ayah-head');
+                      const ctrls = head ? [...head.querySelectorAll('button, a')] : [];
+                      const icons = ctrls.filter(b => b.classList.contains('icon-btn')).map(b => b.getBoundingClientRect());
+                      const tb = document.getElementById('toolbar');
+                      return { ctrls: ctrls.length, smallIcons: icons.filter(r => r.width < 44 || r.height < 44).length,
+                               more: !!head?.querySelector('.more-btn'), toolbarH: tb ? Math.round(tb.getBoundingClientRect().height) : 0 };
+                    }""")
+                    if u3["ctrls"] > 5 or u3["smallIcons"] or not u3["more"] or (vname == "phone" and u3["toolbarH"] > 80):
+                        problems.append(f"ayah controls wrong: {u3}")
                 # U2: on a phone the surah page starts reading on the first screen
                 if vname == "phone" and path.startswith("surah.html"):
                     top, ih = page.evaluate("[document.querySelector('.ayah')?.getBoundingClientRect().top ?? 1e9, innerHeight]")
@@ -129,8 +141,10 @@ def main():
         # "Report" buttons open the pre-filled GitHub form
         page = browser.new_page()
         page.goto(base + "surah.html?n=1", wait_until="domcontentloaded")
-        page.wait_for_selector(".ayah .report-link")
-        href = page.get_attribute(".ayah .report-link", "href")
+        page.wait_for_selector(".ayah .more-btn")
+        page.click(".ayah .more-btn")                      # Report is in the ayah's "More" menu (U3)
+        page.wait_for_selector(".sheet.show a.sheet-item")
+        href = page.get_attribute(".sheet.show a.sheet-item", "href")
         ok = all(s in href for s in ("/issues/new?", "template=content_report.yml", "reference=1%3A1", "kind=Translation"))
         print(f"{'✓' if ok else '✗'} [report] ayah Report button pre-fills the GitHub form" + ("" if ok else f"  ({href})"))
         if not ok:
@@ -143,8 +157,9 @@ def main():
         page.on("pageerror", lambda e: sc_errors.append(str(e)))
         page.goto(base + "surah.html?n=112", wait_until="domcontentloaded")
         try:
-            page.wait_for_selector('[id="112:1"] .icon-btn[aria-label="Share this ayah as an image"]')
-            page.click('[id="112:1"] .icon-btn[aria-label="Share this ayah as an image"]')
+            page.wait_for_selector('[id="112:1"] .more-btn')
+            page.click('[id="112:1"] .more-btn')               # Share is in the ayah's "More" menu (U3)
+            page.click('.sheet.show .sheet-item:has-text("Share this ayah as an image")')
             page.wait_for_selector(".share-preview")
             page.wait_for_timeout(1500)
             w, inked = page.evaluate("""() => {

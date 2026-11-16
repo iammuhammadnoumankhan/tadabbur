@@ -235,6 +235,7 @@ export default {
   "progress.bookmarked": "Bookmarked {key}",
   "progress.unbookmarked": "Removed bookmark {key}",
   "progress.noteTitle": "Write a note on this ayah",
+  "progress.noteEdit": "Edit your note",
   "progress.noteFor": "My note on {key}",
   "progress.notePrivate": "Your own reflection, saved only on this device.",
   "progress.notePlaceholder": "Write your note…",
@@ -262,6 +263,7 @@ export default {
 
   // ---------------------------------------------------------------- report a problem
   "report.label": "Report",
+  "report.hintShort": "A problem with this ayah or its translation (short form on GitHub)",
   "report.title": "Report a problem with this (opens a short form on GitHub)",
   "report.footerAsk": "Spotted a mistake? ",
   "report.ayahSource": "Arabic: {script}; translations: {translations}",
@@ -359,6 +361,9 @@ export default {
   "surah.playAyah": "Play this ayah",
   "surah.playAyahAria": "Play ayah {key}",
   "surah.copyAyah": "Copy ayah with translations",
+  "surah.ayahMore": "More: copy, share, bookmark, note, report",
+  "surah.ayahMoreAria": "More actions for ayah {key}",
+  "surah.ayahMenuTitle": "Ayah {key}",
   "surah.copy": "Copy",
   "surah.copyFooter": "Quran {key}",
   "surah.copied": "Copied {key} with translations",

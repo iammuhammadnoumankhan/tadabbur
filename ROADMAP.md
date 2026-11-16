@@ -111,7 +111,7 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
 - [x] **U2. Reading comes first on the surah page** *(done 2026-11-16; §2, §3.3)*
   - Today the first ayah starts two screens down.
   - Use a compact header (name, Makki/Madani, ayah count), with "About this surah" to expand the introduction, timeline, prophets and sources. Nothing is removed; it's one tap away.
-- [ ] **U3. Simpler ayah actions** *(§2, §3.1, §3.3)*
+- [x] **U3. Simpler ayah actions** *(done 2026-11-16; §2, §3.1, §3.3)*
   - Today there are 8 controls per ayah, at 28×33px.
   - Keep play, tafsir and the hadith/similar badges visible; put copy, share, bookmark, note and report in one labelled "More" menu.
   - Every tap target becomes at least 44px.

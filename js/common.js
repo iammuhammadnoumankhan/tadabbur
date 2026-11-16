@@ -185,6 +185,36 @@ export function header(active = "") {
   tabBar(TAB_OF[active] || (active ? "more" : ""), active);
 }
 
+// ---------- action sheet (U3): a short list of labelled actions sliding up from the bottom.
+// items: [{ label, icon?, hint?, href?, external?, onClick? }]; returns nothing, closes itself on choice.
+export function actionSheet({ title = "", items = [], note = null } = {}) {
+  const opener = document.activeElement;
+  const scrim = document.body.appendChild(h("div", { class: "scrim" }));
+  const close = () => {
+    sheet.classList.remove("show"); scrim.classList.remove("show");
+    removeEventListener("keydown", onKey);
+    setTimeout(() => { sheet.remove(); scrim.remove(); }, 250);
+    opener?.focus?.();
+  };
+  const onKey = e => { if (e.key === "Escape") close(); };
+  const item = it => {
+    const inner = [h("span", { class: "sheet-ic", html: it.icon || "" }),
+      h("span", {}, h("b", {}, it.label), it.hint ? h("span", { class: "sheet-hint" }, it.hint) : null)];
+    return it.href
+      ? h("a", { class: "sheet-item", href: it.href, target: it.external ? "_blank" : null, rel: it.external ? "noopener" : null, onclick: () => close() }, ...inner)
+      : h("button", { class: "sheet-item", type: "button", onclick: () => { close(); it.onClick?.(); } }, ...inner);
+  };
+  const sheet = document.body.appendChild(h("div", { class: "sheet", role: "dialog", "aria-modal": "true", "aria-label": title },
+    h("div", { class: "sheet-grip", "aria-hidden": "true" }),
+    title ? h("div", { class: "sheet-title" }, title) : null,
+    h("div", { class: "sheet-list" }, ...items.map(item)),
+    note ? h("div", { class: "sheet-note" }, note) : null,
+    h("button", { class: "btn sheet-cancel", type: "button", onclick: close }, t("common.close"))));
+  scrim.onclick = close;
+  addEventListener("keydown", onKey);
+  requestAnimationFrame(() => { sheet.classList.add("show"); scrim.classList.add("show"); sheet.querySelector(".sheet-item")?.focus(); });
+}
+
 // ---------- phone tab bar (U1): 5 labelled tabs in thumb reach; the rest under a labelled "More"
 function tabBar(current, active) {
   const tab = (id, href, icon, label) => h("a", {

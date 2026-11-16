@@ -169,12 +169,11 @@ function ayahEl(a, idx) {
     hc ? h("button", { class: "chip hadith-chip", onclick: () => openHadith(a.k), title: t("surah.hadithBadgeTitle") }, t("surah.hadithBadge", { n: hc })) : null,
     SIM[a.k] ? h("button", { class: "chip sim-chip", onclick: () => openSimilar(a.k), title: t("surah.similarTitleAttr") }, t("surah.similarBadge", { n: SIM[a.k].length })) : null,
     h("button", { class: "chip tafsir-chip", onclick: () => openTafsir(a.k), title: t("surah.tafsirTitle") }, t("surah.tafsir")),
+    // U3: only the most used actions stay visible; the rest are in one labelled menu (docs/UX_RESEARCH.md §3.3)
+    P.isBookmarked(a.k) ? bookmarkBtn(a.k) : null,
     h("button", { class: "icon-btn", title: t("surah.playAyah"), "aria-label": t("surah.playAyahAria", { key: a.k }), html: ICON.play, onclick: () => player.playFrom(idx, true) }),
-    h("button", { class: "icon-btn", title: t("surah.copyAyah"), "aria-label": t("surah.copy"), html: ICON.copy, onclick: () => copyAyah(a, idx) }),
-    h("button", { class: "icon-btn", title: t("share.title"), "aria-label": t("share.title"), html: ICON.share, onclick: () => openShare(a, idx) }),
-    bookmarkBtn(a.k),
-    h("button", { class: `icon-btn note-btn${P.note(a.k) ? " on" : ""}`, title: t("progress.noteTitle"), "aria-label": t("progress.noteTitle"), html: ICON.note, onclick: () => openNote(a.k) }),
-    C.reportLink({ kind: "translation", reference: a.k, page: pageUrl(a.k), source: ayahSources() }, { label: false, cls: "icon" }));
+    h("button", { class: "icon-btn more-btn", title: t("surah.ayahMore"), "aria-label": t("surah.ayahMoreAria", { key: a.k }), "aria-haspopup": "dialog",
+      html: ICON.more, onclick: () => openAyahMenu(a, idx) }));
 
   const line = h("div", { class: "arabic-line", lang: "ar" },
     a.w.map((w, i) => wordEl(w, a, i, idx)),
@@ -336,7 +335,7 @@ $("#open-tr").onclick = () => {
 };
 
 // --- settings
-$("#open-settings").innerHTML = `${ICON.gear}<span>${t("surah.settings")}</span>`;
+$("#open-settings").innerHTML = `${ICON.gear}<span class="btn-label">${t("surah.settings")}</span>`;
 $("#open-settings").onclick = () => {
   const st = C.get();
   const seg = (key, opts) => h("div", { class: "seg" }, ...opts.map(([v, l]) =>
@@ -675,13 +674,39 @@ function download(file) {
 // ======================================================= reading progress (stored on this device)
 const P = C.progress;
 const OFFSET = chs.slice(0, N - 1).reduce((s, c) => s + c.ayahs, 0);   // global index of this surah's first ayah
+// The per-ayah "More" menu: copy, share, bookmark, note, report (U3)
+function openAyahMenu(a, idx) {
+  const marked = P.isBookmarked(a.k);
+  const hasNote = !!P.note(a.k);
+  const redraw = () => {
+    const el = document.getElementById(a.k);
+    if (el) el.replaceWith(ayahEl(a, idx));
+    observeAyahs();
+  };
+  C.actionSheet({
+    title: t("surah.ayahMenuTitle", { key: a.k }),
+    items: [
+      { label: t("surah.copyAyah"), icon: ICON.copy, onClick: () => copyAyah(a, idx) },
+      { label: t("share.title"), icon: ICON.share, onClick: () => openShare(a, idx) },
+      { label: t(marked ? "progress.unbookmark" : "progress.bookmark"), icon: marked ? ICON.bookmarkOn : ICON.bookmark,
+        onClick: () => { const now = P.toggleBookmark(a.k); redraw(); C.toast(t(now ? "progress.bookmarked" : "progress.unbookmarked", { key: a.k })); } },
+      { label: t(hasNote ? "progress.noteEdit" : "progress.noteTitle"), icon: ICON.note, onClick: () => openNote(a.k) },
+      { label: t("report.label"), hint: t("report.hintShort"), icon: ICON.flag, external: true,
+        href: C.reportUrl({ kind: "translation", reference: a.k, page: pageUrl(a.k), source: ayahSources() }) },
+    ],
+    note: t("surah.juzPage", { juz: a.juz, page: a.page }),
+  });
+}
+
 function bookmarkBtn(key) {
   const on = P.isBookmarked(key);
   return h("button", { class: `icon-btn bm-btn${on ? " on" : ""}`, title: t(on ? "progress.unbookmark" : "progress.bookmark"),
     "aria-label": t(on ? "progress.unbookmark" : "progress.bookmark"), "aria-pressed": on ? "true" : "false", html: on ? ICON.bookmarkOn : ICON.bookmark,
     onclick: e => {
       const now = P.toggleBookmark(key);
-      e.currentTarget.replaceWith(bookmarkBtn(key));
+      const el = document.getElementById(key);
+      const i = data.ayahs.findIndex(x => x.k === key);
+      if (el && i >= 0) { el.replaceWith(ayahEl(data.ayahs[i], i)); observeAyahs(); }
       C.toast(t(now ? "progress.bookmarked" : "progress.unbookmarked", { key }));
     } });
 }
