@@ -13,6 +13,7 @@ const N = Math.min(114, Math.max(1, parseInt(params.get("n") || "1", 10) || 1));
   C.info(N).catch(() => null);
   C.selectedTranslations().then(list => list.forEach(tr => C.tr(tr.id, N).catch(() => null))).catch(() => null);
   if (sc === "indopak") { C.indopak(N).catch(() => null); C.indopak(1).catch(() => null); }
+  C.quranFont(sc);
   if (sc === "tajweed") { C.tajweed(N).catch(() => null); C.tajweed(1).catch(() => null); }
   if (N !== 1) C.surah(1).catch(() => null);
 }
@@ -876,6 +877,7 @@ function pager() {
 }
 
 await Promise.all([renderGate(), loadTranslations()]);
+await C.quranFont();                                           // never draw the Quran in a substitute font (rule 8)
 await renderReader();
 // word grammar: fetched when the phone is idle (or when a word is tapped), so it never delays a tap (U4)
 // …and the same for the extra word data (transliteration, word audio)

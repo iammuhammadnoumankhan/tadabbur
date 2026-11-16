@@ -14,6 +14,11 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Tadabbur">
+  <script>/* start the IndoPak Quran font early, only for readers who use it (the default script) */
+    try { var qs = JSON.parse(localStorage.getItem("tadabbur.settings") || "{}").script;
+      if (!qs || qs === "indopak") { var ql = document.createElement("link"); ql.rel = "preload"; ql.as = "font";
+        ql.type = "font/woff2"; ql.crossOrigin = "anonymous"; ql.href = "fonts/DigitalKhatt-IndoPak.woff2"; document.head.appendChild(ql); } } catch (e) {}
+  </script>
   <link rel="stylesheet" href="css/style.css">
   <link rel="modulepreload" href="js/common.js">
   <link rel="modulepreload" href="js/i18n/index.js">

@@ -27,6 +27,54 @@ export function applyTheme() {
 }
 applyLanguage();
 applyTheme();
+
+// Quran text is shown ONLY in its own font: DigitalKhatt IndoPak for the IndoPak script, Amiri Quran for Uthmani and
+// tajweed (CLAUDE.md rule 8). A substitute font may lack Quranic marks or shape them differently, so each script's
+// text stays hidden (CSS: .qf-wait-indopak / .qf-wait-uthmani) until its font has loaded. Browsers download a font
+// only on pages that show it; the surah reader starts it early with quranFont() and waits before drawing.
+// If a font truly can't load (e.g. offline and never saved), after 10 s the text is shown in the device's Arabic
+// font WITH a notice saying so: the letters are always the published text, only the shapes differ.
+const QURAN_FONTS = {
+  indopak: ["DigitalKhatt IndoPak", '34px "DigitalKhatt IndoPak"'],
+  uthmani: ["Amiri Quran", '34px "Amiri Quran"'],
+};
+const QF_SAMPLE = "بسم الله";
+// document.fonts.check() also answers "true" for a font it doesn't know at all (e.g. when Google Fonts is
+// unreachable), so we look for the actual font file and require that it has loaded.
+const fontLoaded = family => [...document.fonts].some(f => f.family.replace(/["']/g, "") === family && f.status === "loaded");
+const qfLoads = {};
+function qfReveal(key, fellBack) {
+  const cls = `qf-wait-${key}`;
+  if (!document.documentElement.classList.contains(cls)) return;
+  document.documentElement.classList.remove(cls);
+  if (fellBack) toast(t("common.quranFontFallback"), { ms: 8000 });
+}
+if (globalThis.document?.fonts) {
+  for (const [key, [family]] of Object.entries(QURAN_FONTS)) {
+    if (fontLoaded(family)) continue;
+    document.documentElement.classList.add(`qf-wait-${key}`);
+    const done = () => { if (fontLoaded(family)) qfReveal(key, false); };
+    document.fonts.addEventListener("loadingdone", done);
+    document.fonts.addEventListener("loadingerror", done);
+  }
+}
+const scriptFontKey = script => (script === "indopak" ? "indopak" : "uthmani");
+/** Start loading the Quran font for a script now; resolves when it's ready, or after 10 s if it can't load. */
+export function quranFont(script = get().script) {
+  const key = scriptFontKey(script);
+  if (!globalThis.document?.fonts) return Promise.resolve();
+  const [family, font] = QURAN_FONTS[key];
+  if (qfLoads[key]) return qfLoads[key];
+  const started = performance.now();
+  return (qfLoads[key] = (async () => {
+    await Promise.race([document.fonts.load(font, QF_SAMPLE).catch(() => null), new Promise(r => setTimeout(r, 10000))]);
+    // an unknown font "loads" instantly without loading anything: keep waiting for the real file, up to 10 s in all
+    while (!fontLoaded(family) && performance.now() - started < 10000) await new Promise(r => setTimeout(r, 250));
+    qfReveal(key, !fontLoaded(family));
+  })());
+}
+// Pages that show Quran text without calling quranFont() still get the 10 s safety net
+setTimeout(() => { for (const key of Object.keys(QURAN_FONTS)) if (document.querySelector(key === "indopak" ? ".ar-indopak" : ".ar-uthmani")) quranFont(key === "indopak" ? "indopak" : "uthmani"); }, 1500);
 onChange((_, patch) => {
   if ("uiLang" in patch) applyLanguage();
   applyTheme();

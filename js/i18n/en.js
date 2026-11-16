@@ -34,6 +34,7 @@ export default {
   "common.notInLanguage": "(not available in this language)",
   "common.showMore": "Show more ({n} left)",
   "common.close": "Close",
+  "common.quranFontFallback": "The Quran font couldn't load, so the Quran text is shown in your device's Arabic font. The words are the same; only the letter shapes differ. Check your connection, or use \"Save for offline\" in Settings.",
   "common.firstRevealed": "First revealed",
   "common.lastRevealed": "Last revealed",
   "common.year": "Year {n}",

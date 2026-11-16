@@ -2,7 +2,7 @@
 @font-face {
   font-family: "DigitalKhatt IndoPak";
   src: url("../fonts/DigitalKhatt-IndoPak.woff2") format("woff2");
-  font-display: swap;
+  font-display: block;   /* never draw the Quran in a substitute font; see quranFont() in js/common.js */
 }
 :root {
   --bg: #f7f3ea;
@@ -232,6 +232,9 @@ input[type=search] {
 }
 .toolbar .grow { flex: 1; }
 .reader-more { height: 1px; }
+/* rule 8: Quran text is hidden until its own font has loaded (js/common.js → quranFont) */
+.qf-wait-indopak .ar-indopak, .qf-wait-indopak .ar-indopak *,
+.qf-wait-uthmani .ar-uthmani, .qf-wait-uthmani .ar-uthmani * { visibility: hidden; }
 #reader { overflow-anchor: none; }      /* U4: the page keeps the reader's place itself when ayahs are added above */
 
 /* ---------- ayahs */

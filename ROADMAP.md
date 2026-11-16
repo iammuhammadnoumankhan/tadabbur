@@ -137,10 +137,13 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
   - Data schema 2: transliteration, word audio paths and Quran.com's IndoPak spelling (not shown) moved from `surah/NNN.json` to the new `words/NNN.json`, loaded only when needed. Al-Baqarah's first file: 222 → 118 KB compressed, first visit on slow 4G 2.8 → 2.3s.
   - **Proven lossless:** all 114 files rejoined equal the last commit exactly (0 of 6,236 ayahs and 0 of 77,429 words differ).
   - `checksums-words.json` now fingerprints every ayah's full word data, so CI fails on any one-letter change. Tested with a deliberate change to a transliteration and an Urdu meaning.
-- [ ] **U4c. No rewrap when the Quran font arrives**
-  - On a first visit straight to a linked ayah over slow 4G, the IndoPak font (338 KB) arrives after the text, and the words rewrap once (layout shift about 0.28; the speed test allows 0.3 for that page). Later visits have the font cached.
-  - Waiting for the font instead delays the text by about 1.5s (tested), so text-first is kept for now.
-  - **Idea:** a fallback font sized to match DigitalKhatt (CSS `size-adjust`), tested on a real Android phone. The Quran text itself is never touched.
+- [x] **U4c. Quran text only in its own font** *(done 2026-11-16, the owner's rule 8)*
+  - **What CI caught:** before this, the Quran text was briefly drawn in a substitute font while the real one loaded. On GitHub's Linux machines that made the words rewrap heavily (layout shift 0.78), so the speed test blocked the deploy. A substitute font may also lack Quranic marks.
+  - **Now:**
+    - Quran text is shown only in its own font: DigitalKhatt for IndoPak, Amiri Quran for Uthmani and tajweed. It stays hidden until that font has loaded, and the reader waits for it. The IndoPak font is preloaded for IndoPak readers.
+    - If a font truly can't load (after 10 s), the text is shown in the device's Arabic font with a notice. This was tested by blocking Google Fonts.
+  - **Cost:** a first visit over slow 4G waits for the font. Surah pages appear in 2.7–3.8s; the speed test warns above 4.0s and fails above 4.5s. Repeat visits with the font cached appear in 0.1–0.3s, against the normal 2.5s limit. There's no layout shift.
+  - **Later (optional):** a smaller first download of the font itself is only possible without modifying it (e.g. better HTTP caching); the font file is never changed.
 - [ ] **U5. Easier reading** *(§3.5)*
   - No text under 13px (translator names are 11px today); body text at 16px or more.
   - More line height for Nastaliq; comfortable line length on desktop.

@@ -96,6 +96,15 @@ def main():
                     sw, iw = page.evaluate("[document.documentElement.scrollWidth, innerWidth]")
                     if sw > iw + 1:
                         problems.append(f"scrolls sideways on a phone ({sw}px wide in a {iw}px screen)")
+                # Rule 8: IndoPak Quran text is hidden only until its own font has loaded, never stuck hidden
+                for cls, font in (("indopak", "DigitalKhatt IndoPak"), ("uthmani", "Amiri Quran")):
+                    if not page.evaluate(f"document.querySelector('.ar-{cls}') !== null"):
+                        continue
+                    try:
+                        page.wait_for_function(f"!document.documentElement.classList.contains('qf-wait-{cls}') && "
+                                               f"document.fonts.check('34px \"{font}\"', 'بسم الله')", timeout=30000)
+                    except Exception:  # noqa: BLE001
+                        problems.append(f"{cls} Quran text still hidden or not in its own font ({font})")
                 # U4: scrolling a long surah to the end draws every ayah, once and in order
                 if vname == "phone" and path == "surah.html?n=2":
                     keys = page.evaluate("""async () => {

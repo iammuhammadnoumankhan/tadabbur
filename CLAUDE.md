@@ -21,6 +21,10 @@ Tadabbur helps people who can read the Quran but don't understand Arabic, starti
    - Restructuring data (splitting, moving or indexing files) must be **proven lossless**: rejoined, it equals the original exactly, and fingerprints in `data/checksums*.json` guard it in CI.
    - Prove a new guard works by making a one-letter test change and confirming the validator fails, then restore the file.
    - Display changes (what is drawn when, e.g. drawing long surahs in sections) must show every ayah, once and in order. The smoke test checks this.
+   - **Quran text is shown only in its own font:** DigitalKhatt IndoPak for IndoPak, Amiri Quran for Uthmani and tajweed.
+     - It stays hidden until that font has loaded (`quranFont()` in `js/common.js`, CSS `.qf-wait-*`), and the surah reader waits for it before drawing.
+     - Only if a font truly can't load (after 10 s) is the text shown in the device's Arabic font, with a notice saying so.
+     - The smoke test checks that Quran text is never left hidden and ends up in its own font.
 
 ## Git
 - **No Claude attribution:** no `Co-Authored-By: Claude` trailers in commits, no "Generated with Claude Code" in PRs. Commit as the user only.
