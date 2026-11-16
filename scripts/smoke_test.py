@@ -96,6 +96,11 @@ def main():
                     sw, iw = page.evaluate("[document.documentElement.scrollWidth, innerWidth]")
                     if sw > iw + 1:
                         problems.append(f"scrolls sideways on a phone ({sw}px wide in a {iw}px screen)")
+                # U2: on a phone the surah page starts reading on the first screen
+                if vname == "phone" and path.startswith("surah.html"):
+                    top, ih = page.evaluate("[document.querySelector('.ayah')?.getBoundingClientRect().top ?? 1e9, innerHeight]")
+                    if top > ih - 120:
+                        problems.append(f"first ayah starts at {round(top)}px, below the first screen ({ih}px)")
                 # U1: phones get a 5-tab bar at the bottom (44px+ targets) instead of the top menu; desktop doesn't
                 nav = page.evaluate("""() => {
                   const bar = document.querySelector('.tabbar');

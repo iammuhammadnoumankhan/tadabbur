@@ -18,6 +18,7 @@ export const DEFAULTS = Object.freeze({
   known: [],              // vocabulary keys ("lemma|root") the reader has marked as known
   reciter: null,          // recitation id (data/audio/reciters.json); null = default
   followWords: true,      // highlight each word while it's recited
+  surahAbout: false,      // surah page: "About this surah" (intro, timeline, sources) expanded
 });
 
 function browserStorage() {

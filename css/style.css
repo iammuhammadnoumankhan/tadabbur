@@ -172,6 +172,22 @@ input[type=search] {
 /* ---------- surah gateway */
 .gate { padding: 34px 0 10px; }
 .gate-card { padding: 28px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; }
+.gate-wrap { padding: 20px 24px; }
+.gate-wrap .gate-card { padding: 20px 0 4px; border-top: 1px solid var(--line); margin-top: 14px; }
+.gate-head { display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: flex-end; justify-content: space-between; }
+.gh-names { display: flex; gap: 16px; align-items: center; min-width: 0; }
+.gh-ar { font-family: var(--font-uthmani); font-size: 44px; line-height: 1.5; color: var(--accent); }
+.gate-head .num { font-size: 12px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase; }
+.gate-head h1 { font-family: var(--font-display); font-weight: 500; font-size: 28px; margin: 0; line-height: 1.2; }
+.gate-head .mean { color: var(--ink-2); font-size: 14px; }
+.gate-head .mean .urdu { font-size: 16px; }
+.gh-facts { display: flex; flex-wrap: wrap; gap: 6px; }
+.gh-facts .chip { white-space: nowrap; }
+.gh-row { margin-top: 12px; }
+.about-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
+.about-chev svg { width: 16px; height: 16px; transition: transform .15s; }
+.about-btn[aria-expanded="true"] .about-chev svg { transform: rotate(90deg); }
+.gate-details[hidden] { display: none; }
 .gate-title .num { font-size: 13px; color: var(--ink-3); letter-spacing: 1px; text-transform: uppercase; }
 .gate-title .ar { font-family: var(--font-uthmani); font-size: 54px; line-height: 1.4; color: var(--accent); }
 .gate-title h1 { font-family: var(--font-display); font-weight: 500; font-size: 34px; margin: 0; line-height: 1.2; }
@@ -733,6 +749,10 @@ footer.foot { border-top: 1px solid var(--line); padding: 24px 0 40px; font-size
   .nav a, .icon-btn { padding: 8px 7px; font-size: 13px; }
   .journey-bars { gap: 1px; }
   .gate-card { padding: 16px; }
+  .gate-wrap { padding: 14px 16px; }
+  .gate { padding: 14px 0 4px; }
+  .gh-ar { font-size: 36px; }
+  .gate-head h1 { font-size: 24px; }
   .stats { gap: 6px; }
   .stat { padding: 10px 8px; }
   .toolbar { position: static; }

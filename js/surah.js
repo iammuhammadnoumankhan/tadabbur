@@ -28,16 +28,33 @@ async function renderGate() {
   gate.innerHTML = "";
   const hadithTotal = Object.keys(hCounts).length;
   const mk = ch.place === "makkah";
+  // U2: a compact header so reading starts on the first screen; everything else is one tap away
+  // under "About this surah" (docs/UX_RESEARCH.md §2, §3.3). The reader's choice is remembered.
+  const head = h("div", { class: "gate-head" },
+    h("div", { class: "gh-names" },
+      h("div", { class: "gh-ar", translate: "no", lang: "ar" }, ch.ar),
+      h("div", {},
+        h("div", { class: "num" }, t("surah.ofTotal", { n: ch.n })),
+        h("h1", {}, ch.nameC),
+        h("div", { class: "mean" }, `"${ch.meaning.en}" · `, h("span", { class: "urdu", lang: "ur" }, ch.meaning.ur)))),
+    h("div", { class: "gh-facts" },
+      h("span", { class: `chip ${ch.place}`, title: t(mk ? "surah.revealedInMakkah" : "surah.revealedInMadinah") }, h("span", { class: "dot" }), C.placeName(ch.place)),
+      h("span", { class: "chip" }, t("surah.revealedOrder", { n: ch.order })),
+      h("span", { class: "chip" }, t("common.ayahs", { n: ch.ayahs }), ` · ${t("surah.pagesShort", { from: ch.pages[0], to: ch.pages[1] })}`),
+      hadithTotal ? h("span", { class: "chip hadith-chip" }, t("surah.hadithAyahs", { n: hadithTotal })) : null));
+  const details = h("div", { class: "gate-details", id: "surah-about" });
+  const open = !!C.get().surahAbout;
+  const toggle = h("button", { class: "btn about-btn", type: "button", "aria-expanded": String(open), "aria-controls": "surah-about",
+    onclick: () => {
+      const now = toggle.getAttribute("aria-expanded") !== "true";
+      toggle.setAttribute("aria-expanded", String(now));
+      details.hidden = !now;
+      C.set({ surahAbout: now });
+    } }, t("surah.about"), h("span", { class: "about-chev", html: ICON.chevron }));
+  details.hidden = !open;
   const left = h("div", { class: "gate-title" },
-    h("div", { class: "num" }, t("surah.ofTotal", { n: ch.n })),
-    h("div", { class: "ar", translate: "no" }, ch.ar),
-    h("h1", {}, ch.nameC),
-    h("div", { class: "mean" }, `"${ch.meaning.en}" · `, h("span", { class: "urdu" }, ch.meaning.ur)),
-    h("div", { class: "stats" },
-      h("div", { class: `stat ${ch.place}` }, h("div", { class: "v" }, C.placeName(ch.place)),
-        h("div", { class: "l" }, t(mk ? "surah.revealedInMakkah" : "surah.revealedInMadinah"))),
-      h("div", { class: "stat" }, h("div", { class: "v" }, `#${ch.order}`), h("div", { class: "l" }, t("surah.inRevelationOrder"))),
-      h("div", { class: "stat" }, h("div", { class: "v" }, ch.ayahs), h("div", { class: "l" }, t("surah.ayahsPages", { from: ch.pages[0], to: ch.pages[1] })))),
+    h("p", { class: "muted", style: "margin:0 0 6px" }, t(mk ? "surah.revealedInMakkah" : "surah.revealedInMadinah"), " · ",
+      t("surah.revealedOrderLong", { n: ch.order })),
     h("div", { class: "mini-journey" },
       C.journeyBars(chs, { current: N }),
       h("div", { class: "journey-axis" }, h("span", {}, t("common.firstRevealed")), h("span", {}, t("common.lastRevealed")))),
@@ -78,7 +95,8 @@ async function renderGate() {
       C.reportLink({ kind: "intro", reference: `${t("common.surahNum", { n: ch.n })} ${ch.name}`, source: "Quran.com chapter info" })));
     fill();
   }
-  gate.append(h("div", { class: "card gate-card" }, left, right));
+  details.append(h("div", { class: "gate-card" }, left, right));
+  gate.append(h("div", { class: "card gate-wrap" }, head, h("div", { class: "gh-row" }, toggle), details));
 }
 
 // ======================================================= reader

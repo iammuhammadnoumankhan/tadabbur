@@ -108,7 +108,7 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
 - [x] **U1. Bottom tab bar on phones** *(done 2026-11-16; §2, §3.2)*
   - Today 6 of 9 header links are off-screen on a phone.
   - Phones get a bottom bar with 4–5 labelled tabs (Read, Search, Learn, My reading, More), within thumb reach. Desktop keeps the top menu.
-- [ ] **U2. Reading comes first on the surah page** *(§2, §3.3)*
+- [x] **U2. Reading comes first on the surah page** *(done 2026-11-16; §2, §3.3)*
   - Today the first ayah starts two screens down.
   - Use a compact header (name, Makki/Madani, ayah count), with "About this surah" to expand the introduction, timeline, prophets and sources. Nothing is removed; it's one tap away.
 - [ ] **U3. Simpler ayah actions** *(§2, §3.1, §3.3)*
