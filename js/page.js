@@ -45,7 +45,7 @@ function wordEl(ref, T) {
   }
   const wi = +w - 1;
   const word = T.sd.ayahs[ai].w[wi];
-  const attrs = { class: "m-w", "data-ref": ref, tabindex: "0", role: "button", "aria-label": `${word.u}: ${word.ur || word.en || ""}` };
+  const attrs = { class: "m-w", "data-ref": ref, tabindex: "0", role: "button" };
   if (T.ip) return h("span", { ...attrs, class: "m-w ar-indopak" }, T.ip.ayahs[ai][wi]);
   if (T.tj) return h("span", { ...attrs, class: "m-w ar-uthmani tajweed", html: T.tj.ayahs[ai][wi] });
   return h("span", { ...attrs, class: "m-w ar-uthmani" }, word.u);

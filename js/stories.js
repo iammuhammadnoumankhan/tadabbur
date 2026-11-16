@@ -59,7 +59,7 @@ function familyTree() {
     const person = FAM.people[id];
     const inner = [h("span", { class: "ft-ar", lang: "ar" }, person.ar), h("span", { class: "ft-en" }, person.en)];
     return h("button", { class: `ft-node${byId[id] ? " prophet" : ""}`, type: "button", "data-person": id,
-      "aria-label": t("family.openCard", { name: person.en }), onclick: () => openPerson(id) }, ...inner);
+      "aria-haspopup": "dialog", onclick: () => openPerson(id) }, ...inner);
   };
   const branch = id => h("li", {}, node(id),
     childrenOf.has(id) ? h("ul", {}, ...childrenOf.get(id).map(({ c, rel }) => {
@@ -99,7 +99,7 @@ function openPerson(id) {
     const scrim = document.body.appendChild(h("div", { class: "scrim", onclick: () => closePerson() }));
     const body = h("div", { class: "drawer-b" });
     const title = h("h3", {});
-    const el = document.body.appendChild(h("aside", { class: "drawer pc-drawer", role: "dialog", "aria-modal": "true", "aria-hidden": "true" },
+    const el = document.body.appendChild(h("aside", { class: "drawer pc-drawer", role: "dialog", "aria-modal": "true", "aria-hidden": "true", inert: "" },
       h("div", { class: "drawer-h" }, title,
         h("button", { class: "icon-btn", type: "button", "aria-label": t("common.close"), html: C.ICON.close, onclick: () => closePerson() })),
       body));
@@ -140,12 +140,12 @@ function openPerson(id) {
         h("a", { href: `https://corpus.quran.com/concept.jsp?id=${id}`, target: "_blank", rel: "noopener" }, t("stories.viewConcept"))) : h("span"),
       C.reportLink({ kind: "prophets", reference: t("family.cardRef", { name: person.en }), source: t("report.prophetsSource") })));
   card.opener = document.activeElement;
-  card.el.classList.add("show"); card.scrim.classList.add("show"); card.el.setAttribute("aria-hidden", "false");
+  card.el.classList.add("show"); card.scrim.classList.add("show"); card.el.setAttribute("aria-hidden", "false"); card.el.inert = false;
   card.body.scrollTop = 0;
   card.el.querySelector(".icon-btn").focus();
 }
 function closePerson() {
-  card.el.classList.remove("show"); card.scrim.classList.remove("show"); card.el.setAttribute("aria-hidden", "true");
+  card.el.classList.remove("show"); card.scrim.classList.remove("show"); card.el.setAttribute("aria-hidden", "true"); card.el.inert = true;
   card.opener?.focus?.();
 }
 

@@ -150,10 +150,21 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
   - **Line length:** translations and surah introductions stop at about 72 characters a line on wide screens.
   - **Text size:** a new "Translation size" slider in Settings (15–26px, Urdu 2px larger), next to the existing Arabic size. It applies on every page.
   - **Also fixed:** wide family-tree branches now scroll to their left edge on phones, instead of being cut off.
-- [ ] **U6. Accessibility pass to WCAG 2.2 AA** *(§3.1, §3.7)*
-  - Contrast in both themes, visible keyboard focus, screen-reader labels, correct `lang` on Arabic and Urdu, respect for "reduce motion".
-  - The revelation-order bars stop being 2px links on touch screens.
-  - An automated accessibility check is added to CI.
+- [x] **U6. Accessibility pass to WCAG 2.2 AA** *(done 2026-11-17; §3.1, §3.7)*
+  - **Check:** `scripts/a11y_test.py`, a CI job that blocks deploys. It runs axe-core (WCAG 2.2 A/AA) on 16 pages and 4 open panels, at phone and desktop width, in light and dark themes. Problems found went from 57 to 0.
+  - **Contrast:** all text 4.5:1 or better in both themes. The small grey, gold, Makkah and Madinah colours were darkened slightly in the light theme, the grey lightened in the dark theme, and text on green buttons is dark in the dark theme.
+  - **Links inside sentences are underlined**, not shown by colour alone.
+  - **Keyboard:**
+    - a visible focus outline everywhere, and "Skip to content" as the first Tab stop;
+    - closed panels can't be reached by Tab (`inert`);
+    - closing a panel returns focus to the button that opened it.
+    - Tested: Tab, Enter and Escape through the reader, the More menu, word meanings and Settings.
+  - **Screen readers:**
+    - words, family-tree people and map markers are named by what's on screen;
+    - the places map is a group of buttons, not an image.
+  - **Tap size:** timeline markers are a list on phones (their labels also overlapped there), and source links are 24px tall.
+    - The 2px revelation bars and mushaf-page words use WCAG's own "equivalent" and "inline" exceptions, documented in the test.
+  - **"Reduce motion"** turns off all sliding, fading and smooth scrolling.
 - [ ] **U7. First-time setup** *(§3.3)*
   - On first visit, three quick choices: meaning language (Urdu/English), script (IndoPak/Uthmani) and translations. Then a one-time tip explaining the gold hadith and green "similar" badges.
   - Everything stays changeable in settings.

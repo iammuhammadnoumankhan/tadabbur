@@ -33,7 +33,7 @@ function clusters(list) {
 
 /** The map. focus = a place id to highlight (detail page); onPick(cluster) for the index page. */
 function drawMap({ focus = null, onPick = null } = {}) {
-  const root = svg("svg", { viewBox: `0 0 ${M.w} ${M.h}`, class: "pl-map", role: "img", "aria-label": t("places.mapAria") },
+  const root = svg("svg", { viewBox: `0 0 ${M.w} ${M.h}`, class: "pl-map", role: onPick ? "group" : "img", "aria-label": t("places.mapAria") },
     svg("rect", { x: 0, y: 0, width: M.w, height: M.h, class: "pl-sea" }),
     svg("path", { d: M.land, class: "pl-land" }),
     ...M.rivers.map(d => svg("path", { d, class: "pl-river" })));
@@ -44,7 +44,7 @@ function drawMap({ focus = null, onPick = null } = {}) {
     const region = c.places.every(p => p.at.region);
     const label = c.places.length > 1 ? t("places.cluster", { name: c.places[0].en, n: c.places.length - 1 }) : c.places[0].en;
     const g = svg("g", { class: `pl-pin${on ? " on" : ""}${region ? " region" : ""}${focus && !on ? " dim" : ""}`, tabindex: onPick ? 0 : null,
-      role: onPick ? "button" : null, "aria-label": c.places.map(p => p.en).join(", ") },
+      role: onPick ? "button" : null, "aria-label": c.places.length > 1 ? `${label}: ${c.places.map(p => p.en).join(", ")}` : label },
       region ? svg("circle", { cx: c.x, cy: c.y, r: 34, class: "pl-area" }) : null,
       svg("circle", { cx: c.x, cy: c.y, r: c.places.length > 1 ? 8 : 6, class: "pl-dot" }),
       svg("text", { x: c.x + 12, y: c.y + 5, class: "pl-label" }, label));

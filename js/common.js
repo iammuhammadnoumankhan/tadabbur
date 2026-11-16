@@ -233,6 +233,14 @@ export function header(active = "") {
   // Each page reserves an empty <header class="top"> in its HTML, so filling it doesn't shift the page (U4: CLS)
   const slot = document.querySelector("header.top");
   if (slot) slot.replaceWith(el); else document.body.prepend(el);
+  // "Skip to content": the first thing the Tab key reaches, invisible until focused (WCAG 2.4.1)
+  const main = document.querySelector("main");
+  if (main) {
+    main.id ||= "main";
+    main.tabIndex = -1;
+    document.body.prepend(h("a", { class: "skip-link", href: `#${main.id}`,
+      onclick: e => { e.preventDefault(); main.focus(); main.scrollIntoView(); } }, t("nav.skip")));
+  }
   tabBar(TAB_OF[active] || (active ? "more" : ""), active);
 }
 

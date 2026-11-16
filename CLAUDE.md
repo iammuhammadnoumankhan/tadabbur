@@ -122,8 +122,10 @@ python3 scripts/build_manifest.py  # data/manifest.json (schema version + counts
   pip install -r requirements-dev.txt && python -m playwright install chromium
   python3 scripts/smoke_test.py
   python3 scripts/perf_test.py
+  python3 scripts/a11y_test.py
   python3 scripts/check_links.py
   ```
+- **Accessibility (U6):** `scripts/a11y_test.py` runs in CI (job `accessibility`, which deploys depend on). It checks WCAG 2.2 A/AA with axe-core (vendored at a pinned version in `scripts/vendor/`) on every page, at phone and desktop width, in both themes, with panels open. The only exceptions are WCAG's own: the 2px revelation bars ("equivalent") and mushaf-page words ("inline"), each documented in the script. Text colours use the theme tokens, which all pass 4.5:1; use `--on-accent` for text on accent fills.
 - **Speed (U4):** `scripts/perf_test.py` runs in CI (job `speed-test`, which deploys depend on) on a slowed "budget phone" and fails over budget (LCP ≤ 2.5s, CLS ≤ 0.1, tap ≤ 200 ms, ≤ 6,000 elements).
 - **Static page text:** the English interface text is stamped into the HTML by `python3 scripts/stamp_i18n.py`. Run it after changing a `data-i18n` key's text or adding one to a page; the smoke test fails if the pages are out of date.
 - **Every page preloads the shared modules** (`<link rel="modulepreload">` for `js/common.js`, `js/i18n/*`, `js/core/*`). Add a new core module to every page; the smoke test checks this.

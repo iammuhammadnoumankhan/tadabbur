@@ -163,7 +163,7 @@ const wordMeaning = w => (C.get().wbwLang === "en" ? w.en : w.ur) || w.en || "";
 
 function wordEl(w, a, i, idx) {
   const st = C.get();
-  const el = h("span", { class: "w", "data-k": a.k, "data-i": i, tabindex: "0", role: "button", "aria-label": t("surah.wordAria", { word: w.u, meaning: wordMeaning(w) }) },
+  const el = h("span", { class: "w", "data-k": a.k, "data-i": i, tabindex: "0", role: "button" },
     wordArabic(idx, i));
   const tl = extra?.ayahs[idx]?.w[i]?.tl;
   if (st.wbw) {
@@ -414,12 +414,20 @@ const drawer = $("#drawer"), scrim = $("#scrim");
 $("#drawer-close").innerHTML = ICON.close;
 $("#drawer-close").onclick = closeDrawer;
 scrim.onclick = closeDrawer;
+let drawerOpener = null;
 function openDrawer(title, body) {
+  if (!drawer.classList.contains("show")) drawerOpener = document.activeElement;
   $("#drawer-title").textContent = title;
   const b = $("#drawer-body"); b.innerHTML = ""; b.append(body); b.scrollTop = 0;
-  drawer.classList.add("show"); scrim.classList.add("show"); drawer.setAttribute("aria-hidden", "false");
+  drawer.classList.add("show"); scrim.classList.add("show"); drawer.setAttribute("aria-hidden", "false"); drawer.inert = false;
+  $("#drawer-close").focus({ preventScroll: true });
 }
-function closeDrawer() { drawer.classList.remove("show"); scrim.classList.remove("show"); drawer.setAttribute("aria-hidden", "true"); }
+function closeDrawer() {
+  if (!drawer.classList.contains("show")) return;
+  drawer.classList.remove("show"); scrim.classList.remove("show"); drawer.setAttribute("aria-hidden", "true"); drawer.inert = true;
+  drawerOpener?.focus?.({ preventScroll: true });          // back to the button that opened it (WCAG 2.4.3)
+  drawerOpener = null;
+}
 
 // --- translations picker
 $("#open-tr").onclick = () => {
@@ -647,7 +655,7 @@ const player = {
     $$(".ayah.playing").forEach(x => x.classList.remove("playing"));
     const el = document.getElementById(data.ayahs[i].k);
     el?.classList.add("playing");
-    if (el && !inView(el)) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (el && !inView(el)) el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
   },
   setWord(i, w) {
     const key = i == null || w == null ? null : `${i}:${w}`;

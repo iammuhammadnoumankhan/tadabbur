@@ -114,7 +114,7 @@ renderEvents();
 // ---------------------------------------------------------------- drawer
 const drawer = $("#drawer"), scrim = $("#scrim");
 $("#drawer-close").innerHTML = ICON.close;
-const close = () => { drawer.classList.remove("show"); scrim.classList.remove("show"); highlight(null); history.replaceState(null, "", location.pathname); };
+const close = () => { drawer.classList.remove("show"); scrim.classList.remove("show"); drawer.setAttribute("aria-hidden", "true"); drawer.inert = true; highlight(null); history.replaceState(null, "", location.pathname); };
 $("#drawer-close").onclick = close; scrim.onclick = close;
 document.addEventListener("keydown", e => e.key === "Escape" && close());
 
@@ -156,7 +156,7 @@ async function openEvent(id) {
   fill();
   $("#drawer-title").textContent = e.name.en;
   const b = $("#drawer-body"); b.innerHTML = ""; b.append(body); b.scrollTop = 0;
-  drawer.classList.add("show"); scrim.classList.add("show");
+  drawer.classList.add("show"); scrim.classList.add("show"); drawer.setAttribute("aria-hidden", "false"); drawer.inert = false;
   highlight(e.surahs);
   history.replaceState(null, "", `#${id}`);
 }

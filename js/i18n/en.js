@@ -369,7 +369,6 @@ export default {
   "surah.copyFooter": "Quran {key}",
   "surah.copied": "Copied {key} with translations",
   "surah.copyFailed": "Couldn't copy — your browser blocked the clipboard",
-  "surah.wordAria": "{word}: {meaning}",
   "surah.wordAudioMissing": "This word's audio isn't available.",
   "surah.wordListen": "Listen",
   "surah.wordRef": "{key} · word {n}",
@@ -493,7 +492,6 @@ export default {
   "family.evidenceLead": "Each link below is stated by the ayah or hadith itself (for a hadith, in its Arabic text). “Descendant of” is used where the Prophet ﷺ says “I am the son of Abdul-Muttalib”, since in Arabic “son of” there can also mean grandson.",
   "family.rel.son-of": "is the son of",
   "family.rel.adopted-son-of": "is the adopted son of",
-  "family.openCard": "{name}: open details",
   "family.cardTitle": "Person",
   "family.referredIn": "Referred to in {ayahs} across {surahs}.",
   "family.cardQuran": "In the Quran",
@@ -539,6 +537,7 @@ export default {
 
   "nav.places": "Places",
   "nav.main": "Main menu",
+  "nav.skip": "Skip to content",
   "nav.read": "Read",
   "nav.searchShort": "Search",
   "nav.more": "More",
