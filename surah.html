@@ -15,28 +15,40 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Tadabbur">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="modulepreload" href="js/common.js">
+  <link rel="modulepreload" href="js/i18n/index.js">
+  <link rel="modulepreload" href="js/i18n/en.js">
+  <link rel="modulepreload" href="js/core/index.js">
+  <link rel="modulepreload" href="js/core/data.js">
+  <link rel="modulepreload" href="js/core/learn.js">
+  <link rel="modulepreload" href="js/core/progress.js">
+  <link rel="modulepreload" href="js/core/quran.js">
+  <link rel="modulepreload" href="js/core/report.js">
+  <link rel="modulepreload" href="js/core/search.js">
+  <link rel="modulepreload" href="js/core/settings.js">
 </head>
 <body>
+  <header class="top"></header>
   <main class="wrap">
-    <section class="gate" id="gate"><div class="skeleton" data-i18n="surah.loading"></div></section>
+    <section class="gate" id="gate"><div class="skeleton" data-i18n="surah.loading">Loading surah…</div></section>
 
     <div class="toolbar card" id="toolbar">
       <button class="btn primary" id="play-all"></button>
-      <div class="seg" id="script-seg" data-i18n-title="surah.scriptLabel">
-        <button data-v="indopak" data-i18n="surah.indopak"></button>
-        <button data-v="uthmani" data-i18n="surah.uthmani"></button>
-        <button data-v="tajweed" data-i18n="surah.tajweed"></button>
+      <div class="seg" id="script-seg" data-i18n-title="surah.scriptLabel" title="Arabic script">
+        <button data-v="indopak" data-i18n="surah.indopak">IndoPak</button>
+        <button data-v="uthmani" data-i18n="surah.uthmani">Uthmani</button>
+        <button data-v="tajweed" data-i18n="surah.tajweed">Tajweed</button>
       </div>
-      <div class="seg" id="wbw-seg" data-i18n-title="surah.wbwLabel">
-        <button data-v="off" data-i18n="surah.noWbw"></button>
-        <button data-v="ur" data-i18n="lang.ur"></button>
-        <button data-v="en" data-i18n="lang.en"></button>
-        <button data-v="both" data-i18n="surah.both"></button>
+      <div class="seg" id="wbw-seg" data-i18n-title="surah.wbwLabel" title="Word-by-word meaning under each word">
+        <button data-v="off" data-i18n="surah.noWbw">No WBW</button>
+        <button data-v="ur" data-i18n="lang.ur">اردو</button>
+        <button data-v="en" data-i18n="lang.en">English</button>
+        <button data-v="both" data-i18n="surah.both">Both</button>
       </div>
       <span class="grow"></span>
-      <a class="btn" id="open-mushaf" data-i18n-title="surah.mushafViewTitle"><span data-i18n="surah.mushafView"></span></a>
-      <button class="btn" id="open-tr"><span data-i18n="surah.translations"></span> <span class="chip" id="tr-count"></span></button>
-      <button class="btn" id="open-settings" data-i18n-aria-label="surah.settingsAria"></button>
+      <a class="btn" id="open-mushaf" data-i18n-title="surah.mushafViewTitle" title="Read this surah page by page, like a printed mushaf"><span data-i18n="surah.mushafView">Mushaf</span></a>
+      <button class="btn" id="open-tr"><span data-i18n="surah.translations">Translations</span> <span class="chip" id="tr-count"></span></button>
+      <button class="btn" id="open-settings" data-i18n-aria-label="surah.settingsAria" aria-label="Reading settings"></button>
     </div>
 
     <div id="tajweed-key" class="card tajweed-key hidden"></div>
@@ -45,12 +57,12 @@
   </main>
 
   <!-- word popover -->
-  <div class="pop card" id="pop" role="dialog" data-i18n-aria-label="surah.wordDialog"></div>
+  <div class="pop card" id="pop" role="dialog" data-i18n-aria-label="surah.wordDialog" aria-label="Word details"></div>
 
   <!-- drawers -->
   <div class="scrim" id="scrim"></div>
   <aside class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawer-h"><h3 id="drawer-title"></h3><button class="icon-btn" id="drawer-close" data-i18n-aria-label="common.close"></button></div>
+    <div class="drawer-h"><h3 id="drawer-title"></h3><button class="icon-btn" id="drawer-close" data-i18n-aria-label="common.close" aria-label="Close"></button></div>
     <div class="drawer-b" id="drawer-body"></div>
   </aside>
 

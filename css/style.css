@@ -64,6 +64,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
 }
 .top .wrap { display: flex; align-items: center; gap: 16px; height: 60px; }
+header.top { min-height: 61px; }
+/* U4: keep the footer below the first screen while content loads, so it doesn't jump (CLS) */
+body > main { min-height: calc(100vh - 61px); }
+/* U4: the surah header's space is reserved before its data arrives */
+.gate:has(> .skeleton) { min-height: 300px; }
+@media (max-width: 520px) { .gate:has(> .skeleton) { min-height: 270px; } }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 600; }
 .brand:hover { text-decoration: none; }
 .brand .mark {
@@ -225,6 +231,8 @@ input[type=search] {
   background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(8px);
 }
 .toolbar .grow { flex: 1; }
+.reader-more { height: 1px; }
+#reader { overflow-anchor: none; }      /* U4: the page keeps the reader's place itself when ayahs are added above */
 
 /* ---------- ayahs */
 .bismillah { text-align: center; font-size: 32px; direction: rtl; margin: 26px 0 8px; color: var(--ink-2); }

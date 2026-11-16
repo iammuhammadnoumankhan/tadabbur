@@ -18,7 +18,7 @@ Usage:
   pip install playwright && python -m playwright install --with-deps chromium
   python3 scripts/smoke_test.py
 """
-import functools, glob, http.server, os, re, sys, threading
+import functools, glob, http.server, os, re, subprocess, sys, threading
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,9 +28,9 @@ PAGES = [
     ("index.html", ".s-card", 114),
     ("index.html", ".journey-bars a", 114),
     ("surah.html?n=1", ".ayah", 7),
-    ("surah.html?n=2", ".ayah", 286),
+    ("surah.html?n=2", ".ayah", 24),          # long surahs are drawn a section at a time (U4)
     ("surah.html?n=114", ".ayah", 6),
-    ("surah.html?n=2", ".sim-chip", 100),
+    ("surah.html?n=2", ".sim-chip", 8),
     ("timeline.html", ".ev", 24),
     ("stories.html", ".p-card", 24),
     ("stories.html?p=musa", ".p-group", 34),
@@ -96,6 +96,14 @@ def main():
                     sw, iw = page.evaluate("[document.documentElement.scrollWidth, innerWidth]")
                     if sw > iw + 1:
                         problems.append(f"scrolls sideways on a phone ({sw}px wide in a {iw}px screen)")
+                # U4: scrolling a long surah to the end draws every ayah, once and in order
+                if vname == "phone" and path == "surah.html?n=2":
+                    keys = page.evaluate("""async () => {
+                      for (let i = 0; i < 400 && document.querySelectorAll('.ayah').length < 286; i++) {
+                        scrollTo(0, document.documentElement.scrollHeight); await new Promise(r => setTimeout(r, 40)); }
+                      return [...document.querySelectorAll('.ayah')].map(e => e.id); }""")
+                    if keys != [f"2:{i}" for i in range(1, 287)]:
+                        problems.append(f"scrolling Al-Baqarah drew {len(keys)} ayahs, not 2:1–2:286 in order")
                 # U3: each ayah shows at most 5 controls, icon buttons at least 44px; settings bar on one row on phones
                 if path.startswith("surah.html"):
                     u3 = page.evaluate("""() => {
@@ -184,6 +192,8 @@ def main():
         page.on("pageerror", lambda e: tj_errors.append(str(e)))
         page.goto(base + "surah.html?n=2", wait_until="domcontentloaded")
         try:
+            page.wait_for_selector(".ayah")
+            page.evaluate("(async () => { for (let i = 0; i < 400 && document.querySelectorAll('.ayah').length < 286; i++) { scrollTo(0, document.documentElement.scrollHeight); await new Promise(r => setTimeout(r, 40)); } })()")             # long surahs are drawn as you scroll (U4)
             page.wait_for_function("document.querySelectorAll('.ayah').length >= 286 && document.querySelectorAll('.w .tj').length > 1000", timeout=60000)
             keys = page.evaluate("document.querySelectorAll('#tajweed-key .tj-key-item').length")
             body = page.evaluate("document.body.innerText")
@@ -242,6 +252,15 @@ def static_checks():
     kinds_block = report_js.split("export const KINDS")[1].split("});")[0]
     kinds = re.findall(r'^\s+\w+: "([^"]+)",$', kinds_block, re.M)
     out.append(("report kinds match the GitHub issue form options", options == kinds, f"form={options} code={kinds}"))
+
+    core_mods = ["js/common.js", "js/i18n/index.js", "js/i18n/en.js"] + sorted(
+        os.path.relpath(p, ROOT) for p in glob.glob(os.path.join(ROOT, "js/core/*.js")))
+    no_preload = sorted(f"{os.path.basename(pg)}: {m}" for pg in glob.glob(os.path.join(ROOT, "*.html"))
+                        for m in core_mods if f'rel="modulepreload" href="{m}"' not in open(pg, encoding="utf-8").read())
+    out.append(("every page preloads the shared modules (U4: no download waves)", not no_preload, no_preload[:5]))
+
+    stamp = subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "stamp_i18n.py"), "--check"], capture_output=True, text=True)
+    out.append(("static page text matches js/i18n/en.js (scripts/stamp_i18n.py)", stamp.returncode == 0, stamp.stdout.strip()))
     return out
 
 
@@ -270,12 +289,16 @@ def offline_checks(browser, base):
 
         # read two pages online, so they get saved
         page.goto(base + "surah.html?n=2", wait_until="domcontentloaded")
+        page.wait_for_selector(".ayah", timeout=60000)
+        page.evaluate("(async () => { for (let i = 0; i < 400 && document.querySelectorAll('.ayah').length < 286; i++) { scrollTo(0, document.documentElement.scrollHeight); await new Promise(r => setTimeout(r, 40)); } })()")                 # long surahs are drawn as you scroll (U4)
         page.wait_for_function("document.querySelectorAll('.ayah').length >= 286", timeout=60000)
         page.goto(base + "timeline.html", wait_until="domcontentloaded")
         page.wait_for_function("document.querySelectorAll('.ev').length >= 24", timeout=60000)
 
         ctx.set_offline(True)
         page.goto(base + "surah.html?n=2", wait_until="domcontentloaded")
+        page.wait_for_selector(".ayah", timeout=30000)
+        page.evaluate("(async () => { for (let i = 0; i < 400 && document.querySelectorAll('.ayah').length < 286; i++) { scrollTo(0, document.documentElement.scrollHeight); await new Promise(r => setTimeout(r, 40)); } })()")
         page.wait_for_function("document.querySelectorAll('.ayah').length >= 286", timeout=30000)
         out.append(("offline: a surah you've read opens (Al-Baqarah, 286 ayahs)", count(".ayah") >= 286, count(".ayah")))
         page.goto(base + "timeline.html", wait_until="domcontentloaded")

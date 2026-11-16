@@ -16,35 +16,47 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Tadabbur">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="modulepreload" href="js/common.js">
+  <link rel="modulepreload" href="js/i18n/index.js">
+  <link rel="modulepreload" href="js/i18n/en.js">
+  <link rel="modulepreload" href="js/core/index.js">
+  <link rel="modulepreload" href="js/core/data.js">
+  <link rel="modulepreload" href="js/core/learn.js">
+  <link rel="modulepreload" href="js/core/progress.js">
+  <link rel="modulepreload" href="js/core/quran.js">
+  <link rel="modulepreload" href="js/core/report.js">
+  <link rel="modulepreload" href="js/core/search.js">
+  <link rel="modulepreload" href="js/core/settings.js">
 </head>
 <body>
+  <header class="top"></header>
   <main>
     <section class="hero wrap">
-      <h1 data-i18n-html="home.heroHtml"></h1>
-      <p class="lead" data-i18n="home.lead"></p>
+      <h1 data-i18n-html="home.heroHtml">Don't just recite the Quran.<br><em>Understand</em> it as you read.</h1>
+      <p class="lead" data-i18n="home.lead">See the meaning of every word in Urdu and English, learn when and where each surah was revealed, and read the Sahih hadith connected to it. Every line comes from a cited source.</p>
       <form class="search-box card hero-search" action="search.html" role="search">
-        <input type="search" name="q" autocomplete="off" data-i18n-placeholder="home.searchPlaceholder" data-i18n-aria-label="nav.search" dir="auto">
-        <button class="btn primary" type="submit" data-i18n="common.search"></button>
+        <input type="search" name="q" autocomplete="off" data-i18n-placeholder="home.searchPlaceholder" data-i18n-aria-label="nav.search" dir="auto" placeholder="Search: صبر · patience · 2:255 · Yusuf" aria-label="Search the Quran">
+        <button class="btn primary" type="submit" data-i18n="common.search">Search</button>
       </form>
       <div id="continue"></div>
       <div class="hero-ayah card" id="hero-ayah" translate="no">
-        <div class="skeleton" data-i18n="common.loading"></div>
+        <div class="skeleton" data-i18n="common.loading">Loading…</div>
       </div>
     </section>
 
     <section class="wrap" id="journey">
       <div class="section-h">
         <div>
-          <h2 data-i18n="home.journeyTitle"></h2>
-          <p data-i18n="home.journeyLead"></p>
+          <h2 data-i18n="home.journeyTitle">The Revelation Journey</h2>
+          <p data-i18n="home.journeyLead">All 114 surahs in the order they were revealed, from the first to the last. Bar height shows length. Notice that the mushaf order is not the order of revelation.</p>
         </div>
       </div>
       <div class="card journey">
         <div id="journey-bars"></div>
-        <div class="journey-axis"><span data-i18n="home.axisFirst"></span><span data-i18n="home.axisLast"></span></div>
+        <div class="journey-axis"><span data-i18n="home.axisFirst">← First revealed</span><span data-i18n="home.axisLast">Last revealed →</span></div>
         <div class="journey-legend">
-          <span class="chip makkah"><span class="dot"></span><span data-i18n="home.legendMakki"></span></span>
-          <span class="chip madinah"><span class="dot"></span><span data-i18n="home.legendMadani"></span></span>
+          <span class="chip makkah"><span class="dot"></span><span data-i18n="home.legendMakki">Makki: revealed in Makkah period</span></span>
+          <span class="chip madinah"><span class="dot"></span><span data-i18n="home.legendMadani">Madani: revealed in Madinah period</span></span>
           <span class="tiny" id="journey-src"></span>
         </div>
       </div>
@@ -53,27 +65,27 @@
     <section class="wrap" id="surahs">
       <div class="section-h">
         <div>
-          <h2 data-i18n="home.surahsTitle"></h2>
+          <h2 data-i18n="home.surahsTitle">Surahs</h2>
           <p id="surah-count"></p>
         </div>
         <div class="controls">
           <div class="seg" id="order-seg">
-            <button data-v="mushaf" class="on" data-i18n="home.orderMushaf"></button>
-            <button data-v="revelation" data-i18n="home.orderRevelation"></button>
+            <button data-v="mushaf" class="on" data-i18n="home.orderMushaf">Mushaf order</button>
+            <button data-v="revelation" data-i18n="home.orderRevelation">Revelation order</button>
           </div>
           <div class="seg" id="place-seg">
-            <button data-v="all" class="on" data-i18n="home.filterAll"></button>
-            <button data-v="makkah" data-i18n="common.makki"></button>
-            <button data-v="madinah" data-i18n="common.madani"></button>
+            <button data-v="all" class="on" data-i18n="home.filterAll">All</button>
+            <button data-v="makkah" data-i18n="common.makki">Makki</button>
+            <button data-v="madinah" data-i18n="common.madani">Madani</button>
           </div>
-          <input type="search" id="q" data-i18n-placeholder="home.filterPlaceholder" data-i18n-aria-label="home.filterPlaceholder">
+          <input type="search" id="q" data-i18n-placeholder="home.filterPlaceholder" data-i18n-aria-label="home.filterPlaceholder" placeholder="Search name, number, meaning…" aria-label="Search name, number, meaning…">
         </div>
       </div>
       <div class="grid" id="grid"></div>
     </section>
 
     <section class="wrap" id="offline">
-      <div class="section-h"><div><h2 data-i18n="pwa.offlineTitle"></h2></div></div>
+      <div class="section-h"><div><h2 data-i18n="pwa.offlineTitle">Read offline</h2></div></div>
       <div class="card" style="padding:18px" id="offline-panel"></div>
     </section>
   </main>

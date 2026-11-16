@@ -12,12 +12,24 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Tadabbur">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="modulepreload" href="js/common.js">
+  <link rel="modulepreload" href="js/i18n/index.js">
+  <link rel="modulepreload" href="js/i18n/en.js">
+  <link rel="modulepreload" href="js/core/index.js">
+  <link rel="modulepreload" href="js/core/data.js">
+  <link rel="modulepreload" href="js/core/learn.js">
+  <link rel="modulepreload" href="js/core/progress.js">
+  <link rel="modulepreload" href="js/core/quran.js">
+  <link rel="modulepreload" href="js/core/report.js">
+  <link rel="modulepreload" href="js/core/search.js">
+  <link rel="modulepreload" href="js/core/settings.js">
 </head>
 <body>
+  <header class="top"></header>
   <main class="wrap">
     <section class="hero" style="text-align:left;padding-bottom:0">
-      <h1 data-i18n="sources.title"></h1>
-      <p class="lead" style="margin:0" data-i18n="sources.lead"></p>
+      <h1 data-i18n="sources.title">Sources &amp; citations</h1>
+      <p class="lead" style="margin:0" data-i18n="sources.lead">Tadabbur writes no religious content itself. Everything you read here comes from the sources below. We download each one, keep it unchanged, and show where it came from. Where scholars differ, we say so.</p>
     </section>
     <div class="src-list" id="list"></div>
   </main>

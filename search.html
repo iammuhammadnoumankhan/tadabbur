@@ -15,16 +15,28 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Tadabbur">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="modulepreload" href="js/common.js">
+  <link rel="modulepreload" href="js/i18n/index.js">
+  <link rel="modulepreload" href="js/i18n/en.js">
+  <link rel="modulepreload" href="js/core/index.js">
+  <link rel="modulepreload" href="js/core/data.js">
+  <link rel="modulepreload" href="js/core/learn.js">
+  <link rel="modulepreload" href="js/core/progress.js">
+  <link rel="modulepreload" href="js/core/quran.js">
+  <link rel="modulepreload" href="js/core/report.js">
+  <link rel="modulepreload" href="js/core/search.js">
+  <link rel="modulepreload" href="js/core/settings.js">
 </head>
 <body>
+  <header class="top"></header>
   <main class="wrap">
     <section class="hero" style="text-align:left;padding-bottom:6px">
-      <h1 data-i18n-html="search.titleHtml"></h1>
-      <p class="lead" style="margin:0" data-i18n-html="search.leadHtml"></p>
+      <h1 data-i18n-html="search.titleHtml">Search the <em>Quran</em></h1>
+      <p class="lead" style="margin:0" data-i18n-html="search.leadHtml">Search by meaning in Urdu or English, by Arabic word (with or without harakat), by reference like <b>2:255</b> or <b>Baqarah 255</b>, or by surah or prophet name.</p>
     </section>
     <form class="search-box card" id="form" role="search">
-      <input type="search" id="q" name="q" autocomplete="off" data-i18n-placeholder="search.placeholder" data-i18n-aria-label="nav.search" dir="auto">
-      <button class="btn primary" type="submit" data-i18n="common.search"></button>
+      <input type="search" id="q" name="q" autocomplete="off" data-i18n-placeholder="search.placeholder" data-i18n-aria-label="nav.search" dir="auto" placeholder="صبر · patience · رحمة · 2:255 · Yusuf" aria-label="Search the Quran">
+      <button class="btn primary" type="submit" data-i18n="common.search">Search</button>
     </form>
     <div class="search-scope" id="scope"></div>
     <div id="results"></div>

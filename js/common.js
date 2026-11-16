@@ -181,7 +181,9 @@ export function header(active = "") {
         h("a", { href: "sources.html", class: `nav-link ${on("sources") || ""}` }, t("nav.sources")),
         installBtn(),
         themeButton())));
-  document.body.prepend(el);
+  // Each page reserves an empty <header class="top"> in its HTML, so filling it doesn't shift the page (U4: CLS)
+  const slot = document.querySelector("header.top");
+  if (slot) slot.replaceWith(el); else document.body.prepend(el);
   tabBar(TAB_OF[active] || (active ? "more" : ""), active);
 }
 

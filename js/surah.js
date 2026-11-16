@@ -1,5 +1,4 @@
 import * as C from "./common.js";
-import * as Card from "./sharecard.js";
 const { h, $, $$, ICON, t, sanitize, toArabicDigits } = C;
 
 C.header("surah");
@@ -8,16 +7,25 @@ C.footer();
 const params = new URLSearchParams(location.search);
 const N = Math.min(114, Math.max(1, parseInt(params.get("n") || "1", 10) || 1));
 
-const [chs, data, hIndex, src, trMeta, seerah, seerahBySurah, stories, storiesBySurah, SIM] = await Promise.all([
+// U4: ask for everything the first screen needs at once (requests are cached, so later calls reuse them)
+{
+  const sc = C.get().script;
+  C.info(N).catch(() => null);
+  C.selectedTranslations().then(list => list.forEach(tr => C.tr(tr.id, N).catch(() => null))).catch(() => null);
+  if (sc === "indopak") { C.indopak(N).catch(() => null); C.indopak(1).catch(() => null); }
+  if (sc === "tajweed") { C.tajweed(N).catch(() => null); C.tajweed(1).catch(() => null); }
+  if (N !== 1) C.surah(1).catch(() => null);
+}
+const [chs, data, hIndex, src, trMeta, seerah, seerahBySurah, stories, storiesBySurah, SIM, RECITERS] = await Promise.all([
   C.chapters(), C.surah(N), C.hadithIndex(), C.sources(), C.translations(),
   C.seerah().catch(() => null), C.seerahBySurah(), C.stories().catch(() => null), C.storiesBySurah(),
-  C.similarIndex().then(ix => ix[N] ? C.similar(N) : {}),
+  C.similarIndex().then(ix => ix[N] ? C.similar(N) : {}), C.reciters().catch(() => null),
 ]);
 const surahProphets = (storiesBySurah[N] || []).map(id => stories.prophets.find(p => p.id === id)).filter(Boolean);
 const seerahEvents = (seerahBySurah[N] || []).map(id => seerah.events.find(e => e.id === id)).filter(Boolean);
 const ch = chs.find(c => c.n === N);
-const morphP = C.morph(N).catch(() => null);          // word grammar, loaded in the background
-const RECITERS = await C.reciters().catch(() => null);
+let morphP = null;                                    // word grammar: loaded after the reader is drawn (U4)
+const morphNow = () => (morphP ||= C.morph(N).catch(() => null));
 const hCounts = hIndex[N] || {};
 document.title = t("surah.pageTitle", { name: ch.name, n: ch.n });
 
@@ -208,12 +216,93 @@ async function renderReader() {
       r.append(h("div", { class: `bismillah ar-${st.script}`, lang: "ar" }, text));
     }
   }
-  const frag = document.createDocumentFragment();
-  data.ayahs.forEach((a, i) => frag.append(ayahEl(a, i)));
-  r.append(frag);
+  // U4: draw only a window of ayahs: from the start, or around a linked ayah. More are added as the
+  // reader scrolls near either end, so long surahs open fast on budget phones.
+  io?.disconnect();
+  const target = hashIndex();
+  first = last = target >= 0 ? Math.max(0, target - 3) : 0;
+  sentinelTop.hidden = sentinelEnd.hidden = false;
+  r.append(sentinelTop, sentinelEnd);
+  renderUpTo(Math.max(first + 2 * CHUNK, target + 8));
   syncToolbar();
-  if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ block: "start" });
-  observeAyahs();
+  if (target >= 0) pinTo(document.getElementById(data.ayahs[target].k));
+  if (more) { more.observe(sentinelEnd); if (first > 0) more.observe(sentinelTop); else sentinelTop.hidden = true; }
+}
+
+const CHUNK = 12;                        // small sections keep each drawing step short on slow phones
+let first = 0, last = 0;                 // ayahs first..last-1 are drawn
+const sentinelTop = h("div", { class: "reader-more", "aria-hidden": "true" });
+const sentinelEnd = h("div", { class: "reader-more", "aria-hidden": "true" });
+const more = "IntersectionObserver" in window
+  ? new IntersectionObserver(es => {
+    for (const e of es) {
+      if (!e.isIntersecting) continue;
+      if (e.target === sentinelEnd) renderUpTo(last + CHUNK);
+      else renderFrom(first - CHUNK);
+    }
+  }, { rootMargin: "800px 0px" })
+  : null;
+const hashIndex = () => location.hash ? data.ayahs.findIndex(a => a.k === decodeURIComponent(location.hash.slice(1))) : -1;
+function drawRange(from, to) {
+  const frag = document.createDocumentFragment();
+  for (let i = from; i < to; i++) {
+    const el = ayahEl(data.ayahs[i], i);
+    frag.append(el);
+    io?.observe(el);
+  }
+  return frag;
+}
+/** Draw ayahs up to (not including) n at the end of the window. */
+function renderUpTo(n) {
+  n = Math.min(more ? n : data.ayahs.length, data.ayahs.length);
+  if (n <= last) return;
+  sentinelEnd.before(drawRange(last, n));
+  last = n;
+  more?.unobserve(sentinelEnd);
+  if (last >= data.ayahs.length) sentinelEnd.hidden = true;
+  else more?.observe(sentinelEnd);        // re-observing reports again if the end is still near, so drawing continues
+}
+/** Draw ayahs from i up to the current start of the window, keeping the reader's place on screen. */
+function renderFrom(i) {
+  i = Math.max(0, i);
+  if (i >= first) return;
+  const anchor = document.getElementById(data.ayahs[first].k);
+  const before = anchor?.getBoundingClientRect().top;
+  sentinelTop.after(drawRange(i, first));
+  first = i;
+  if (anchor) scrollBy(0, anchor.getBoundingClientRect().top - before);   // keep the reader's place (#reader has no browser anchoring)
+  more?.unobserve(sentinelTop);
+  if (first === 0) sentinelTop.hidden = true;
+  else more?.observe(sentinelTop);
+}
+/** Make sure ayah i is drawn (call before looking one up by id). */
+function ensureAyah(i) {
+  if (i < first) renderFrom(i - 3);
+  if (i >= last) renderUpTo(i + CHUNK);
+}
+addEventListener("hashchange", () => {
+  const i = hashIndex();
+  if (i < 0) return;
+  ensureAyah(i);
+  pinTo(document.getElementById(data.ayahs[i].k));
+});
+// Scroll to an ayah and keep it there for a moment while the ayahs around it finish drawing at their
+// real height (they start with an estimate) and fonts arrive. Stops as soon as the reader scrolls.
+function pinTo(el) {
+  if (!el) return;
+  el.scrollIntoView({ block: "start" });
+  const want = el.getBoundingClientRect().top;
+  let stop = false;
+  const quit = () => { stop = true; };
+  const evs = ["wheel", "touchstart", "keydown", "pointerdown"];
+  evs.forEach(e => addEventListener(e, quit, { once: true, passive: true }));
+  const until = performance.now() + 2500;
+  const tick = () => {
+    if (stop || performance.now() > until) { evs.forEach(e => removeEventListener(e, quit)); return; }
+    if (Math.abs(el.getBoundingClientRect().top - want) > 4) el.scrollIntoView({ block: "start" });
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
 async function copyAyah(a, idx) {
@@ -275,7 +364,7 @@ function placePop() {
 // root / dictionary form / type for one word (fills in when the grammar data arrives)
 function grammarBox(idx, wi) {
   const box = h("dl", { class: "grammar" }, h("dt", {}, t("morph.root")), h("dd", { class: "tiny" }, t("morph.loading")));
-  morphP.then(async m => {
+  morphNow().then(async m => {
     const e = m?.ayahs?.[idx]?.[wi];
     box.innerHTML = "";
     if (!e) { box.remove(); return; }
@@ -528,6 +617,7 @@ const player = {
     if (i === this.idx) return;
     if (this.idx >= 0 && this.playing) P.markRead([OFFSET + this.idx]);
     this.idx = i;
+    ensureAyah(i);
     $$(".ayah.playing").forEach(x => x.classList.remove("playing"));
     const el = document.getElementById(data.ayahs[i].k);
     el?.classList.add("playing");
@@ -618,6 +708,7 @@ async function openShare(a, idx) {
   const canvas = h("canvas", { class: "share-preview", role: "img", "aria-label": t("share.previewAria", { key: a.k }) });
   const body = h("div");
   openDrawer(t("share.drawerTitle", { key: a.k }), body);
+  const Card = await import("./sharecard.js");          // loaded only when someone shares (U4)
   await Card.loadFonts(script);
 
   const card = () => {
@@ -764,8 +855,9 @@ function pager() {
     next ? h("a", { class: "btn", href: `surah.html?n=${next.n}` }, `${next.n}. ${next.name} →`) : h("span"));
 }
 
-await renderGate();
-await loadTranslations();
+await Promise.all([renderGate(), loadTranslations()]);
 await renderReader();
+// word grammar: fetched when the phone is idle (or when a word is tapped), so it never delays a tap (U4)
+if ("requestIdleCallback" in window) requestIdleCallback(() => morphNow(), { timeout: 8000 }); else setTimeout(morphNow, 4000);
 pager();
 P.setLast(location.hash ? decodeURIComponent(location.hash.slice(1)) : `${N}:1`, "reader");

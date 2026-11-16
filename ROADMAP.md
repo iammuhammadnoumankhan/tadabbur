@@ -115,10 +115,27 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
   - Today there are 8 controls per ayah, at 28×33px.
   - Keep play, tafsir and the hadith/similar badges visible; put copy, share, bookmark, note and report in one labelled "More" menu.
   - Every tap target becomes at least 44px.
-- [ ] **U4. Fast on budget phones** *(§2, §3.4)*
-  - Al-Baqarah today has 30k elements and downloads 2.7 MB.
-  - Draw long surahs in pieces as you scroll; load the Nastaliq font only when Urdu is shown; trim the fonts.
-  - Target: LCP ≤ 2.5s, INP ≤ 200ms, CLS ≤ 0.1 on a slowed "budget phone" profile, checked in CI.
+- [x] **U4. Fast on budget phones** *(done 2026-11-16; §2, §3.4)*
+  - **Test:** `scripts/perf_test.py`, a CI job that blocks deploys. It runs at 375px with the CPU 4× slower and slow 4G (1.6 Mbps, 150 ms), and checks LCP ≤ 2.5s, CLS ≤ 0.1, tap ≤ 200 ms and ≤ 6,000 elements.
+  - **Before → after (slow 4G):**
+
+    | Page | Before | After |
+    |---|---|---|
+    | Home | LCP 3.0s, CLS 0.84 | LCP 1.5s, CLS 0.04 |
+    | Al-Fatihah | LCP 3.2s, CLS 0.33 | LCP 1.4s, CLS 0.02 |
+    | Al-Baqarah | 25,481 elements | 1,831 elements, LCP 2.8s |
+    | Al-Baqarah at 2:255 | LCP 12.3s | LCP 2.9s, 3,051 elements |
+    | Prophets | CLS 0.20 | CLS 0.00 |
+
+  - **How:**
+    - long surahs are drawn 12 ayahs at a time as you scroll, either way from a linked ayah;
+    - every request starts at once, and the shared scripts are preloaded;
+    - the word grammar and share-card code load only when needed;
+    - the header's space is reserved, and the English page text is in the HTML (`scripts/stamp_i18n.py`), so nothing jumps.
+  - **Fonts:** Google Fonts already sends each font only when its letters appear on screen, so Nastaliq downloads only when Urdu is shown. The bundled IndoPak font (338 KB) is left untouched: trimming it risks how the Quran text is drawn, and the OFL would require renaming it.
+- [ ] **U4b. Smaller first download for long surahs**
+  - Al-Baqarah's first visit on slow 4G is 2.8s, because its word-by-word file is 222 KB compressed. The speed test allows 3.0s for it until this is done.
+  - **Idea:** split `surah/NNN.json` so the first screen needs less (e.g. move word audio paths and transliteration to their own file). This changes the data format, so it needs a schema bump (docs/DATA.md).
 - [ ] **U5. Easier reading** *(§3.5)*
   - No text under 13px (translator names are 11px today); body text at 16px or more.
   - More line height for Nastaliq; comfortable line length on desktop.

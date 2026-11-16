@@ -113,8 +113,13 @@ python3 scripts/build_manifest.py  # data/manifest.json (schema version + counts
   python3 scripts/validate_data.py
   pip install -r requirements-dev.txt && python -m playwright install chromium
   python3 scripts/smoke_test.py
+  python3 scripts/perf_test.py
   python3 scripts/check_links.py
   ```
+- **Speed (U4):** `scripts/perf_test.py` runs in CI (job `speed-test`, which deploys depend on) on a slowed "budget phone" and fails over budget (LCP ≤ 2.5s, CLS ≤ 0.1, tap ≤ 200 ms, ≤ 6,000 elements).
+- **Static page text:** the English interface text is stamped into the HTML by `python3 scripts/stamp_i18n.py`. Run it after changing a `data-i18n` key's text or adding one to a page; the smoke test fails if the pages are out of date.
+- **Every page preloads the shared modules** (`<link rel="modulepreload">` for `js/common.js`, `js/i18n/*`, `js/core/*`). Add a new core module to every page; the smoke test checks this.
+- **Long surahs are drawn in sections** (`renderUpTo` / `renderFrom` / `ensureAyah` in `js/surah.js`). Call `ensureAyah(i)` before looking up an ayah element that may not be drawn yet.
 - **When adding a page or data file:**
   - add the page to `PAGES` in `smoke_test.py`;
   - add invariants for the new data to `validate_data.py`.

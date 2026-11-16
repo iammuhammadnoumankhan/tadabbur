@@ -15,12 +15,24 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Tadabbur">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="modulepreload" href="js/common.js">
+  <link rel="modulepreload" href="js/i18n/index.js">
+  <link rel="modulepreload" href="js/i18n/en.js">
+  <link rel="modulepreload" href="js/core/index.js">
+  <link rel="modulepreload" href="js/core/data.js">
+  <link rel="modulepreload" href="js/core/learn.js">
+  <link rel="modulepreload" href="js/core/progress.js">
+  <link rel="modulepreload" href="js/core/quran.js">
+  <link rel="modulepreload" href="js/core/report.js">
+  <link rel="modulepreload" href="js/core/search.js">
+  <link rel="modulepreload" href="js/core/settings.js">
 </head>
 <body>
+  <header class="top"></header>
   <main class="wrap">
     <section class="hero" style="text-align:left;padding-bottom:10px">
-      <h1 data-i18n-html="timeline.titleHtml"></h1>
-      <p class="lead" style="margin:0" data-i18n="timeline.lead"></p>
+      <h1 data-i18n-html="timeline.titleHtml">The 23 years of <em>revelation</em></h1>
+      <p class="lead" style="margin:0" data-i18n="timeline.lead">The Quran was revealed over 23 years: 13 in Makkah, then 10 in Madinah. Below, the surahs are shown in order of revelation, alongside the events of the Prophet's ﷺ life as narrated in Sahih al-Bukhari.</p>
       <blockquote class="card frame-quote" id="frame-quote"></blockquote>
     </section>
 
@@ -28,19 +40,19 @@
       <div class="tl-periods" id="tl-periods"></div>
       <div class="tl-ruler" id="tl-ruler"></div>
       <div class="tl-anchors" id="tl-anchors"></div>
-      <div class="tl-lane-label"><span data-i18n="timeline.laneLabel"></span><span class="tiny" data-i18n="timeline.laneHint"></span></div>
+      <div class="tl-lane-label"><span data-i18n="timeline.laneLabel">Surahs in order of revelation</span><span class="tiny" data-i18n="timeline.laneHint"> · spacing shows order, not exact dates · tap one to read it</span></div>
       <div class="tl-surahs" id="tl-surahs"></div>
       <div class="journey-legend">
-        <span class="chip makkah"><span class="dot"></span><span data-i18n="common.makki"></span></span>
-        <span class="chip madinah"><span class="dot"></span><span data-i18n="common.madani"></span></span>
-        <span class="chip"><span class="dot" style="color:var(--accent-2)"></span><span data-i18n="timeline.legendDated"></span></span>
+        <span class="chip makkah"><span class="dot"></span><span data-i18n="common.makki">Makki</span></span>
+        <span class="chip madinah"><span class="dot"></span><span data-i18n="common.madani">Madani</span></span>
+        <span class="chip"><span class="dot" style="color:var(--accent-2)"></span><span data-i18n="timeline.legendDated">Dated by a hadith that states the time</span></span>
       </div>
     </section>
 
     <section>
       <div class="section-h">
         <div>
-          <h2 data-i18n="timeline.eventsTitle"></h2>
+          <h2 data-i18n="timeline.eventsTitle">Events narrated in Sahih al-Bukhari</h2>
           <p id="order-note"></p>
         </div>
       </div>
@@ -50,7 +62,7 @@
 
   <div class="scrim" id="scrim"></div>
   <aside class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawer-h"><h3 id="drawer-title"></h3><button class="icon-btn" id="drawer-close" data-i18n-aria-label="common.close"></button></div>
+    <div class="drawer-h"><h3 id="drawer-title"></h3><button class="icon-btn" id="drawer-close" data-i18n-aria-label="common.close" aria-label="Close"></button></div>
     <div class="drawer-b" id="drawer-body"></div>
   </aside>
   <script type="module" src="js/timeline.js"></script>
