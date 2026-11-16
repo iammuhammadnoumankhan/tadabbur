@@ -246,6 +246,7 @@ input[type=search] {
 }
 .toolbar .grow { flex: 1; }
 .reader-more { height: 1px; }
+@media (max-width: 1099px) { .wide-only { display: none; } }
 /* rule 8: Quran text is hidden until its own font has loaded (js/common.js → quranFont) */
 .qf-wait-indopak .ar-indopak, .qf-wait-indopak .ar-indopak *,
 .qf-wait-uthmani .ar-uthmani, .qf-wait-uthmani .ar-uthmani * { visibility: hidden; }
@@ -253,6 +254,13 @@ input[type=search] {
 
 /* ---------- ayahs */
 .bismillah { text-align: center; font-size: 32px; direction: rtl; margin: 26px 0 8px; color: var(--ink-2); }
+@media (min-width: 1100px) {
+  .side-by-side .ayah { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); column-gap: 32px; align-items: start; }
+  .side-by-side .ayah > .ayah-head { grid-column: 1 / -1; }
+  .side-by-side .ayah > .arabic-line { grid-column: 2; grid-row: 2; }
+  .side-by-side .ayah > .trs { grid-column: 1; grid-row: 2; align-self: center; }
+  .side-by-side .ayah > .my-note, .side-by-side .ayah > .tip-card { grid-column: 1 / -1; }
+}
 .ayah { padding: 22px 6px 22px; border-bottom: 1px solid var(--line); scroll-margin-top: 140px; transition: background .3s; border-radius: 10px; }
 .ayah.playing { background: var(--hl); }
 .ayah-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; row-gap: 4px; }
@@ -519,7 +527,7 @@ main > .pr-card { margin: 18px 0 60px; }
 
 /* ---------- phone tab bar + More sheet (U1; docs/UX_RESEARCH.md §3.2) */
 .tabbar { display: none; }
-@media (max-width: 720px) {
+@media (max-width: 1023px) {
   .nav .nav-link { display: none; }
   .brand .t { display: inline; }
   .tabbar {
@@ -569,7 +577,7 @@ main > .pr-card { margin: 18px 0 60px; }
 .sheet:not(.show) { visibility: hidden; transition: transform .22s ease, visibility 0s .22s; }
 .sheet-note { font-size: 13px; color: var(--ink-3); padding: 10px 6px 2px; }
 .sheet-cancel { width: 100%; min-height: 48px; margin-top: 10px; justify-content: center; }
-@media (min-width: 721px) {
+@media (min-width: 1024px) {
   .sheet { left: 50%; right: auto; width: 440px; bottom: 24px; border-radius: 18px; border: 1px solid var(--line); transform: translate(-50%, 120%); }
   .sheet.show { transform: translate(-50%, 0); }
 }
@@ -589,6 +597,11 @@ main > .pr-card { margin: 18px 0 60px; }
 /* respect "reduce motion" everywhere (WCAG 2.3.3): no sliding, fading or smooth scrolling */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  .sheet { left: 50%; right: auto; width: 520px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); border-radius: 18px; border: 1px solid var(--line); transform: translate(-50%, 130%); }
+  .sheet.show { transform: translate(-50%, 0); }
 }
 
 /* ---------- first-time setup and tips (U7) */
@@ -621,6 +634,15 @@ main > .pr-card { margin: 18px 0 60px; }
 .tip-more svg { width: 18px; height: 18px; vertical-align: -4px; color: var(--ink-2); }
 .tip-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
 .tip-actions .btn { min-height: 44px; }
+
+/* ---------- keyboard shortcuts list (U8) */
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; margin: 4px 6px 10px; }
+.keys dt { margin: 0; }
+.keys dd { margin: 0; }
+kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 8px; border: 1px solid var(--line); border-bottom-width: 2px;
+  border-radius: 8px; background: var(--bg-2); font: 600 14px var(--font-ui); color: var(--ink); }
+.ayah:focus { outline: none; }
+.ayah:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
 /* ---------- toast */
 .toast {

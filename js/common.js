@@ -362,7 +362,7 @@ export function actionSheet({ title = "", items = [], note = null } = {}) {
   requestAnimationFrame(() => { sheet.classList.add("show"); scrim.classList.add("show"); sheet.querySelector(".sheet-item")?.focus(); });
 }
 
-// ---------- phone tab bar (U1): 5 labelled tabs in thumb reach; the rest under a labelled "More"
+// ---------- phone and tablet tab bar (U1, U8: up to 1023px): 5 labelled tabs in thumb reach; the rest under "More"
 function tabBar(current, active) {
   const tab = (id, href, icon, label) => h("a", {
     class: `tab${current === id ? " on" : ""}`, href, "aria-current": current === id ? "page" : null,

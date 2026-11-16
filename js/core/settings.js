@@ -20,6 +20,7 @@ export const DEFAULTS = Object.freeze({
   reciter: null,          // recitation id (data/audio/reciters.json); null = default
   followWords: true,      // highlight each word while it's recited
   surahAbout: false,
+  sideBySide: false,      // wide screens: Arabic and translation side by side (U8)
   onboarded: false,       // first-time setup (U7) done or skipped
   seenTips: [],           // one-time tips already shown, e.g. "badges"      // surah page: "About this surah" (intro, timeline, sources) expanded
 });

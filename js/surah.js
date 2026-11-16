@@ -209,6 +209,7 @@ function ayahEl(a, idx) {
 
 async function renderReader() {
   const st = C.get();
+  $("#reader").classList.toggle("side-by-side", !!st.sideBySide);
   ip = st.script === "indopak" ? await C.indopak(N) : null;
   if (st.showTranslit && !extra) await extraNow();
   tj = st.script === "tajweed" ? await C.tajweed(N).catch(() => null) : null;
@@ -504,6 +505,12 @@ $("#open-settings").onclick = () => {
       h("label", { class: "check", style: "margin-top:8px" },
         h("input", { type: "checkbox", checked: st.followWords, onchange: e => C.set({ followWords: e.target.checked }) }), t("surah.setFollow")),
       h("div", { class: "tiny", style: "margin-top:4px" }, t("surah.setReciterNote"))) : null,
+    h("div", { class: "opt-group wide-only" }, h("h4", {}, t("surah.setLayout")),
+      h("label", { class: "check" },
+        h("input", { type: "checkbox", checked: !!st.sideBySide, onchange: e => C.set({ sideBySide: e.target.checked }) }), t("surah.setSideBySide")),
+      h("div", { class: "tiny", style: "margin-top:4px" }, t("surah.setSideBySideNote"))),
+    h("div", { class: "opt-group" }, h("h4", {}, t("surah.setKeys")),
+      h("button", { class: "btn", type: "button", onclick: () => showShortcuts() }, t("keys.show"))),
     h("div", { class: "opt-group" }, h("h4", {}, t("surah.setTheme")),
       seg("theme", [["auto", t("surah.themeAuto")], ["light", t("surah.themeLight")], ["dark", t("surah.themeDark")]])),
     h("div", { class: "opt-group" }, h("h4", {}, t("pwa.offlineTitle")), C.offlinePanel()));
@@ -901,6 +908,47 @@ addEventListener("scroll", () => {
     if (top) P.setLast(top.id, "reader");
   }, 800);
 }, { passive: true });
+
+// ======================================================= keyboard shortcuts (U8)
+// J / ↓ next ayah · K / ↑ previous ayah · P play or pause · T tafsir · M more · ? this list. Arrow keys keep
+// scrolling the page normally unless an ayah has focus.
+const SHORTCUTS = [["J", "keys.next"], ["K", "keys.prev"], ["P", "keys.play"], ["T", "keys.tafsir"], ["M", "keys.more"], ["?", "keys.help"]];
+function currentAyahIndex() {
+  const el = document.activeElement?.closest?.(".ayah") ||
+    [...document.querySelectorAll(".ayah")].find(e => e.getBoundingClientRect().bottom > 150);
+  return el ? +el.dataset.idx : 0;
+}
+function goAyah(i) {
+  i = Math.max(0, Math.min(data.ayahs.length - 1, i));
+  ensureAyah(i);
+  const el = document.getElementById(data.ayahs[i].k);
+  if (!el) return;
+  el.tabIndex = -1;
+  el.focus({ preventScroll: true });
+  el.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+function showShortcuts() {
+  C.contentSheet(t("keys.title"), h("div", {},
+    h("dl", { class: "keys" }, ...SHORTCUTS.flatMap(([k, label]) => [h("dt", {}, h("kbd", {}, k)), h("dd", {}, t(label))])),
+    h("p", { class: "tiny" }, t("keys.note"))));
+}
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented) return;
+  if (e.target.closest?.("input, textarea, select, [contenteditable], .sheet, .drawer.show")) return;
+  const onAyah = !!document.activeElement?.closest?.(".ayah");
+  const k = e.key;
+  const act = {
+    j: () => goAyah(currentAyahIndex() + 1), k: () => goAyah(currentAyahIndex() - 1),
+    ArrowDown: onAyah ? () => goAyah(currentAyahIndex() + 1) : null, ArrowUp: onAyah ? () => goAyah(currentAyahIndex() - 1) : null,
+    p: () => (player.playing ? player.toggle() : player.playFrom(currentAyahIndex(), false)),
+    t: () => openTafsir(data.ayahs[currentAyahIndex()].k),
+    m: () => openAyahMenu(data.ayahs[currentAyahIndex()], currentAyahIndex()),
+    "?": () => showShortcuts(),
+  }[k.length === 1 ? k.toLowerCase() : k];
+  if (!act) return;
+  e.preventDefault();
+  act();
+});
 
 // ======================================================= pager
 function pager() {

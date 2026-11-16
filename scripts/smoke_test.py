@@ -199,6 +199,41 @@ def main():
             failures.append(f"[first visit] {detail}")
         ctx2.close()
 
+        # U8: tablets get the tab bar (nothing cut off); keyboard shortcuts move between ayahs and open tafsir;
+        # the optional side-by-side layout puts each translation beside its Arabic on wide screens
+        ok, detail = True, []
+        try:
+            seen = 'localStorage.setItem("tadabbur.settings", JSON.stringify({onboarded:true, seenTips:["badges"]%s}))'
+            ctx3 = browser.new_context(viewport={"width": 820, "height": 1180}); ctx3.add_init_script(seen % "")
+            page = ctx3.new_page(); page.goto(base + "surah.html?n=2", wait_until="load"); page.wait_for_selector(".ayah")
+            tab = page.evaluate("""() => ({ bar: getComputedStyle(document.querySelector('.tabbar')).display !== 'none',
+              cut: [...document.querySelectorAll('header .nav > *')].filter(l => getComputedStyle(l).display !== 'none' && l.getBoundingClientRect().right > innerWidth).length })""")
+            if not tab["bar"] or tab["cut"]:
+                ok = False; detail.append(f"tablet navigation {tab}")
+            ctx3.close()
+            ctx3 = browser.new_context(viewport={"width": 1440, "height": 900}); ctx3.add_init_script(seen % ", sideBySide:true")
+            page = ctx3.new_page(); page.goto(base + "surah.html?n=2", wait_until="load"); page.wait_for_selector(".ayah"); page.wait_for_timeout(800)
+            keys = []
+            for k in ("j", "j", "k"):
+                page.keyboard.press(k); page.wait_for_timeout(400)
+                keys.append(page.evaluate("document.activeElement.closest('.ayah')?.id"))
+            if keys != ["2:2", "2:3", "2:2"]:
+                ok = False; detail.append(f"J/K went to {keys}")
+            page.keyboard.press("t"); page.wait_for_timeout(600)
+            if "2:2" not in (page.evaluate("document.getElementById('drawer-title').textContent") or ""):
+                ok = False; detail.append("T didn't open the tafsir")
+            page.keyboard.press("Escape")
+            sbs = page.evaluate("""() => { const a = document.querySelector('.ayah'); const ar = a.querySelector('.arabic-line').getBoundingClientRect(),
+              tr = a.querySelector('.trs').getBoundingClientRect(); return tr.right <= ar.left && tr.top < ar.bottom && ar.top < tr.bottom; }""")
+            if not sbs:
+                ok = False; detail.append("side-by-side layout not side by side")
+            ctx3.close()
+        except Exception as e:  # noqa: BLE001
+            ok, detail = False, [type(e).__name__]
+        print(f"{'✓' if ok else '✗'} [desktop & tablet] tablet tab bar, J/K/T shortcuts, side-by-side option" + ("" if ok else f"  ({detail})"))
+        if not ok:
+            failures.append(f"[desktop & tablet] {detail}")
+
         # "Report" buttons open the pre-filled GitHub form
         page = browser.new_page()
         page.goto(base + "surah.html?n=1", wait_until="domcontentloaded")

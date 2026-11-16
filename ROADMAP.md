@@ -175,8 +175,15 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
     "Skip for now" keeps the defaults and says what they are. Everything stays changeable in Settings.
   - **Surah page, first visit:** after the first ayah, a one-time card explains the gold hadith badge, the green "similar" badge, Tafsir, the More menu and tapping words. It also links to the setup. "Got it" remembers it.
   - **Tests:** setup appears on the home page only; Skip and Got it are remembered; the tip sits right after the first ayah; the accessibility check covers the open setup panel.
-- [ ] **U8. Better on desktop and tablet** *(§3.2)*
-  - A side navigation rail, Arabic and translation side by side on wide screens, and keyboard shortcuts (next/previous ayah, play, tafsir).
+- [x] **U8. Better on desktop and tablet** *(done 2026-11-17; §3.2)*
+  - **Tablets (up to 1023px) use the bottom tab bar.** The top menu was cut off at 768–820px. Material Design suggests a rail or a bar for tablets; the bar keeps one pattern to learn. Sheets show as centred panels on tablets. The full top menu is used from 1024px.
+  - **Side by side (option, wide screens ≥1100px):** each translation beside its Arabic, so the eye no longer travels about 1,000px across the page. It's **off by default** until real readers try it (U10); it's in Settings → "Layout on wide screens".
+  - **Keyboard shortcuts in the reader:**
+    - J / K for next and previous ayah (↓ / ↑ too when an ayah is selected);
+    - P to play or pause, T for tafsir, M for the More menu, ? to list them.
+
+    They're ignored while typing, and the list is also in Settings.
+  - **Tests:** smoke checks the tablet tab bar, J/K/T, and the side-by-side layout.
 - [ ] **U9. Design system notes**
   - `docs/DESIGN.md`: colours, type sizes, spacing, and the shared components (chips, cards, drawers, tabs). New features then look and behave the same, and the mobile and desktop apps reuse them.
 - [ ] **U10. Second test with 5 readers**
