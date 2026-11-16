@@ -169,6 +169,36 @@ def main():
             if not ok:
                 failures.append(f"[files] {name}: {detail}")
 
+        # U7: first visit — setup slides up on the home page (never on a surah page); skipping remembers it;
+        # a surah page shows the badge tip after the first ayah once, and "Got it" remembers it
+        ctx2 = browser.new_context(viewport={"width": 375, "height": 812})
+        page = ctx2.new_page()
+        ok, detail = True, []
+        try:
+            page.goto(base + "index.html", wait_until="load")
+            page.wait_for_selector(".sheet.show .setup", timeout=15000)
+            page.click(".sheet.show .setup-actions button:not(.primary)")          # "Skip for now"
+            page.wait_for_function("!document.querySelector('.sheet.show')", timeout=5000)
+            page.reload(wait_until="load"); page.wait_for_timeout(2000)
+            if page.query_selector(".sheet.show .setup"):
+                ok = False; detail.append("setup came back after Skip")
+            page.goto(base + "surah.html?n=1", wait_until="load")
+            page.wait_for_selector(".tip-card", timeout=15000)
+            if page.query_selector(".sheet.show .setup"):
+                ok = False; detail.append("setup sheet shown on a surah page")
+            if page.evaluate("document.querySelector('.tip-card').previousElementSibling?.classList.contains('ayah')") is not True:
+                ok = False; detail.append("tip isn't right after the first ayah")
+            page.click(".tip-card .btn.primary")
+            page.reload(wait_until="load"); page.wait_for_selector(".ayah"); page.wait_for_timeout(1000)
+            if page.query_selector(".tip-card"):
+                ok = False; detail.append("tip came back after Got it")
+        except Exception as e:  # noqa: BLE001
+            ok, detail = False, [type(e).__name__]
+        print(f"{'✓' if ok else '✗'} [first visit] setup on home only, Skip and Got it remembered" + ("" if ok else f"  ({detail})"))
+        if not ok:
+            failures.append(f"[first visit] {detail}")
+        ctx2.close()
+
         # "Report" buttons open the pre-filled GitHub form
         page = browser.new_page()
         page.goto(base + "surah.html?n=1", wait_until="domcontentloaded")

@@ -591,6 +591,37 @@ main > .pr-card { margin: 18px 0 60px; }
   *, *::before, *::after { transition-duration: 0s !important; animation-duration: 0s !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
 
+/* ---------- first-time setup and tips (U7) */
+.sheet-content { max-height: 90vh; }
+.sheet-h { font-family: var(--font-display); font-weight: 500; font-size: 22px; margin: 0 6px 6px; }
+.setup { padding: 0 6px 6px; }
+.setup fieldset { border: 0; padding: 0; margin: 14px 0 0; }
+.setup legend { font-weight: 600; margin-bottom: 8px; padding: 0; }
+.setup-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.setup-col { display: grid; gap: 8px; }
+.setup-opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; min-height: 44px; }
+.setup-opt.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.setup-opt input { margin-top: 4px; accent-color: var(--accent); }
+.setup-opt-t { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.setup-prev { font-size: 26px; line-height: 2; text-align: right; color: var(--ink); }
+.setup-prev.ar-indopak { font-family: var(--font-indopak); }
+.setup-prev.ar-uthmani { font-family: var(--font-uthmani); }
+.setup-trs { display: grid; max-height: 34vh; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; padding: 4px 6px; }
+.setup-trs .check { min-height: 44px; align-items: center; }
+.urdu-name { font-family: var(--font-urdu); line-height: 2; }
+.setup-msg { color: var(--makkah); font-weight: 600; min-height: 1em; margin-top: 8px; }
+.setup-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; flex-wrap: wrap; }
+.setup-actions .btn { min-height: 44px; }
+.tip-card { padding: 16px 18px; margin: 10px 0 18px; border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.tip-card h3 { margin: 0 0 8px; font-size: 16px; }
+.tip-card ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.tip-card li { display: grid; grid-template-columns: 7.5em 1fr; gap: 10px; align-items: start; }
+.tip-card li > :first-child { justify-self: start; }
+.tip-card li.plain { grid-template-columns: 1fr; }
+.tip-more svg { width: 18px; height: 18px; vertical-align: -4px; color: var(--ink-2); }
+.tip-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 12px; }
+.tip-actions .btn { min-height: 44px; }
+
 /* ---------- toast */
 .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); z-index: 100;

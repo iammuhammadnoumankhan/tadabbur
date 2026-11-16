@@ -165,9 +165,16 @@ Based on a measured audit and research, written up in [docs/UX_RESEARCH.md](docs
   - **Tap size:** timeline markers are a list on phones (their labels also overlapped there), and source links are 24px tall.
     - The 2px revelation bars and mushaf-page words use WCAG's own "equivalent" and "inline" exceptions, documented in the test.
   - **"Reduce motion"** turns off all sliding, fading and smooth scrolling.
-- [ ] **U7. First-time setup** *(§3.3)*
-  - On first visit, three quick choices: meaning language (Urdu/English), script (IndoPak/Uthmani) and translations. Then a one-time tip explaining the gold hadith and green "similar" badges.
-  - Everything stays changeable in settings.
+- [x] **U7. First-time setup** *(done 2026-11-17; §3.3)*
+  - **Never blocks reading:** readers who arrive by a shared link land straight on the ayah.
+  - **Home page, first visit:** a setup panel slides up over the page, without moving anything. It has three choices:
+    - meanings in Urdu or English;
+    - script: IndoPak, Uthmani or Tajweed, each previewed with the Bismillah exactly as published, in its own font;
+    - which translations to show, with the chosen language's translations listed first.
+
+    "Skip for now" keeps the defaults and says what they are. Everything stays changeable in Settings.
+  - **Surah page, first visit:** after the first ayah, a one-time card explains the gold hadith badge, the green "similar" badge, Tafsir, the More menu and tapping words. It also links to the setup. "Got it" remembers it.
+  - **Tests:** setup appears on the home page only; Skip and Got it are remembered; the tip sits right after the first ayah; the accessibility check covers the open setup panel.
 - [ ] **U8. Better on desktop and tablet** *(§3.2)*
   - A side navigation rail, Arabic and translation side by side on wide screens, and keyboard shortcuts (next/previous ayah, play, tafsir).
 - [ ] **U9. Design system notes**

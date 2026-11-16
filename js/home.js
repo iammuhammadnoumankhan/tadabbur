@@ -5,6 +5,9 @@ C.header("surahs");
 C.footer();
 document.title = t("home.title");
 
+// U7: first visit → the setup slides up over the page after it has settled (it never moves the page)
+if (!C.get().onboarded) setTimeout(() => C.openSetup({ onSaved: () => location.reload() }), 900);
+
 const chs = await C.chapters();
 const src = await C.sources();
 

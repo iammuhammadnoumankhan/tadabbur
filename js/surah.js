@@ -233,8 +233,28 @@ async function renderReader() {
   r.append(sentinelTop, sentinelEnd);
   renderUpTo(Math.max(first + 2 * CHUNK, target + 8));
   syncToolbar();
+  badgeTip();
   if (target >= 0) pinTo(document.getElementById(data.ayahs[target].k));
   if (more) { more.observe(sentinelEnd); if (first > 0) more.observe(sentinelTop); else sentinelTop.hidden = true; }
+}
+
+// U7: a one-time card after the first drawn ayah: what the badges mean, and (on a first visit) the setup
+function badgeTip() {
+  if (C.seenTip("badges")) return;
+  const first = document.querySelector(".ayah");
+  if (!first) return;
+  const card = h("aside", { class: "card tip-card", "aria-label": t("tip.title") },
+    h("h3", {}, t("tip.title")),
+    h("ul", {},
+      h("li", {}, h("span", { class: "chip hadith-chip" }, t("tip.hadithChip")), h("span", {}, t("tip.hadith"))),
+      h("li", {}, h("span", { class: "chip sim-chip" }, t("tip.similarChip")), h("span", {}, t("tip.similar"))),
+      h("li", {}, h("span", { class: "chip tafsir-chip" }, t("surah.tafsir")), h("span", {}, t("tip.tafsir"))),
+      h("li", {}, h("span", { class: "tip-more", html: ICON.more, "aria-hidden": "true" }), h("span", {}, t("tip.more"))),
+      h("li", { class: "plain" }, t("tip.word"))),
+    h("div", { class: "tip-actions" },
+      !C.get().onboarded ? h("button", { class: "btn", type: "button", onclick: () => C.openSetup() }, t("tip.setup")) : null,
+      h("button", { class: "btn primary", type: "button", onclick: () => { C.markTip("badges"); card.remove(); } }, t("tip.ok"))));
+  first.after(card);
 }
 
 const CHUNK = 12;                        // small sections keep each drawing step short on slow phones
@@ -714,6 +734,8 @@ $$("#wbw-seg button").forEach(b => b.onclick = () =>
   b.dataset.v === "off" ? C.set({ wbw: false }) : C.set({ wbw: true, wbwLang: b.dataset.v }));
 
 C.onChange(async (_, patch) => {
+  if ("onboarded" in patch && Object.keys(patch).length === 1) return;
+  if ("seenTips" in patch && Object.keys(patch).length === 1) return;
   if ("arSize" in patch || "trSize" in patch || "theme" in patch || "tafsir" in patch || "known" in patch || "reciter" in patch || "followWords" in patch) return;
   if ("translations" in patch) await loadTranslations();
   if ("uiMeaning" in patch) await renderGate();

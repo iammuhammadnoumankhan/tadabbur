@@ -244,6 +244,94 @@ export function header(active = "") {
   tabBar(TAB_OF[active] || (active ? "more" : ""), active);
 }
 
+// ---------- content sheet: any content sliding up from the bottom (a centred panel on wide screens)
+export function contentSheet(title, content, { onClose } = {}) {
+  const opener = document.activeElement;
+  const scrim = document.body.appendChild(h("div", { class: "scrim" }));
+  const close = () => {
+    sheet.classList.remove("show"); scrim.classList.remove("show");
+    removeEventListener("keydown", onKey);
+    setTimeout(() => { sheet.remove(); scrim.remove(); }, 250);
+    opener?.focus?.();
+    onClose?.();
+  };
+  const onKey = e => { if (e.key === "Escape") close(); };
+  const sheet = document.body.appendChild(h("div", { class: "sheet sheet-content", role: "dialog", "aria-modal": "true", "aria-label": title },
+    h("div", { class: "sheet-grip", "aria-hidden": "true" }),
+    h("h2", { class: "sheet-h" }, title),
+    content));
+  scrim.onclick = close;
+  addEventListener("keydown", onKey);
+  requestAnimationFrame(() => { sheet.classList.add("show"); scrim.classList.add("show"); sheet.querySelector("input, button")?.focus({ preventScroll: true }); });
+  return close;
+}
+
+// ---------- first-time setup (U7): meaning language, script, translations. Never blocks reading:
+// on the home page it slides up over the page; on a surah page it's offered from a card after the first ayah.
+export async function setupForm(onDone) {
+  const st = get();
+  const [trMeta, bis1, ip1, tj1] = await Promise.all([core.translations(), core.surah(1), core.indopak(1).catch(() => null), core.tajweed(1).catch(() => null)]);
+  const chosen = new Set((await core.selectedTranslations()).map(x => x.id));
+  let lang = st.uiMeaning === "en" ? "en" : "ur", script = st.script;
+  const radio = (name, value, checked, label, extra) => h("label", { class: `setup-opt${checked ? " on" : ""}` },
+    h("input", { type: "radio", name, value, checked, onchange: e => {
+      e.target.closest("fieldset").querySelectorAll(".setup-opt").forEach(o => o.classList.toggle("on", o.contains(e.target)));
+      if (name === "su-lang") { lang = value; sortTr(); } else script = value;
+    } }), h("span", { class: "setup-opt-t" }, label, extra || null));
+  // previews: the Bismillah, exactly as each source publishes it, in that script's own font (rule 8)
+  const preview = {
+    indopak: ip1 ? h("span", { class: "setup-prev ar-indopak", lang: "ar", dir: "rtl" }, ip1.ayahs[0].join(" ")) : null,
+    uthmani: h("span", { class: "setup-prev ar-uthmani", lang: "ar", dir: "rtl" }, bis1.ayahs[0].u),
+    tajweed: tj1 ? h("span", { class: "setup-prev ar-uthmani tajweed", lang: "ar", dir: "rtl", html: tj1.ayahs[0].join(" ") }) : null,
+  };
+  quranFont("indopak"); quranFont("uthmani");
+  const msg = h("div", { class: "setup-msg", role: "alert" });
+  const trBox = h("div", { class: "setup-trs" });
+  const trItem = tr => h("label", { class: "check" },
+    h("input", { type: "checkbox", value: tr.id, checked: chosen.has(tr.id), onchange: e => { e.target.checked ? chosen.add(tr.id) : chosen.delete(tr.id); msg.textContent = ""; } }),
+    h("span", { class: tr.lang === "ur" ? "urdu-name" : "" }, tr.name, h("span", { class: "tiny" }, ` · ${t(`setup.trLang.${tr.lang}`)}`)));
+  const sortTr = () => {
+    trBox.innerHTML = "";
+    const first = trMeta.list.filter(x => (lang === "en" ? x.lang === "en" : x.lang !== "en"));
+    const rest = trMeta.list.filter(x => !first.includes(x));
+    trBox.append(...first.map(trItem), h("div", { class: "tiny", style: "margin:8px 0 4px" }, t("setup.trMore")), ...rest.map(trItem));
+  };
+  sortTr();
+  const done = skip => {
+    if (!skip) {
+      if (!chosen.size) { msg.textContent = t("setup.needOne"); return; }
+      const order = trMeta.list.map(x => x.id).filter(id => chosen.has(id));
+      set({ uiMeaning: lang, wbwLang: lang, script, translations: order, onboarded: true });
+    } else set({ onboarded: true });
+    onDone?.(!skip);
+  };
+  return h("form", { class: "setup", onsubmit: e => { e.preventDefault(); done(false); } },
+    h("p", { class: "muted", style: "margin-top:0" }, t("setup.lead")),
+    h("fieldset", {}, h("legend", {}, t("setup.lang")),
+      h("div", { class: "setup-row" },
+        radio("su-lang", "ur", lang === "ur", h("span", { class: "urdu-name", lang: "ur" }, t("lang.ur"))),
+        radio("su-lang", "en", lang === "en", t("lang.en")))),
+    h("fieldset", {}, h("legend", {}, t("setup.script")),
+      h("div", { class: "setup-col" },
+        radio("su-script", "indopak", script === "indopak", t("surah.setScriptIndopak"), preview.indopak),
+        radio("su-script", "uthmani", script === "uthmani", t("surah.setScriptUthmani"), preview.uthmani),
+        radio("su-script", "tajweed", script === "tajweed", t("surah.setScriptTajweed"), preview.tajweed))),
+    h("fieldset", {}, h("legend", {}, t("setup.translations")), h("p", { class: "tiny", style: "margin:0 0 6px" }, t("setup.trHint")), trBox),
+    msg,
+    h("div", { class: "setup-actions" },
+      h("button", { class: "btn", type: "button", onclick: () => done(true) }, t("setup.skip")),
+      h("button", { class: "btn primary", type: "submit" }, t("setup.start"))),
+    h("p", { class: "tiny", style: "margin-bottom:0" }, t("setup.later")));
+}
+
+export async function openSetup({ onSaved } = {}) {
+  let close = null;
+  const form = await setupForm(saved => { close?.(); if (saved) onSaved?.(); });
+  close = contentSheet(t("setup.title"), form, { onClose: () => { if (!get().onboarded) set({ onboarded: true }); } });
+}
+export const seenTip = id => (get().seenTips || []).includes(id);
+export const markTip = id => set({ seenTips: [...new Set([...(get().seenTips || []), id])] });
+
 // ---------- action sheet (U3): a short list of labelled actions sliding up from the bottom.
 // items: [{ label, icon?, hint?, href?, external?, onClick? }]; returns nothing, closes itself on choice.
 export function actionSheet({ title = "", items = [], note = null } = {}) {

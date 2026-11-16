@@ -88,6 +88,7 @@ def main():
         def measure(path, tap_sel, repeat=False):
             ctx = browser.new_context(viewport={"width": 375, "height": 812}, device_scale_factor=2, is_mobile=True, has_touch=True)
             ctx.add_init_script(OBSERVE)
+            ctx.add_init_script('if (!localStorage.getItem("tadabbur.settings")) localStorage.setItem("tadabbur.settings", JSON.stringify({ onboarded: true }))')
             page = ctx.new_page()
             cdp = ctx.new_cdp_session(page)
             cdp.send("Network.enable")

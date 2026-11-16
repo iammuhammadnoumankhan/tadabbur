@@ -25,6 +25,7 @@ PANELS = [
     ("surah.html?n=1", "Settings", "document.getElementById('open-settings').click()"),
     ("surah.html?n=2", "hadith panel", "document.querySelector('.ayah .hadith-chip')?.click()"),
     ("index.html", "phone More sheet", "document.querySelector('.tabbar .tab:last-child').click()"),
+    ("index.html", "first-visit setup", "void 0"),          # opens by itself on a first visit (U7)
 ]
 # WCAG 2.5.8 (target size) has its own exceptions; these two are applied, with the reason:
 #  - .journey-bars a, #tl-surahs .sbar: the 2px revelation-order bars (home, surah page, timeline) are a visual summary. Every surah they link to is also a
